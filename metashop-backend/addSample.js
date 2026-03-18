@@ -1,34 +1,51 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+// CRITICAL: dotenv.config() MUST be called before any other imports that might use env variables
 dotenv.config();
-import { connectDB } from "./config/db.js";
-import Product from "./models/Product.js";
 
-const seed = async () => {
-  await connectDB(process.env.MONGO_URL || "mongodb://127.0.0.1:27017/metashop");
+import mongoose from 'mongoose';
+import Product from './models/Product.js';
 
-  const sample = [
-    {
-      name: "Smart Lamp",
-      description: "Ambient smart lamp with WiFi",
-      price: 1299,
-      image: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?w=1200",
-      model3dUrl: "",
-      category: "home"
-    },
-    {
-      name: "VR Headset",
-      description: "Immersive VR headset",
-      price: 4999,
-      image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?w=1200",
-      model3dUrl: "",
-      category: "electronics"
+const seedCloudDB = async () => {
+  try {
+    // Debugging: Check if the .env is actually loading
+    console.log("-----------------------------------------");
+    console.log("DEBUG: Connecting to ->", process.env.MONGO_URL ? "ATLAS URL DETECTED" : "UNDEFINED (Check your .env path)");
+    console.log("-----------------------------------------");
+
+    if (!process.env.MONGO_URL) {
+      throw new Error("MONGO_URL is not defined in .env file");
     }
-  ];
 
-  await Product.deleteMany({});
-  await Product.insertMany(sample);
-  console.log("Sample products inserted");
-  process.exit(0);
+    // Explicitly target 'metashop' database
+    await mongoose.connect(process.env.MONGO_URL, {
+      dbName: 'metashop',
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+
+    console.log('✅ Successfully connected to MongoDB Atlas');
+
+    const sampleProduct = {
+      name: 'Premium Red Dress',
+      price: 4999,
+      description: 'A stunning premium red dress perfect for evening parties.',
+      category: 'top',
+      image: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=800&q=80',
+      modelUrl: '/assets/models/dress.glb',
+      stock: 10 // Adding a default stock since your schema might require it
+    };
+
+    // Insert the product
+    const created = await Product.create(sampleProduct);
+    console.log(`🚀 Inserted product: ${created.name} (ID: ${created._id})`);
+
+    console.log('--- CLOUD UPDATE SUCCESSFUL ---');
+    process.exit(0);
+
+  } catch (err) {
+    console.error(`❌ Error connecting or inserting into cloud DB: ${err.message}`);
+    process.exit(1);
+  }
 };
 
-seed();
+seedCloudDB();

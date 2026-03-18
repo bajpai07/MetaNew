@@ -1,17 +1,21 @@
 // src/pages/ARViewer.js
-import { useParams } from "react-router-dom";
-import ModelViewer from "../components/ar/ModelViewer";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import VirtualTryOn from "../components/ar/VirtualTryOn";
 
 export default function ARViewer() {
   const { model } = useParams();
-
-  const modelUrl = `/models/${model}.glb`;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const category = location.state?.category || "top";
+  const modelUrl = location.state?.modelUrl || `/assets/models/${model}.glb`;
 
   return (
-    <div style={{ height: "100vh" }}>
-      <h2 style={{ textAlign: "center" }}>AR Preview</h2>
-
-      <ModelViewer modelUrl={modelUrl} ar />
+    <div className="ar-viewer-page">
+      <VirtualTryOn 
+        modelUrl={modelUrl} 
+        category={category}
+        onClose={() => navigate(-1)} 
+      />
     </div>
   );
 }

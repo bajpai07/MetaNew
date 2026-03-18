@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Texture Test</title>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: white; 
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .texture-test {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+        }
+        img {
+            max-width: 200px;
+            height: auto;
+            margin: 10px;
+            border: 2px solid #444;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Texture Loading Test</h1>
+    
+    <div class="texture-test">
+        <h3>Shirt Texture (Primary)</h3>
+        <img src="/assets/textures/shirt_texture.png" 
+             onload="this.nextElementSibling.innerHTML='✅ Loaded successfully'; this.nextElementSibling.className='success'"
+             onerror="this.nextElementSibling.innerHTML='❌ Failed to load'; this.nextElementSibling.className='error'">
+        <div>Testing...</div>
+    </div>
+
+    <div class="texture-test">
+        <h3>T-Shirt White (Fallback)</h3>
+        <img src="/assets/textures/tshirt_white.png" 
+             onload="this.nextElementSibling.innerHTML='✅ Loaded successfully'; this.nextElementSibling.className='success'"
+             onerror="this.nextElementSibling.innerHTML='❌ Failed to load'; this.nextElementSibling.className='error'">
+        <div>Testing...</div>
+    </div>
+
+    <div class="texture-test">
+        <h3>Shirt Blue (Alternative)</h3>
+        <img src="/assets/textures/shirt_blue.png" 
+             onload="this.nextElementSibling.innerHTML='✅ Loaded successfully'; this.nextElementSibling.className='success'"
+             onerror="this.nextElementSibling.innerHTML='❌ Failed to load'; this.nextElementSibling.className='error'">
+        <div>Testing...</div>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background: #333; border-radius: 5px;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Open this file in your browser at: <code>http://localhost:3001/test-textures.html</code></li>
+            <li>All images should show "✅ Loaded successfully"</li>
+            <li>If any show "❌ Failed to load", check the file paths</li>
+            <li>Once confirmed, the 3D try-on should work without texture errors</li>
+        </ol>
+    </div>
+</body>
+</html>

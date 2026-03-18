@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config(); // ✅ Ensure envs are loaded before anything else
 
 import { connectDB } from "./config/db.js";
 
@@ -11,23 +12,41 @@ import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
-
-dotenv.config();
+import vtonRoutes from "./routes/vtonRoutes.js";
 
 const app = express();
 
 /* ✅ CORS — MUST BE AT TOP */
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.options("*", cors());
 
 /* middlewares */
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 /* routes */
 app.use("/api/auth", authRoutes);
@@ -36,6 +55,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/vton", vtonRoutes);
 
 /* root */
 app.get("/", (req, res) => {
@@ -43,7 +63,7 @@ app.get("/", (req, res) => {
 });
 
 /* DB */
-connectDB(process.env.MONGO_URL || "mongodb://127.0.0.1:27017/metashop");
+connectDB(process.env.MONGO_URL);
 
 /* server */
 const PORT = process.env.PORT || 4000;

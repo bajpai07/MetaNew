@@ -5,7 +5,10 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false, // Set to false to allow guest checkout
+    },
+    userId: {
+      type: String, // To store guest_user_123
     },
     orderItems: [
       {
@@ -32,13 +35,16 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
   type: String,
-  enum: ["PLACED", "SHIPPED", "DELIVERED"],
-  default: "PLACED",
+  enum: ["Pending", "Processing", "Shipped", "Delivered", "PLACED", "SHIPPED"], // Kept old ones for existing DB compatibility
+  default: "Pending",
 },
 
     paymentMethod: {
       type: String,
-      default: "MOCK",
+      default: "Virtual Gateway",
+    },
+    transactionId: {
+      type: String,
     },
   },
   { timestamps: true }

@@ -4,6 +4,7 @@ const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     description: { type: String, default: "" },
+    category: { type: String, default: "Uncategorized", index: true },
     image: { type: String, required: true },
 
     // ✅ ONE PRICE FIELD FOR FRONTEND
@@ -11,6 +12,9 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true
     },
+
+    // 3D Model URL for Virtual Try-On
+    modelUrl: { type: String, default: "" },
 
     // Optional internal fields
     basePrice: Number,
@@ -21,7 +25,7 @@ const productSchema = new mongoose.Schema(
     sellerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true
+      required: false
     }
   },
   { timestamps: true }

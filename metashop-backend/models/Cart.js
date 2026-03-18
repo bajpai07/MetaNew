@@ -10,7 +10,7 @@ const cartItemSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  price: {
+  priceAtPurchase: {
     type: Number,
     required: true,
   },
@@ -18,9 +18,8 @@ const cartItemSchema = new mongoose.Schema({
 
 const cartSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    userId: {
+      type: String, // Changed to string for hardcoded guest_user_123
       required: true,
       unique: true,
     },
