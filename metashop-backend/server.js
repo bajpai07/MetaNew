@@ -1,7 +1,18 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config(); // ✅ Ensure envs are loaded before anything else
+import path from "path";
+import { fileURLToPath } from "url";
+
+// ES Module compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const result = dotenv.config({ path: path.join(__dirname, '.env') });
+if (result.error) {
+  console.error('CRITICAL: Could not find .env file. Please check the backend root.');
+}
+console.log('--- PATH CHECK: Current Dir is', __dirname);
 
 import { connectDB } from "./config/db.js";
 

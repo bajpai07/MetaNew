@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import ReactCompareImage from 'react-compare-image';
+import { validatePose } from '../../utils/poseValidation';
 
 export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDescription, garmentCategory, garmentName }) {
   const [userImage, setUserImage] = useState(null);
@@ -51,16 +52,33 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
 
     setIsProcessing(true);
     setResultImage(null);
+    setLoadingMessage("Checking pose visibility...");
 
     try {
-      // 1. Kick off prediction
+      // 1. Validate the pose using AI
+      const validation = await validatePose(userImage);
+      if (!validation.isValid) {
+         toast.error(validation.message);
+         setIsProcessing(false);
+         return;
+      }
+      setLoadingMessage("AI is analyzing your photo...");
+
+      // 2. Kick off prediction
       const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
         human_image: userImage,
         garment_image: garmentImage,
         garment_des: garmentDescription || "photorealistic clothing",
         product_category: garmentCategory,
-        product_name: garmentName
+        product_name: garmentName,
+        faceBox: validation.faceBox
       }, { timeout: 120000 });
+
+      if (res.data.status === "202_WARMING_UP") {
+        toast.loading(res.data.message || "AI Engine is warming up. Please try again shortly.");
+        setIsProcessing(false);
+        return;
+      }
 
       const { predictionId } = res.data;
 
@@ -123,8 +141,8 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
                   <div style={styles.uploadBox}>
                     <input type="file" accept="image/*" onChange={handleFileUpload} style={styles.fileInput} id="vton-upload" />
                     <label htmlFor="vton-upload" style={styles.uploadLabel}>
-                      <div style={{ marginBottom: '10px' }}>Click or drag to upload a clear photo of yourself looking forward.</div>
-                      <div style={styles.fidelityTip}>✨ <strong>Fidelity Tip:</strong> For model-level accuracy, upload a high-resolution photo.</div>
+                      <div style={{ marginBottom: '10px' }}>Click or drag to upload a photo of yourself.</div>
+                      {/* Fidelity tip removed per user request */}
                     </label>
                   </div>
                 </div>
@@ -148,13 +166,16 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
                   <p style={styles.loadingText}>{loadingMessage}</p>
                 </div>
               ) : (
-                <button 
-                  onClick={handleGenerate} 
-                  disabled={!userImage}
-                  style={userImage ? styles.generateBtn : styles.generateBtnDisabled}
-                >
-                  Generate HD Fit ✨
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                  {/* Quality Checklist removed per user request */}
+                  <button 
+                    onClick={handleGenerate} 
+                    disabled={!userImage}
+                    style={userImage ? styles.generateBtn : styles.generateBtnDisabled}
+                  >
+                    Generate HD Fit ✨
+                  </button>
+                </div>
               )}
             </div>
 
@@ -166,13 +187,22 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
                   <motion.div 
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
-                    style={styles.compareWrapper}
+                    style={styles.fullFrameWrapper}
                   >
                     <img 
                       src={resultImage} 
                       alt="AI Try-On Result" 
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                     />
+                    <div style={styles.resultActions}>
+                      <button onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = resultImage;
+                        link.download = 'metashop-tryon.jpg';
+                        link.click();
+                      }} style={styles.downloadBtn}>⬇️ Download</button>
+                      <button style={styles.shareBtn} onClick={() => toast.success("Ready for studio review!")}>↗️ Share to Studio</button>
+                    </div>
                   </motion.div>
                 ) : (
                   <div style={styles.placeholderBox}>
@@ -244,9 +274,16 @@ const styles = {
   spinner: { width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #FF3F6C', borderRadius: '50%', animation: 'spin 1s linear infinite' },
   loadingText: { fontSize: '12px', color: '#666', textAlign: 'center', fontStyle: 'italic' },
   successArrow: { fontSize: '40px' },
-  resultArea: { flex: 1, border: '1px dashed #ccc', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#fdfdfd', overflow: 'hidden', minHeight: '370px' },
+  resultArea: { flex: 1, border: '1px dashed #ccc', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#fdfdfd', overflow: 'hidden', minHeight: '370px', position: 'relative' },
   placeholderBox: { textAlign: 'center', padding: '30px' },
   placeholderText: { color: '#aaa', fontSize: '14px', lineHeight: '1.5' },
+  qualityChecklist: { padding: '12px', background: '#f8f8f8', borderRadius: '8px', fontSize: '12px', width: '100%', textAlign: 'left', border: '1px solid #eaeaea' },
+  checklistTitle: { fontWeight: '700', marginBottom: '8px', color: '#333' },
+  checkItem: { marginBottom: '5px', color: '#555', display: 'flex', justifyContent: 'space-between' },
+  fullFrameWrapper: { width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' },
+  resultActions: { position: 'absolute', bottom: '15px', left: '0', right: '0', display: 'flex', justifyContent: 'center', gap: '10px', padding: '0 10px' },
+  downloadBtn: { padding: '8px 15px', background: '#fff', border: 'none', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' },
+  shareBtn: { padding: '8px 15px', background: '#FF3F6C', color: '#fff', border: 'none', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 10px rgba(255,63,108,0.3)' }
 };
 
 // Add spinner keyframes globally if not exists

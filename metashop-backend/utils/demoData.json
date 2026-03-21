@@ -1,0 +1,12 @@
+{
+  "demo_products": [
+    {
+      "product_name": "Demo Varsity Jacket",
+      "pre_cached_result": "https://placehold.co/768x1024/FF3F6C/FFFFFF/png?text=Pre-Cached+Demo+Result"
+    },
+    {
+      "product_name": "Premium Cotton Shirt",
+      "pre_cached_result": "https://placehold.co/768x1024/4A90E2/FFFFFF/png?text=Instant+Premium+Fit"
+    }
+  ]
+}
