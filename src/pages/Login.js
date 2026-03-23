@@ -8,10 +8,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const success = await login(email, password);
+    setIsSubmitting(false);
     if (success) {
       navigate("/");
     }
@@ -33,8 +36,8 @@ export default function Login() {
             <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} style={{ width: "100%", padding: "12px", border: "1px solid #d4d5d9", borderRadius: "4px" }} />
           </div>
 
-          <button type="submit" style={{ padding: "14px", background: "#FF3F6C", color: "white", border: "none", borderRadius: "4px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" }}>
-            LOGIN
+          <button type="submit" disabled={isSubmitting} style={{ padding: "14px", background: isSubmitting ? "#ccc" : "#FF3F6C", color: "white", border: "none", borderRadius: "4px", fontSize: "16px", fontWeight: "bold", cursor: isSubmitting ? "not-allowed" : "pointer", marginTop: "10px" }}>
+            {isSubmitting ? "LOGGING IN..." : "LOGIN"}
           </button>
         </form>
 

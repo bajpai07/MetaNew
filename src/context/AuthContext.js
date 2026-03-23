@@ -44,7 +44,10 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error(error.response?.data?.message || 'Login failed');
+      const apiMsg = error.response?.data?.message;
+      const apiErr = error.response?.data?.error;
+      const display = apiErr ? `${apiMsg}: ${apiErr}` : (apiMsg || 'Login failed');
+      toast.error(display, { id: 'login-error' });
       return false;
     }
   };

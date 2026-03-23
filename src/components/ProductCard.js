@@ -12,9 +12,9 @@ function ProductCard({ product }) {
       await toast.promise(
         addToCart(product._id),
         {
-          loading: 'Adding to bag...',
-          success: 'Added to your bag! 👜',
-          error: (err) => err.response?.data?.message || 'Failed to add item',
+          loading: 'Adding...',
+          success: 'Added',
+          error: (err) => err.response?.data?.message || 'Failed to add',
         }
       );
     } catch (error) {
@@ -31,36 +31,49 @@ function ProductCard({ product }) {
           className="product-image" 
         />
         {product.modelUrl && (
-             <div className="ar-badge">3D / AR</div>
+             <div className="ar-badge">AR</div>
         )}
+        
+        <div className="product-actions" onClick={(e) => e.stopPropagation()}>
+          <button 
+            className="add-to-bag-bar" 
+            onClick={handleAddToCart}
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "44px",
+              background: "rgba(255,255,255,0.95)",
+              color: "#1A1A18",
+              border: "none",
+              fontSize: "11px",
+              letterSpacing: "0.1em",
+              cursor: "pointer",
+              textTransform: "uppercase",
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 500
+            }}
+          >
+            ADD TO BAG
+          </button>
+        </div>
       </div>
       <div className="product-info">
-        <h3 className="product-brand">{product.brand || "ROADSTER"}</h3>
+        {product.brand && <h3 className="product-brand">{product.brand}</h3>}
         <p className="product-title">{product.name}</p>
         <div className="product-price-row">
           <span className="current-price">₹{product.price}</span>
-          <span className="original-price">₹{product.originalPrice || Math.round(product.price * 1.5)}</span>
-          <span className="discount">{product.discount || "33% OFF"}</span>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <>
+              <span className="original-price">₹{product.originalPrice}</span>
+              {product.discount && <span className="discount">-{(100 - (product.price / product.originalPrice) * 100).toFixed(0)}%</span>}
+            </>
+          )}
         </div>
-      </div>
-      
-      <div className="product-actions" onClick={(e) => e.stopPropagation()}>
-        <button className="add-cart-btn" onClick={handleAddToCart} style={{ marginBottom: "5px" }}>
-          ADD TO BAG
-        </button>
-        {product.modelUrl && (
-          <button 
-            className="add-cart-btn" 
-            style={{ borderColor: "var(--brand)", color: "var(--brand)" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              const encodedUrl = encodeURIComponent(product.modelUrl);
-              navigate(`/ar/${encodedUrl}`, { state: { category: product.category, modelUrl: product.modelUrl } });
-            }}
-          >
-            ✦ TRY IN AR
-          </button>
-        )}
       </div>
     </div>
   );

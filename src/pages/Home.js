@@ -8,14 +8,23 @@ import useDebounce from "../hooks/useDebounce";
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const debouncedQuery = useDebounce(query, 300);
 
   // Filters State
-  const [category, setCategory] = useState("All");
+  const [category, setCategory] = useState(searchParams.get("category") || "All");
   const [priceRange, setPriceRange] = useState([0, 10000]);
+
+  useEffect(() => {
+    const urlCat = searchParams.get("category");
+    if (urlCat && urlCat !== category) {
+      setCategory(urlCat);
+    } else if (!urlCat && category !== "All") {
+      setCategory("All");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,9 +41,9 @@ export default function Home() {
             maxPrice: priceRange[1]
           });
         }
-        
+
         const productArray = Array.isArray(data) ? data : (data.data || []);
-        
+
         const updated = productArray.map((p) => {
           const baseP = Number(p.price || p.currentPrice || p.basePrice || 0);
           return {
@@ -42,8 +51,8 @@ export default function Home() {
             price: baseP,
             originalPrice: p.originalPrice || Math.round(baseP * 1.5),
             modelUrl: p.modelUrl || "/assets/models/dress.glb",
-            brand: p.brand || "Roadster",
-            discount: "33% OFF",
+            brand: p.brand || "",
+            discount: "",
             image: p.image || p.imageUrl || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"
           }
         });
@@ -65,78 +74,83 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      <div className="hero-banner">
-        <div className="hero-content">
-          <p className="hero-subtitle">M E T A S H O P &nbsp; P R E S E N T S</p>
-          <h1 className="hero-title">BIG FASHION FESTIVAL</h1>
-          <h2 className="hero-discount">50-80% OFF</h2>
-          <p className="hero-desc">On Top Brands & Latest Trends</p>
-          <button className="shop-now-btn">EXPLORE NOW</button>
+      <div className="zara-hero-banner">
+        <div className="zara-hero-overlay"></div>
+        <div className="zara-hero-content">
+          <h1 className="zara-hero-title">NEW COLLECTION</h1>
+          <button className="zara-discover-btn" onClick={() => document.getElementById('product-section')?.scrollIntoView({ behavior: 'smooth' })}>DISCOVER</button>
         </div>
       </div>
 
-      <div style={{ display: "flex", maxWidth: "1400px", margin: "0 auto", padding: "20px" }}>
-        {/* SIDEBAR */}
-        <aside style={{ width: "250px", flexShrink: 0, paddingRight: "30px" }}>
-          <h3 style={{ fontSize: "16px", marginBottom: "20px", color: "#282c3f", borderBottom: "1px solid #eaeaec", paddingBottom: "10px" }}>FILTERS</h3>
-          
-          <div style={{ marginBottom: "30px" }}>
-            <h4 style={{ fontSize: "14px", marginBottom: "15px", color: "#282c3f", textTransform: "uppercase" }}>Categories</h4>
-            {["All", "Men", "Women", "Accessories"].map(cat => (
-              <label key={cat} style={{ display: "flex", alignItems: "center", marginBottom: "12px", cursor: "pointer", color: "#535766", fontSize: "14px", fontWeight: category === cat ? "bold" : "normal" }}>
-                <input 
-                  type="radio" 
-                  name="category" 
-                  checked={category === cat}
-                  onChange={() => setCategory(cat)}
-                  style={{ marginRight: "10px", accentColor: "#FF3F6C", width: "16px", height: "16px" }}
-                />
-                {cat}
-              </label>
-            ))}
-          </div>
+      <div style={{ maxWidth: "1600px", margin: "0 auto", padding: "64px 48px" }}>
 
-          <div>
-            <h4 style={{ fontSize: "14px", marginBottom: "15px", color: "#282c3f", textTransform: "uppercase" }}>Price Range</h4>
-            <input 
-              type="range" 
-              min="0" 
-              max="10000" 
-              step="500"
-              value={priceRange[1]} 
-              onChange={handlePriceChange}
-              style={{ width: "100%", accentColor: "#FF3F6C" }}
-            />
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", color: "#535766", fontSize: "12px", fontWeight: "bold" }}>
-              <span>₹0</span>
-              <span>₹{priceRange[1]}</span>
-            </div>
-          </div>
-        </aside>
+        {/* TOP CATEGORY FILTER ROW */}
+        <div style={{ display: "flex", justifySelf: "center", gap: "32px", marginBottom: "64px" }}>
+          {["All", "Men", "Women", "Kids", "Beauty"].map(cat => (
+            <span
+              key={cat}
+              onClick={() => {
+                setCategory(cat);
+                const newParams = new URLSearchParams(searchParams);
+                if (cat === "All") newParams.delete("category");
+                else newParams.set("category", cat);
+                navigate(`/?${newParams.toString()}`);
+              }}
+              style={{
+                cursor: "pointer",
+                fontSize: "12px",
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                background: "none",
+                color: "var(--color-text-primary)",
+                textDecoration: category === cat ? "underline" : "none",
+                textUnderlineOffset: "6px"
+              }}
+            >
+              {cat.toUpperCase()}
+            </span>
+          ))}
+        </div>
 
-        {/* MAIN PRODUCT GRID */}
-        <div style={{ flex: 1, borderLeft: "1px solid #eaeaec", paddingLeft: "30px", minHeight: "600px" }}>
-          <div className="section-title" style={{ textAlign: "left", marginBottom: "20px", marginTop: "5px" }}>
-            <h2 style={{ fontSize: "20px", margin: 0 }}>{debouncedQuery ? `Search Results for "${debouncedQuery}"` : "DEAL OF THE DAY"}</h2>
-          </div>
+        {/* SECTION HEADING */}
+        <h2 style={{
+          fontSize: "13px",
+          letterSpacing: "0.15em",
+          textTransform: "uppercase",
+          fontWeight: 400,
+          color: "#6B6B67",
+          marginBottom: "32px"
+        }}>
+          NEW IN
+        </h2>
 
-          <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: "30px", padding: 0 }}>
+        {/* MAIN PRODUCT GRID (4 columns, no sidebar) */}
+        <div id="product-section" style={{ width: "100%", minHeight: "600px" }}>
+          {debouncedQuery && (
+            <h2 style={{ fontSize: "13px", fontWeight: "400", color: "var(--color-text-secondary)", marginBottom: "32px", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              Search Results for "{debouncedQuery}"
+            </h2>
+          )}
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "24px"
+          }}>
             {loading ? (
-              <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '50px', color: '#666' }}>
-                <h2>{debouncedQuery ? 'Searching...' : 'Loading trending styles...'}</h2>
+              <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '100px 0', color: 'var(--color-text-muted)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Loading...
               </div>
             ) : products.length > 0 ? (
               products.map((p) => (
-                <ProductCard key={p._id} product={p} />
+                <ProductCard key={p._id} product={{ ...p, modelUrl: null, arSupported: false, hasAR: false }} />
               ))
             ) : (
-              <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '80px 20px', background: '#FAFAFA', borderRadius: '12px', border: '1px dashed #EAEAEC' }}>
-                <span style={{ fontSize: '48px', display: 'block', marginBottom: '20px' }}>🔍</span>
-                <h2 style={{ color: '#282C3F', marginBottom: '10px' }}>We couldn't find any matches!</h2>
-                <p style={{ color: '#7E818C', marginBottom: '30px', fontSize: '16px' }}>Try adjusting your filters or search query.</p>
-                <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-                  <button onClick={() => navigate('/')} style={{ background: '#FF3F6C', color: 'white', padding: '12px 30px', border: 'none', borderRadius: '4px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>CLEAR SEARCH</button>
-                  <button onClick={() => { setCategory("All"); setPriceRange([0, 10000]); }} style={{ background: '#fff', color: '#FF3F6C', border: '1px solid #FF3F6C', padding: '12px 30px', borderRadius: '4px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }}>RESET FILTERS</button>
+              <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '100px 0' }}>
+                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '32px', fontSize: '13px', letterSpacing: '0.06em', textTransform: 'uppercase' }}>No matches found</p>
+                <div style={{ display: "flex", justifyContent: "center", gap: "16px" }}>
+                  <button onClick={() => navigate('/')} style={{ background: 'transparent', color: 'var(--color-text-primary)', padding: '12px 24px', border: '1px solid var(--color-text-primary)', borderRadius: '0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>Clear Search</button>
+                  <button onClick={() => { setCategory("All"); setPriceRange([0, 10000]); }} style={{ background: 'transparent', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', padding: '12px 24px', borderRadius: '0', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }}>Reset Filters</button>
                 </div>
               </div>
             )}
