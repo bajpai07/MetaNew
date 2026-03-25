@@ -119,102 +119,87 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
   if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        style={styles.overlay}
-      >
-        <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <button style={styles.closeBtn} onClick={() => { onClose(); }}>×</button>
-          
-          <h2 style={styles.title}>✨ Premium AI Try-On</h2>
-          <p style={styles.subtitle}>Let AI weave the perfect fit with photorealistic precision.</p>
+    <div className={`ai-overlay ${isOpen ? 'open' : ''}`} onClick={(e) => { if (e.target.className.includes('ai-overlay')) onClose(); }}>
+      <div className="ai-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="ai-modal-handle" onClick={onClose}></div>
+        <div className="ai-modal-inner">
+          <div className="ai-modal-header">
+            <div className="ai-modal-eyebrow">PREMIUM AI TRY-ON</div>
+            <h2 className="ai-modal-title">See yourself in<br/><em>this outfit.</em></h2>
+            <p className="ai-modal-sub">Upload your photo. AI drapes the garment with photorealistic precision.</p>
+          </div>
 
-          <div style={styles.content}>
-            {/* LEFT COLUMN: Input */}
-            <div style={styles.column}>
-              <h3 style={styles.colTitle}>Your Photo</h3>
-              {!userImage ? (
-                <div style={styles.inputArea}>
-                  <div style={styles.uploadBox}>
-                    <input type="file" accept="image/*" onChange={handleFileUpload} style={styles.fileInput} id="vton-upload" />
-                    <label htmlFor="vton-upload" style={styles.uploadLabel}>
-                      <div style={{ marginBottom: '10px' }}>Click or drag to upload a photo of yourself.</div>
-                      {/* Fidelity tip removed per user request */}
-                    </label>
-                  </div>
+          <div className="ai-panels">
+            <label htmlFor="photoInput" style={{display:'block', cursor:'pointer'}}>
+              <div className={`ai-upload ${userImage ? 'has-photo' : ''}`} id="uploadZone">
+                <span className="upload-panel-label">YOUR PHOTO</span>
+                <div className="upload-icon-wrap">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
                 </div>
-              ) : (
-                <div style={styles.imagePreview}>
-                  <img src={userImage} alt="User" style={styles.image} />
-                  {!isProcessing && !resultImage && (
-                    <button onClick={resetFlow} style={styles.textBtn}>Try another photo</button>
-                  )}
-                </div>
-              )}
+                <p className="upload-hint"><b>Tap to upload</b><br/>your photo</p>
+                <img className="upload-preview" id="uploadPrev" src={userImage || ""} alt="User" />
+              </div>
+            </label>
+            <input type="file" id="photoInput" accept="image/*" onChange={handleFileUpload} style={{display:'none'}} />
+
+            <div className="ai-mid-col">
+              <div className="ai-mid-line"></div>
+              <button 
+                className={`ai-gen-btn ${isProcessing ? 'spinning' : ''}`} 
+                id="genBtn" 
+                onClick={handleGenerate}
+                disabled={!userImage || isProcessing}
+              >
+                <svg width="18" height="18" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              </button>
+              <div className="ai-mid-line"></div>
             </div>
 
-            {/* MIDDLE: Generate Action */}
-            <div style={styles.actionColumn}>
-              {resultImage ? (
-                <div style={styles.successArrow}>➡️</div>
-              ) : isProcessing ? (
-                <div style={styles.loaderBox}>
-                  <div style={styles.spinner}></div>
-                  <p style={styles.loadingText}>{loadingMessage}</p>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-                  {/* Quality Checklist removed per user request */}
-                  <button 
-                    onClick={handleGenerate} 
-                    disabled={!userImage}
-                    style={userImage ? styles.generateBtn : styles.generateBtnDisabled}
-                  >
-                    Generate HD Fit ✨
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT COLUMN: Output */}
-            <div style={styles.column}>
-              <h3 style={styles.colTitle}>AI Result</h3>
-              <div style={styles.resultArea}>
-                {resultImage ? (
-                  <motion.div 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    style={styles.fullFrameWrapper}
-                  >
-                    <img 
-                      src={resultImage} 
-                      alt="AI Try-On Result" 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                    />
-                    <div style={styles.resultActions}>
-                      <button onClick={() => {
+            <div className={`ai-result ${isProcessing ? 'scanning' : ''} ${resultImage ? 'done glowing' : ''}`} id="resultZone">
+              <span className="result-panel-label">AI RESULT</span>
+              <p className="result-placeholder">Your HD try-on result appears here</p>
+              <img className="result-img" id="resultImg" src={resultImage || ""} alt="AI Result" />
+              
+              {resultImage && (
+                <div style={{ position: 'absolute', bottom: '15px', display: 'flex', gap: '8px', zIndex: 10 }}>
+                  <button onClick={() => {
                         const link = document.createElement('a');
                         link.href = resultImage;
                         link.download = 'metashop-tryon.jpg';
                         link.click();
-                      }} style={styles.downloadBtn}>⬇️ Download</button>
-                      <button style={styles.shareBtn} onClick={() => toast.success("Ready for studio review!")}>↗️ Share to Studio</button>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <div style={styles.placeholderBox}>
-                    <p style={styles.placeholderText}>Your photorealistic result will appear here</p>
-                  </div>
-                )}
-              </div>
+                      }}
+                      style={{ padding: '8px 15px', background: 'rgba(0,0,0,0.85)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontSize: '10px', letterSpacing: '0.1em', cursor: 'pointer', backdropFilter: 'blur(5px)' }}
+                  >
+                    ⬇️ DOWNLOAD
+                  </button>
+                  <button 
+                      onClick={() => toast.success("Ready for studio review!")}
+                      style={{ padding: '8px 15px', background: 'var(--rose)', color: 'white', border: 'none', borderRadius: '20px', fontSize: '10px', letterSpacing: '0.1em', cursor: 'pointer', boxShadow: '0 4px 10px rgba(232,57,90,0.3)' }}
+                  >
+                    ↗️ SHARE
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="ai-stats">
+            <div className="ai-stat">
+              <span className="stat-n">2s</span>
+              <span className="stat-l">Generation</span>
+            </div>
+            <div className="ai-stat">
+              <span className="stat-n">HD</span>
+              <span className="stat-l">Photorealistic</span>
+            </div>
+            <div className="ai-stat">
+              <span className="stat-n">1st</span>
+              <span className="stat-l">India First</span>
             </div>
           </div>
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
 }
 
