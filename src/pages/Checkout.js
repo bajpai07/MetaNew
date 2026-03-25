@@ -51,7 +51,7 @@ export default function Checkout() {
 
       const config = user ? { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } } : {};
 
-      const res = await axios.post("http://localhost:4000/api/orders", payload, config);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders`, payload, config);
       
       // Backend automatically wiped the cart. Just refresh frontend state.
       await fetchCart(); 

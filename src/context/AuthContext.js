@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post('http://localhost:4000/api/auth/login', { email, password });
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/auth/login`, { email, password });
       
       setToken(data.token);
       setUser(data.user); // Keep data.user for user state
@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      await axios.post('http://localhost:4000/api/auth/signup', { name, email, password });
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/auth/signup`, { name, email, password });
       toast.success("Registration successful! Please login.");
       return true;
     } catch (error) {

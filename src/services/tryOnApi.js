@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}`;
 
 // Helper to convert base64 data URL or external URL to a File object
 async function urlToFile(url, filename) {

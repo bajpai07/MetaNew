@@ -32,7 +32,7 @@ export default function Home() {
       try {
         let data;
         if (debouncedQuery.trim()) {
-          const res = await axios.get(`http://localhost:4000/api/products/search?q=${encodeURIComponent(debouncedQuery)}`);
+          const res = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products/search?q=${encodeURIComponent(debouncedQuery)}`);
           data = res.data;
         } else {
           data = await getProducts({ category, minPrice: priceRange[0], maxPrice: priceRange[1] });

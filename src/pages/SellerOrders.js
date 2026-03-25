@@ -13,7 +13,7 @@ export default function SellerOrders() {
   const fetchOrders = async () => {
     try {
       const res = await axios.get(
-        "http://localhost:4000/api/orders/seller",
+        `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/seller`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -29,7 +29,7 @@ export default function SellerOrders() {
   const updateStatus = async (id, status) => {
     try {
       await axios.put(
-        `http://localhost:4000/api/orders/${id}`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/${id}`,
         { status },
         {
           headers: {

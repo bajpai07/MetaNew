@@ -65,7 +65,7 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
       setLoadingMessage("AI is analyzing your photo...");
 
       // 2. Kick off prediction
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/generate`, {
         human_image: userImage,
         garment_image: garmentImage,
         garment_des: garmentDescription || "photorealistic clothing",
@@ -86,7 +86,7 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
       let isDone = false;
       while (!isDone) {
         await new Promise(resolve => setTimeout(resolve, 3000)); // poll every 3 seconds
-        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/status/${predictionId}`, { timeout: 120000 });
+        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/status/${predictionId}`, { timeout: 120000 });
         const status = checkRes.data.status;
         
         if (status === 'succeeded') {

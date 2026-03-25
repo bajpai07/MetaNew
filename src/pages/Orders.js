@@ -19,7 +19,7 @@ export default function Orders() {
            return;
         }
 
-        const { data } = await axios.get("http://localhost:4000/api/orders/user", {
+        const { data } = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/user`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

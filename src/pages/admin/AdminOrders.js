@@ -13,7 +13,7 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.get("http://localhost:4000/api/orders/admin/all", {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setOrders(data);
@@ -28,7 +28,7 @@ export default function AdminOrders() {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`http://localhost:4000/api/orders/admin/${orderId}/status`, { status: newStatus }, {
+      await axios.put(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/admin/${orderId}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Order status updated perfectly");

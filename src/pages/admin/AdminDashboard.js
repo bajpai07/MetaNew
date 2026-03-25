@@ -36,8 +36,8 @@ export default function AdminDashboard() {
         
         // Parallel fetches for Orders and Products
         const [ordersRes, productsRes] = await Promise.all([
-           axios.get("http://localhost:4000/api/orders/admin/all", { headers: { Authorization: `Bearer ${token}` } }),
-           axios.get("http://localhost:4000/api/products")
+           axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, { headers: { Authorization: `Bearer ${token}` } }),
+           axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products`)
         ]);
 
         const allOrders = ordersRes.data;

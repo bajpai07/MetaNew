@@ -44,7 +44,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
          toast.error(validation.message); setIsProcessing(false); return;
       }
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/generate`, {
         human_image: imageToUse,
         garment_image: product.image,
         garment_des: `${product.brand || ''} ${product.name} ${product.category || ''}`,
@@ -62,7 +62,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
       let isDone = false;
       while (!isDone) {
         await new Promise(resolve => setTimeout(resolve, 3000));
-        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/status/${predictionId}`, { timeout: 120000 });
+        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/status/${predictionId}`, { timeout: 120000 });
         const status = checkRes.data.status;
         
         if (status === 'succeeded') {

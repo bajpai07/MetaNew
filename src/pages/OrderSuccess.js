@@ -10,7 +10,7 @@ export default function OrderSuccess() {
 
   useEffect(() => {
     // Calling the API directly to bypass the token header requirement for guest flows
-    axios.get(`http://localhost:4000/api/orders/${id}`)
+    axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/${id}`)
       .then(res => {
           setOrder(res.data);
           setLoading(false);

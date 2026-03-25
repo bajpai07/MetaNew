@@ -18,7 +18,7 @@ export const CartProvider = ({ children }) => {
   }
   
   const userId = user ? (user.id || user._id) : guestId;
-  const API_URL = 'http://localhost:4000/api/cart';
+  const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/cart`;
 
   const fetchCart = async () => {
     try {

@@ -48,7 +48,7 @@ export default function AdminInventory() {
         description: "Premium product added via Admin Terminal."
       };
 
-      await axios.post("http://localhost:4000/api/products", payload, {
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
