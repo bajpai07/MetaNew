@@ -40,7 +40,7 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -74,7 +74,7 @@ app.get("/", (req, res) => {
 });
 
 /* DB */
-connectDB(process.env.MONGO_URL);
+connectDB(process.env.MONGO_URI);
 
 /* server */
 const PORT = process.env.PORT || 4000;
