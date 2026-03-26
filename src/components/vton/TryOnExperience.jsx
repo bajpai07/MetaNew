@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
   const [resultImage, setResultImage] = useState(null);
   const [loadingText, setLoadingText] = useState('Analyzing your photo...');
   const [viewMode, setViewMode] = useState('ai'); // 'ai' or 'user'
+  const fileInputRef = useRef(null);
 
   const loadingMessages = [
     "Analyzing your photo...",
@@ -125,20 +126,32 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                   <p className="text-white/50 text-sm tracking-wide">Use a clear front-facing photo</p>
                 </div>
 
-                <div className="relative w-full aspect-[3/4] max-h-[55vh] mx-auto rounded-[32px] overflow-hidden border-2 border-dashed border-white/15 bg-white/5 flex flex-col items-center justify-center animate-pulse-soft shadow-inner">
+                <div 
+                  className="relative w-full aspect-[3/4] max-h-[55vh] mx-auto rounded-[32px] overflow-hidden border-2 border-dashed border-white/15 bg-[#1a1a1a] cursor-pointer hover:bg-white/10 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   {userImage ? (
-                    <img src={userImage} alt="Uploaded" className="w-full h-full object-cover" />
+                    <img 
+                      src={userImage} 
+                      alt="Uploaded photo" 
+                      className="w-full h-full object-cover block" 
+                      style={{ objectPosition: 'top center' }} 
+                    />
                   ) : (
-                    <div className="flex flex-col items-center gap-4 text-white/50 pointer-events-none">
-                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center shadow-sm">
-                        <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
+                    <div className="flex flex-col items-center justify-center h-full gap-3 text-white/50 pointer-events-none">
+                      <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl shadow-sm">
+                        +
                       </div>
                       <p className="text-sm font-semibold tracking-wide">Upload your photo</p>
                     </div>
                   )}
-                  <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+                  <input 
+                    ref={fileInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileUpload} 
+                    style={{ display: 'none' }} 
+                  />
                 </div>
                 
                 <div className="mt-8 text-center flex items-center justify-center gap-1.5 text-[11px] font-medium text-white/50 uppercase tracking-widest">

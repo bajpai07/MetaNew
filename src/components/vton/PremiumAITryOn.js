@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [resultImage, setResultImage] = useState(null);
   const [isDragActive, setIsDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleFileUpload = (e) => {
     const file = e.target?.files?.[0];
@@ -139,27 +140,40 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4, duration: 0.8 }}
                   onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag} onDrop={handleDrop}
-                  className="w-full max-w-xl mx-auto relative group cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full max-w-xl mx-auto relative group cursor-pointer aspect-[3/4] overflow-hidden rounded-[2.5rem] bg-[#1a1a1a] border-2 border-dashed border-white/20"
                 >
-                  <div className={`absolute inset-0 rounded-[2.5rem] border-2 border-dashed transition-all duration-500 pointer-events-none flex flex-col items-center justify-center p-12
-                    ${isDragActive ? 'bg-white/15 border-white scale-[1.02]' : 'bg-white/5 border-white/20 group-hover:bg-white/10 group-hover:border-white/40'}
-                  `}>
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-2xl transition-all duration-500
-                      ${isDragActive ? 'bg-white text-black scale-110' : 'bg-white/10 text-white backdrop-blur-md'}
+                  {userImage ? (
+                    <img 
+                      src={userImage} 
+                      alt="Uploaded photo" 
+                      className="w-full h-full object-cover block" 
+                      style={{ objectPosition: 'top center' }} 
+                    />
+                  ) : (
+                    <div className={`absolute inset-0 flex flex-col items-center justify-center p-12 transition-all duration-500 pointer-events-none
+                      ${isDragActive ? 'bg-white/15 scale-[1.02]' : 'group-hover:bg-white/10'}
                     `}>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                      </svg>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-500 text-2xl
+                        ${isDragActive ? 'bg-white text-black scale-110' : 'bg-white/10 text-white shadow-sm'}
+                      `}>
+                        +
+                      </div>
+                      <span className="text-xl font-medium text-white tracking-wide">
+                        {isDragActive ? 'Drop to upload' : 'Upload your photo'}
+                      </span>
+                      <span className="text-sm text-white/40 mt-2 font-light">
+                        Supports high-resolution JPEG & PNG
+                      </span>
                     </div>
-                    <span className="text-xl font-medium text-white tracking-wide">
-                      {isDragActive ? 'Drop to upload' : 'Drag and drop your photo'}
-                    </span>
-                    <span className="text-sm text-white/40 mt-2 font-light">
-                      Supports high-resolution JPEG & PNG
-                    </span>
-                  </div>
-                  <input type="file" accept="image/*" onChange={handleFileUpload} className="w-full h-[320px] opacity-0 cursor-pointer" />
+                  )}
+                  <input 
+                    ref={fileInputRef}
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleFileUpload} 
+                    style={{ display: 'none' }} 
+                  />
                 </motion.div>
               </motion.div>
             )}
