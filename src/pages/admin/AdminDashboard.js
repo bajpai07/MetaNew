@@ -33,11 +33,11 @@ export default function AdminDashboard() {
     const fetchDashboardStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        
+
         // Parallel fetches for Orders and Products
         const [ordersRes, productsRes] = await Promise.all([
-           axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, { headers: { Authorization: `Bearer ${token}` } }),
-           axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products`)
+          axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/admin/all`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/products`)
         ]);
 
         const allOrders = ordersRes.data;
@@ -48,14 +48,14 @@ export default function AdminDashboard() {
         let completed = 0;
 
         allOrders.forEach(order => {
-           // If 'Delivered', it's completed. Otherwise Active.
-           if (order.status === "Delivered" || order.status === "DELIVERED") {
-              completed += 1;
-              rev += order.totalPrice; // Only count delivered revenue, or count all? Let's count all realized revenue.
-           } else {
-              active += 1;
-              rev += order.totalPrice; // Counting all placed orders as revenue
-           }
+          // If 'Delivered', it's completed. Otherwise Active.
+          if (order.status === "Delivered" || order.status === "DELIVERED") {
+            completed += 1;
+            rev += order.totalPrice; // Only count delivered revenue, or count all? Let's count all realized revenue.
+          } else {
+            active += 1;
+            rev += order.totalPrice; // Counting all placed orders as revenue
+          }
         });
 
         setStats({
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
         console.error("Dashboard Stats Error:", err);
       }
     };
-    
+
     fetchDashboardStats();
   }, []);
 
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
       <h1 style={{ fontSize: "24px", color: "#282c3f", marginBottom: "30px", borderBottom: "1px solid #eaeaec", paddingBottom: "15px" }}>
         Dashboard Overview
       </h1>
-      
+
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "24px" }}>
         {metrics.map((m, i) => (
           <div key={i} style={{ background: "#fff", padding: "24px", borderRadius: "8px", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", borderLeft: `4px solid ${m.color}` }}>

@@ -44,38 +44,32 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
          toast.error(validation.message); setIsProcessing(false); return;
       }
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/generate`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
         human_image: imageToUse,
         garment_image: product.image,
         garment_des: `${product.brand || ''} ${product.name} ${product.category || ''}`,
         product_category: product.category,
         product_name: product.name,
         faceBox: validation.faceBox
-      }, { timeout: 120000 });
+      }, { timeout: 180000 });
 
-      if (res.data.status === "202_WARMING_UP") {
-        toast.loading(res.data.message || "Warming up engine...");
-        setIsProcessing(false); return;
+      if (res.data.success || res.data.resultUrl) {
+        setResultImage(res.data.resultUrl);
+        setIsProcessing(false);
+      } else {
+        toast.error(res.data.error || "Generation failed.");
+        setIsProcessing(false);
       }
-
-      const { predictionId } = res.data;
-      let isDone = false;
-      while (!isDone) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/status/${predictionId}`, { timeout: 120000 });
-        const status = checkRes.data.status;
-        
-        if (status === 'succeeded') {
-          setResultImage(checkRes.data.output[0]);
-          isDone = true; setIsProcessing(false);
-        } else if (status === 'failed' || status === 'canceled') {
-          isDone = true; setIsProcessing(false);
-          toast.error(checkRes.data.error || "Generation failed.");
-        }
+    } catch (err) {
+      console.error("Generation error:", err);
+      setIsProcessing(false);
+      if (err.code === 'ECONNABORTED') {
+        toast.error("Taking too long. AI is warming up — please try again in 30 seconds.");
+      } else if (err.response?.status === 500) {
+        toast.error(`Server error: ${err.response.data?.error || "Unknown"}`);
+      } else {
+        toast.error("Generation failed. Check your internet and try again.");
       }
-    } catch (error) {
-      console.error(error); setIsProcessing(false);
-      toast.error("Network interface offline.");
     }
   };
 
@@ -191,7 +185,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
                      <div className="absolute inset-0 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                   </div>
                   <h3 className="text-xl font-medium tracking-tight text-white animate-pulse">Generating your realistic look...</h3>
-                  <p className="text-white/40 text-sm mt-2 font-light">Analyzing fabric drape and body topography</p>
+                  <p className="text-white/40 text-sm mt-2 font-light">Analyzing fabric drape and body topography. This takes 30-60 seconds.</p>
                 </div>
               </motion.div>
             )}
@@ -239,11 +233,24 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
                   className="flex flex-col sm:flex-row gap-4 mt-12 w-full max-w-[400px]"
                 >
                    <button 
-                     onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = resultImage;
-                        link.download = `preview-${product.name.replace(/\s+/g, '-').toLowerCase()}.jpg`;
-                        link.click();
+                     onClick={async () => {
+                        try {
+                          const imageUrl = resultImage;
+                          if (/Mobi|Android/i.test(navigator.userAgent)) {
+                            window.open(imageUrl, '_blank');
+                            return;
+                          }
+                          const link = document.createElement('a');
+                          link.href = imageUrl;
+                          link.download = `metashop-tryon-${Date.now()}.jpg`;
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        } catch (err) {
+                          console.error('Save failed:', err);
+                          toast.error('Could not save image. Please screenshot manually.');
+                        }
                      }}
                      className="flex-1 py-4 bg-white text-black rounded-full font-bold text-[15px] tracking-wide hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10"
                    >

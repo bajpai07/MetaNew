@@ -53,42 +53,31 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
     
     setStep('processing');
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/generate`, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
         human_image: userImage,
         garment_image: garmentImage,
         garment_des: garmentDescription || "photorealistic clothing",
         product_category: garmentCategory,
         product_name: garmentName
-      }, { timeout: 120000 });
+      }, { timeout: 180000 });
 
-      if (res.data.status === "202_WARMING_UP") {
-        toast.loading("AI Engine warming up...");
+      if (res.data.success || res.data.resultUrl) {
+        setResultImage(res.data.resultUrl);
+        setTimeout(() => setStep('result'), 800);
+      } else {
+        toast.error(res.data.error || "Generation failed.");
         setStep('upload');
-        return;
       }
-
-      const { predictionId } = res.data;
-      let isDone = false;
-      while (!isDone) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/status/${predictionId}`);
-        const status = checkRes.data.status;
-        
-        if (status === 'succeeded') {
-          setResultImage(checkRes.data.output[0]);
-          isDone = true;
-          // Wait briefly to finish the fake progress bar illusion before revealing
-          setTimeout(() => setStep('result'), 800);
-        } else if (status === 'failed' || status === 'canceled') {
-          isDone = true;
-          setStep('upload');
-          toast.error("Generation failed. Please try again.");
-        }
+    } catch (err) {
+      console.error("Generation error:", err);
+      if (err.code === 'ECONNABORTED') {
+        toast.error("Taking too long. AI is warming up — please try again in 30 seconds.");
+      } else if (err.response?.status === 500) {
+        toast.error(`Server error: ${err.response.data?.error || "Unknown"}`);
+      } else {
+        toast.error("Generation failed. Check your internet and try again.");
       }
-    } catch (error) {
-      console.error(error);
       setStep('upload');
-      toast.error("Failed to connect to AI server");
     }
   };
 
@@ -180,10 +169,11 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                     key={loadingText}
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.5 }}
-                    className="text-lg font-bold text-white tracking-wide mb-6 h-6"
+                    className="text-lg font-bold text-white tracking-wide mb-2 h-6"
                   >
                     {loadingText}
                   </motion.p>
+                  <p className="text-white/40 text-sm mt-2 mb-4 font-light">This takes 30-60 seconds</p>
                   
                   {/* Fake Progress Illusion */}
                   <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -290,9 +280,25 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                   Try Another
                 </button>
                 <button 
-                  onClick={() => {
-                    const link = document.createElement('a'); link.href = resultImage; link.download = 'metashop-look.jpg'; link.click();
-                    toast.success("Saved to your device!");
+                  onClick={async () => {
+                    try {
+                      const imageUrl = resultImage;
+                      if (/Mobi|Android/i.test(navigator.userAgent)) {
+                        window.open(imageUrl, '_blank');
+                        return;
+                      }
+                      const link = document.createElement('a');
+                      link.href = imageUrl;
+                      link.download = `metashop-tryon-${Date.now()}.jpg`;
+                      link.target = '_blank';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast.success("Saved to your device!");
+                    } catch (err) {
+                      console.error('Save failed:', err);
+                      toast.error('Could not save image. Please screenshot manually.');
+                    }
                   }}
                   className="flex-1 h-14 rounded-2xl bg-white text-black font-bold text-[11px] tracking-widest uppercase transition-transform active:scale-[0.96] shadow-[0_8px_30px_rgba(255,255,255,0.15)] hover:-translate-y-0.5"
                 >
