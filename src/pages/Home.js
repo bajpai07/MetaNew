@@ -154,16 +154,16 @@ export default function Home() {
             marginBottom: '16px'
           }}
         >
-          {["All", "Men", "Women", "Kids", "Brands"].map((cat) => (
+          {["All", "Men", "Women", "Kids"].map((cat) => (
             <button
               key={cat}
               onClick={() => setCategory(cat)}
               style={{
                 padding: '14px 20px',
                 whiteSpace: 'nowrap',
-                fontSize: '11px',
+                fontSize: '12px',
                 letterSpacing: '0.14em',
-                color: category === cat ? 'var(--white)' : 'var(--text-muted)',
+                color: category === cat ? 'var(--white)' : 'rgba(250,250,248,0.7)',
                 borderBottom: category === cat ? '2px solid var(--rose)' : '2px solid transparent',
                 fontFamily: 'var(--font-body)',
                 background: 'transparent',
@@ -172,7 +172,7 @@ export default function Home() {
                 borderRight: 'none',
                 cursor: 'pointer',
                 flexShrink: 0,
-                fontWeight: category === cat ? 500 : 400
+                fontWeight: 'bold'
               }}
             >
               {cat.toUpperCase()}
