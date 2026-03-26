@@ -44,14 +44,20 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
          toast.error(validation.message); setIsProcessing(false); return;
       }
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
-        human_image: imageToUse,
-        garment_image: product.image,
-        garment_des: `${product.brand || ''} ${product.name} ${product.category || ''}`,
-        product_category: product.category,
-        product_name: product.name,
-        faceBox: validation.faceBox
-      }, { timeout: 180000 });
+      // Convert base64 Data URL to Blob
+      const fetchResponse = await fetch(imageToUse);
+      const blob = await fetchResponse.blob();
+
+      const formData = new FormData();
+      formData.append('humanImage', blob, 'human_user.jpg');
+      formData.append('garmentImageUrl', product.image);
+
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, 
+      formData, 
+      { 
+        timeout: 180000,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
       if (res.data.success || res.data.resultUrl) {
         setResultImage(res.data.resultUrl);

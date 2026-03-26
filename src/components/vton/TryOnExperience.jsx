@@ -53,13 +53,20 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
     
     setStep('processing');
     try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, {
-        human_image: userImage,
-        garment_image: garmentImage,
-        garment_des: garmentDescription || "photorealistic clothing",
-        product_category: garmentCategory,
-        product_name: garmentName
-      }, { timeout: 180000 });
+      // Convert base64 Data URL to Blob
+      const fetched = await fetch(userImage);
+      const blob = await fetched.blob();
+      
+      const formData = new FormData();
+      formData.append('humanImage', blob, 'human_image.jpg');
+      formData.append('garmentImageUrl', garmentImage);
+
+      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, 
+      formData, 
+      { 
+        timeout: 180000,
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
       if (res.data.success || res.data.resultUrl) {
         setResultImage(res.data.resultUrl);
