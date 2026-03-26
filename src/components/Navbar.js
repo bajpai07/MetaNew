@@ -33,31 +33,60 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10 h-14 flex items-center justify-between px-4 md:px-8 max-w-screen-xl mx-auto text-white">
+      <nav 
+        style={{
+          height: '56px',
+          background: 'var(--black)',
+          borderBottom: '0.5px solid var(--border)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
+        }}
+      >
         {/* Left: Mobile Hamburger & Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button 
-            className="md:hidden flex flex-col justify-center items-center w-11 h-11 space-y-1.5"
+            className="md:hidden flex flex-col justify-center items-center w-6 h-6 space-y-1.5"
             onClick={() => setIsDrawerOpen(true)}
             aria-label="Menu"
           >
-            <span className="block w-5 h-0.5 bg-white"></span>
-            <span className="block w-5 h-0.5 bg-white"></span>
-            <span className="block w-5 h-0.5 bg-white"></span>
+            <span className="block w-5 h-[1.5px] bg-white"></span>
+            <span className="block w-5 h-[1.5px] bg-white"></span>
+            <span className="block w-5 h-[1.5px] bg-white"></span>
           </button>
           
-          <Link to="/" className="font-display font-bold text-xl md:text-2xl tracking-widest uppercase text-white">
-            MetaShop
+          <Link 
+            to="/" 
+            style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontSize: '22px', 
+              fontWeight: 600, 
+              color: 'var(--white)', 
+              letterSpacing: '0.06em' 
+            }}
+          >
+            METASHOP
           </Link>
         </div>
 
         {/* Center/Desktop Menu */}
-        <div className="hidden md:flex items-center gap-8 h-full">
-          {["Men", "Women", "Kids", "Beauty"].map(cat => (
+        <div className="hidden md:flex items-center gap-[24px] h-full">
+          {["Men", "Women", "Kids"].map(cat => (
             <Link 
               key={cat} 
               to={`/?category=${cat}`} 
-              className="text-xs uppercase tracking-widest font-medium hover:text-rose transition-colors"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '11px',
+                letterSpacing: '0.14em',
+                color: 'var(--text-secondary)',
+                textTransform: 'uppercase'
+              }}
+              className="hover:text-white transition-colors"
             >
               {cat}
             </Link>
@@ -151,25 +180,35 @@ export default function Navbar() {
         </div>
       </div>
       {/* Bottom Navigation (Mobile) */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full h-[calc(60px+env(safe-area-inset-bottom))] bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/10 pb-[env(safe-area-inset-bottom)] flex items-center justify-around z-50 shadow-[0_-5px_30px_rgba(0,0,0,0.4)]">
-        <Link to="/" className={`flex flex-col items-center justify-center w-full h-full transition-transform active:scale-95 space-y-1 ${location.pathname === '/' ? 'text-rose' : 'text-white/50'}`}>
-          <svg width="22" height="22" fill={location.pathname === '/' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-          <span className="text-[10px] font-bold tracking-wide">Home</span>
+      <div 
+        className="md:hidden fixed bottom-0 left-0 w-full z-[100]"
+        style={{
+          height: 'calc(64px + env(safe-area-inset-bottom))',
+          background: 'var(--black)',
+          borderTop: '0.5px solid var(--border)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          paddingBottom: 'env(safe-area-inset-bottom)'
+        }}
+      >
+        <Link to="/" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: location.pathname === '/' ? 'var(--rose)' : 'var(--text-muted)' }}>
+          <svg width="20" height="20" fill={location.pathname === '/' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Home</span>
         </Link>
-        <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className={`flex flex-col items-center justify-center w-full h-full transition-transform active:scale-95 space-y-1 ${isMobileSearchOpen || location.pathname.includes('/search') ? 'text-rose' : 'text-white/50'}`}>
-          <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth={isMobileSearchOpen || location.pathname.includes('/search') ? '2.5' : '1.5'} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/></svg>
-          <span className="text-[10px] font-bold tracking-wide">Search</span>
+        <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: isMobileSearchOpen || location.pathname.includes('/search') ? 'var(--rose)' : 'var(--text-muted)' }}>
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={isMobileSearchOpen || location.pathname.includes('/search') ? '2.5' : '1.5'} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.4-4.4"/></svg>
+          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Search</span>
         </button>
-        <Link to="/try-on" className={`flex flex-col items-center justify-center w-full h-full transition-transform active:scale-95 space-y-1 ${location.pathname.includes('/try-on') ? 'text-rose' : 'text-white/50'}`}>
-          <svg width="24" height="24" fill={location.pathname.includes('/try-on') ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          <span className="text-[10px] font-bold tracking-wide">Try AI</span>
+        <Link to="/try-on" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: 'var(--rose)' }}>
+          <svg width="20" height="20" fill={location.pathname.includes('/try-on') ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
+          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Try AI</span>
         </Link>
-        <Link to="/cart" className={`flex flex-col items-center justify-center w-full h-full transition-transform active:scale-95 relative space-y-1 ${location.pathname === '/cart' ? 'text-rose' : 'text-white/50'}`}>
+        <Link to="/cart" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 relative" style={{ color: location.pathname === '/cart' ? 'var(--rose)' : 'var(--text-muted)' }}>
           <div className="relative">
-            <svg width="22" height="22" fill={location.pathname === '/cart' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            {cartCount > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose border border-black rounded-full"></span>}
+            <svg width="20" height="20" fill={location.pathname === '/cart' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--rose)] border border-[var(--black)] rounded-full"></span>}
           </div>
-          <span className="text-[10px] font-bold tracking-wide">Bag</span>
+          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Bag</span>
         </Link>
       </div>
     </>

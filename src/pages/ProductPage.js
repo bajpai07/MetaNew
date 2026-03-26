@@ -86,48 +86,51 @@ export default function ProductPage() {
           <h1 className="text-[11px] font-bold tracking-[0.2em] uppercase text-white/50 mb-2">
             {product.brand || "Metashop"}
           </h1>
-          <h2 className="font-display text-3xl md:text-5xl font-medium leading-tight mb-4">
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 400, color: 'var(--white)', lineHeight: 1.2, marginBottom: '16px' }}>
             {product.name}
           </h2>
 
           <div className="flex items-baseline gap-3 mb-6">
-            <span className="text-2xl font-bold">₹{product.price}</span>
-            <span className="text-base text-white/50 line-through">₹{product.originalPrice}</span>
-            <span className="text-xs font-bold text-rose px-2 py-1 bg-rose/10 rounded-md">
+            <span style={{ color: 'var(--white)', fontSize: '22px', fontWeight: 500 }}>₹{product.price}</span>
+            <span style={{ color: 'var(--text-muted)', textDecoration: 'line-through', fontSize: '16px' }}>₹{product.originalPrice}</span>
+            <span style={{ background: 'var(--rose-glow)', color: 'var(--rose)', border: '0.5px solid var(--rose)', padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 500 }}>
               {Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
             </span>
           </div>
 
           <div className="w-full h-px bg-white/10 my-6"></div>
 
-          <p className="text-[15px] leading-relaxed text-white/70 mb-8 font-bold">
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.7, marginBottom: '32px' }}>
             {product.description || "Minimal. Editorial. Confident. Expertly tailored from premium materials, designed to slot seamlessly into your wardrobe."}
           </p>
 
-          <p className="text-xs font-bold text-green-400 mb-8">
+          <p style={{ color: '#4ade80', fontSize: '13px', marginBottom: '32px' }}>
             {product.stock > 0 ? `● In Stock & Ready to Ship` : "○ Out of Stock"}
           </p>
 
           <div className="hidden md:flex flex-col gap-3 mb-8">
-            {/* PRIMARY: SEE THIS ON YOU */}
             <button
               onClick={() => setIsAIModalOpen(true)}
-              className="w-full bg-gradient-to-r from-rose to-[#ff4d6d] text-white flex flex-col items-center justify-center h-16 rounded-2xl shadow-[0_8px_30px_rgba(232,57,90,0.25)] transition-transform active:scale-[0.96] overflow-hidden relative group"
+              style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
+              className="active:scale-[0.98]"
             >
-              <span className="font-semibold text-[15px] tracking-wide mt-1">✨ See this on you</span>
-              <span className="text-[10px] font-medium opacity-80 tracking-widest uppercase mt-0.5">Upload your photo & preview instantly</span>
+              ✨ SEE THIS ON YOU
             </button>
-            <div className="text-center text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1 mb-2">
-              🔒 Your photo is private & auto-deleted
-            </div>
             
-            {/* SECONDARY: ADD TO BAG */}
             <button
               disabled={product.stock <= 0}
               onClick={() => toast.promise(addToCart(product._id), { loading: 'Adding...', success: 'Added', error: 'Failed' })}
-              className="w-full bg-transparent border-2 border-white/20 text-white h-14 rounded-2xl font-bold text-[11px] tracking-widest uppercase transition-transform active:scale-95 hover:border-white disabled:border-white/10 disabled:text-white/20"
+              style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
+              className="active:scale-[0.98] disabled:opacity-50"
             >
-              Add to bag
+              ADD TO BAG
+            </button>
+
+            <button
+              style={{ background: 'transparent', color: 'var(--white)', border: '0.5px solid var(--border-hover)', borderRadius: 'var(--radius-xl)', padding: '16px', width: '100%', fontSize: '13px', letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
+              className="active:scale-[0.98]"
+            >
+              WISHLIST
             </button>
           </div>
 
@@ -166,29 +169,25 @@ export default function ProductPage() {
       )}
 
       {/* MOBILE STICKY BOTTOM CTA */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/10 px-4 pt-3 pb-[calc(16px+env(safe-area-bottom,16px))] z-[100] flex flex-col gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]">
-        {/* PRIMARY: SEE THIS ON YOU */}
-        <div className="flex flex-col gap-1.5 w-full">
-          <button
-            onClick={() => setIsAIModalOpen(true)}
-            className="w-full bg-gradient-to-r from-rose to-[#ff4d6d] text-white flex flex-col items-center justify-center min-h-[60px] rounded-[18px] shadow-[0_8px_25px_rgba(232,57,90,0.3)] transition-transform active:scale-[0.96] relative overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white/30 -translate-x-[150%] skew-x-12 animate-[shimmer-slide_3s_infinite]"></div>
-            <span className="font-semibold text-[15px] tracking-wide">✨ See this on you</span>
-            <span className="text-[10px] font-medium opacity-80 tracking-widest uppercase">Upload your photo & preview instantly</span>
-          </button>
-          <div className="text-center text-[9px] text-white/60 font-bold uppercase tracking-widest mt-1">
-            🔒 Your photo is private & auto-deleted
-          </div>
-        </div>
+      <div 
+        className="md:hidden fixed bottom-0 left-0 w-full z-[100] flex flex-col gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]"
+        style={{ background: 'var(--black)', padding: '16px 16px env(safe-area-inset-bottom,16px) 16px', borderTop: '0.5px solid var(--border)' }}
+      >
+        <button
+          onClick={() => setIsAIModalOpen(true)}
+          style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
+          className="active:scale-[0.98]"
+        >
+          ✨ SEE THIS ON YOU
+        </button>
 
-        {/* SECONDARY: ADD TO BAG */}
         <button
           disabled={product.stock <= 0}
           onClick={() => toast.promise(addToCart(product._id), { loading: 'Adding...', success: 'Added', error: 'Failed' })}
-          className="w-full bg-transparent border-2 border-white text-white min-h-[50px] rounded-[16px] font-bold text-[11px] tracking-widest uppercase active:scale-[0.97] transition-transform disabled:border-white/20 disabled:text-white/20"
+          style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
+          className="active:scale-[0.98] disabled:opacity-50"
         >
-          Add to Bag
+          ADD TO BAG
         </button>
       </div>
 

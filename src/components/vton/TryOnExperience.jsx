@@ -99,7 +99,8 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: "100%", opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-[200] bg-[#0a0a0a] flex flex-col font-body text-white overflow-hidden"
+          className="fixed inset-0 z-[200] flex flex-col font-body text-white overflow-hidden"
+          style={{ background: 'var(--black)' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 h-16 border-b border-white/10 flex-shrink-0 z-10 bg-[#0a0a0a]/80 backdrop-blur-md">
@@ -108,7 +109,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="font-display font-semibold text-lg tracking-wide uppercase">Try this look on you</h1>
+            <h1 style={{ fontFamily: 'var(--font-body)', fontSize: '13px', letterSpacing: '0.2em', color: 'var(--white)', textTransform: 'uppercase' }}>TRY THIS LOOK ON YOU</h1>
             <div className="w-10"></div>
           </div>
 
@@ -122,19 +123,20 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                 className="h-full flex flex-col p-4 pb-32"
               >
                 <div className="text-center mt-2 mb-6">
-                  <h2 className="font-display text-3xl font-medium mb-1">✨ See yourself in this outfit</h2>
-                  <p className="text-white/50 text-sm tracking-wide">Use a clear front-facing photo</p>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 400, color: 'var(--white)' }}>✨ See yourself in this outfit</h2>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Use a clear front-facing photo</p>
                 </div>
 
                 <div 
-                  className="relative w-full aspect-[3/4] max-h-[55vh] mx-auto rounded-[32px] overflow-hidden border-2 border-dashed border-white/15 bg-[#1a1a1a] cursor-pointer hover:bg-white/10 transition-colors"
+                  className="relative w-full max-h-[55vh] mx-auto overflow-hidden cursor-pointer"
+                  style={{ background: 'var(--surface)', border: '1.5px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-xl)', aspectRatio: '3/4', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {userImage ? (
                     <img 
                       src={userImage} 
                       alt="Uploaded photo" 
-                      className="w-full h-full object-cover block" 
+                      className="absolute inset-0 w-full h-full object-cover block" 
                       style={{ objectPosition: 'top center' }} 
                     />
                   ) : (
@@ -154,9 +156,9 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
                   />
                 </div>
                 
-                <div className="mt-8 text-center flex items-center justify-center gap-1.5 text-[11px] font-medium text-white/50 uppercase tracking-widest">
+                <div className="mt-8 text-center flex items-center justify-center gap-1.5" style={{ color: 'var(--text-muted)', fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                   <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                  Your photo is not stored
+                  Your photo is private & auto-deleted
                 </div>
               </motion.div>
             )}
@@ -273,14 +275,10 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
               <button 
                 onClick={generateLook}
                 disabled={!userImage}
-                className="w-full h-14 rounded-2xl bg-gradient-to-r from-rose to-[#ff4d6d] text-white font-bold text-sm tracking-widest uppercase transition-transform active:scale-[0.96] disabled:opacity-50 shadow-[0_8px_20px_rgba(232,57,90,0.25)] relative overflow-hidden group"
+                style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', letterSpacing: '0.15em', fontWeight: 500, textTransform: 'uppercase', cursor: 'pointer', transition: 'transform 0.1s' }}
+                className="active:scale-[0.98] disabled:opacity-50"
               >
-                {!userImage ? "✨ Generate My Look" : (
-                  <>
-                    <div className="absolute inset-0 bg-white/20 -translate-x-[150%] skew-x-12 group-hover:animate-shimmer-slide"></div>
-                    <span>✨ Generate My Look</span>
-                  </>
-                )}
+                {!userImage ? "✨ Generate My Look" : "✨ Generate My Look"}
               </button>
             )}
             
