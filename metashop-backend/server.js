@@ -28,8 +28,14 @@ import vtonRoutes from "./routes/vtonRoutes.js";
 const app = express();
 
 /* ✅ CORS — MUST BE AT TOP */
+const allowedOrigins = [
+  "https://meta-new-git-main-abhishek-bajpais-projects.vercel.app",
+  "https://meta-new-beige.vercel.app",
+  "http://localhost:3000"
+];
+
 app.use(cors({
-  origin: ["https://meta-new-git-main-abhishek-bajpais-projects.vercel.app", "http://localhost:3000"],
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -38,12 +44,13 @@ app.options("*", cors());
 
 // Manual Pre-flight Header Verification Fallback
 app.use((req, res, next) => {
-  const allowed = ["https://meta-new-git-main-abhishek-bajpais-projects.vercel.app", "http://localhost:3000"];
   const origin = req.headers.origin;
-  if (allowed.includes(origin)) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
+  } else if (origin && origin.endsWith('.vercel.app')) {
+    res.header('Access-Control-Allow-Origin', origin); // dynamically allow any vercel branch
   } else {
-    res.header('Access-Control-Allow-Origin', 'https://meta-new-git-main-abhishek-bajpais-projects.vercel.app');
+    res.header('Access-Control-Allow-Origin', 'https://meta-new-beige.vercel.app');
   }
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

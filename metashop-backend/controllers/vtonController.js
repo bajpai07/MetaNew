@@ -86,7 +86,7 @@ async function callHuggingFace(humanImageBase64, garmentImageBase64) {
           { data: garmentImageBase64, type: "base64" },
           true,  
           true,  
-          30,    
+          0,    
           42     
         ]
       }),
