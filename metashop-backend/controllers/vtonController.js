@@ -54,7 +54,7 @@ async function processAndUploadResult(imageData) {
   return uploadResult.secure_url;
 }
 
-async function callHuggingFace(humanImageBase64, garmentImageBase64) {
+async function callHuggingFace(humanImageBase64, garmentImageBase64, garmentDes) {
   const HF_TOKEN = process.env.HF_TOKEN;
   const HF_SPACE_URL = process.env.HF_SPACE_URL || "https://yisol-idm-vton.hf.space"; 
 
@@ -82,12 +82,13 @@ async function callHuggingFace(humanImageBase64, garmentImageBase64) {
       body: JSON.stringify({
         fn_index: 0,
         data: [
-          { data: humanImageBase64, type: "base64" },
-          { data: garmentImageBase64, type: "base64" },
+          { background: humanImageBase64, layers: [], composite: null },
+          garmentImageBase64,
+          garmentDes || "photorealistic clothing",
           true,  
-          true,  
-          0,    
-          42     
+          false,  
+          30,    
+          -1     
         ]
       }),
       signal: controller.signal
@@ -139,7 +140,7 @@ export const generateVTONController = async (req, res) => {
     console.log("   HF_TOKEN exists:", !!process.env.HF_TOKEN);
     console.log("   CLOUDINARY set:", !!process.env.CLOUDINARY_API_SECRET);
 
-    let { human_image, garment_image, product_name } = req.body;
+    let { human_image, garment_image, product_name, garment_des } = req.body;
     
     if (!human_image || !garment_image) {
       return res.status(400).json({ success: false, error: "Images required." });
@@ -167,7 +168,7 @@ export const generateVTONController = async (req, res) => {
       }
     }
 
-    const hfResultImage = await callHuggingFace(human_image, garment_image);
+    const hfResultImage = await callHuggingFace(human_image, garment_image, garment_des);
 
     console.log("5. Uploading to Cloudinary...");
     const cloudinaryUrl = await processAndUploadResult(hfResultImage);
