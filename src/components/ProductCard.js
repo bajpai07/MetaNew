@@ -1,10 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
-export default function ProductCard({ product }) {
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: (i || 0) * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+  })
+};
+
+export default function ProductCard({ product, index = 0 }) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
@@ -17,65 +28,101 @@ export default function ProductCard({ product }) {
   };
 
   return (
-    <div 
-      className="flex flex-col overflow-hidden cursor-pointer group hover:-translate-y-1 active:scale-[0.98] transition-all duration-300"
-      style={{ background: 'var(--black)', border: 'none' }}
+    <motion.div 
+      custom={index}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
       onClick={() => navigate(`/products/${product._id}`)}
+      style={{
+        background: 'var(--black)',
+        cursor: 'pointer',
+        position: 'relative'
+      }}
     >
       <div 
-        className="relative w-full group"
-        style={{ aspectRatio: '3/4', overflow: 'hidden' }}
+        style={{ aspectRatio: '3/4', overflow: 'hidden', position: 'relative', background: 'var(--surface)' }}
       >
-        <img 
+        <motion.img 
           loading="lazy"
           src={product.image || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"} 
           alt={product.name} 
-          className="w-full h-full object-cover transition-opacity duration-500 opacity-0"
+          whileHover={{ scale: 1.04 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="transition-opacity duration-500 opacity-0"
           onLoad={(e) => e.target.classList.replace('opacity-0', 'opacity-100')}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
         />
+        <motion.button
+          whileTap={{ scale: 0.8 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsWishlisted(!isWishlisted);
+          }}
+          style={{
+            position: 'absolute', top: '10px', right: '10px',
+            background: 'rgba(10,10,10,0.5)', backdropFilter: 'blur(8px)',
+            border: 'none', borderRadius: '50%', width: '34px', height: '34px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 10
+          }}>
+          <motion.span
+            animate={{ scale: isWishlisted ? [1, 1.4, 1] : 1, color: isWishlisted ? 'var(--rose)' : 'var(--white)' }}
+            transition={{ duration: 0.3 }}
+            style={{ fontSize: '14px', color: 'var(--white)' }}>
+            {isWishlisted ? '♥' : '♡'}
+          </motion.span>
+        </motion.button>
+
         {product.discount && (
-          <div style={{ color: 'var(--rose)', fontSize: '11px', fontWeight: 500, position: 'absolute', top: '12px', left: '12px' }}>
+          <div style={{
+            position: 'absolute', top: '10px', left: '10px', background: 'var(--rose)', borderRadius: '4px',
+            padding: '3px 8px', fontSize: '10px', color: 'var(--white)', fontWeight: 500, letterSpacing: '0.05em', zIndex: 10
+          }}>
             -{product.discount}
           </div>
         )}
         
         {/* Try-On Button Overlay */}
-        <button 
+        <motion.div 
+          initial={{ opacity: 0, y: 8 }}
+          whileHover={{ opacity: 1, y: 0 }}
           style={{
-            background: 'rgba(10,10,10,0.75)',
-            backdropFilter: 'blur(4px)',
-            borderRadius: '20px',
-            padding: '8px 14px',
-            fontSize: '11px',
-            color: 'var(--white)',
-            letterSpacing: '0.1em',
-            position: 'absolute',
-            bottom: '12px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            whiteSpace: 'nowrap'
+            position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)',
+            background: 'rgba(10,10,10,0.75)', backdropFilter: 'blur(12px)',
+            border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: '20px',
+            padding: '8px 16px', whiteSpace: 'nowrap', cursor: 'pointer', zIndex: 10
           }}
-          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all active:scale-[0.96]"
           onClick={(e) => { e.stopPropagation(); navigate(`/products/${product._id}?ai=true`); }}
         >
-          Try this look
-        </button>
+          <span style={{ fontSize: '10px', letterSpacing: '0.12em', color: 'var(--white)' }}>
+            ✦ Try this look
+          </span>
+        </motion.div>
       </div>
 
-      <div className="p-4 flex flex-col flex-1 pl-0 pr-0 mt-1">
-        <h3 
-          className="line-clamp-1 leading-tight mb-1" 
-          style={{ color: 'var(--white)', fontSize: '13px', fontFamily: 'var(--font-body)', fontWeight: 400 }}
-        >
+      <div style={{ padding: '12px 4px 16px' }}>
+        <p style={{ fontSize: '11px', letterSpacing: '0.1em', color: 'var(--text-2)', marginBottom: '4px', textTransform: 'uppercase' }}>
+          {product.brand || 'METASHOP'}
+        </p>
+        <p style={{
+          fontSize: '13px', color: 'var(--white)', marginBottom: '8px', lineHeight: 1.3,
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+        }}>
           {product.name}
-        </h3>
-        <div className="flex flex-wrap items-baseline gap-2 mt-1">
-          <span style={{ color: 'var(--white)', fontSize: '15px', fontWeight: 500 }}>₹{product.price}</span>
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--white)' }}>
+            ₹{product.price}
+          </span>
           {product.originalPrice && product.originalPrice > product.price && (
-            <span style={{ color: 'var(--text-muted)', fontSize: '12px', textDecoration: 'line-through' }}>₹{product.originalPrice}</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'line-through' }}>
+              ₹{product.originalPrice}
+            </span>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

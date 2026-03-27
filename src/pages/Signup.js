@@ -1,6 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { motion } from "framer-motion";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.1 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] } }
+};
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -30,32 +41,40 @@ export default function Signup() {
       justifyContent: "center",
       padding: "24px"
     }}>
-      <div style={{
-        fontFamily: "var(--font-display)",
-        fontSize: "28px",
-        fontWeight: "600",
-        color: "var(--white)",
-        letterSpacing: "0.08em",
-        marginBottom: "48px"
-      }}>
-        METASHOP
-      </div>
-
-      <div style={{
-        background: "var(--surface)",
-        border: "0.5px solid var(--border)",
-        borderRadius: "var(--radius-xl)",
-        padding: "36px 28px",
-        width: "100%",
-        maxWidth: "400px"
-      }}>
-        <h2 style={{
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: "400px" }}
+      >
+        <motion.div variants={itemVariants} style={{
           fontFamily: "var(--font-display)",
-          fontSize: "32px",
-          fontWeight: "400",
+          fontSize: "28px",
+          fontWeight: "600",
           color: "var(--white)",
-          marginBottom: "8px"
-        }}>Create account</h2>
+          letterSpacing: "0.08em",
+          marginBottom: "48px"
+        }}>
+          METASHOP
+        </motion.div>
+
+        <motion.div 
+          variants={itemVariants}
+          style={{
+            background: "var(--surface)",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--radius-xl)",
+            padding: "36px 28px",
+            width: "100%"
+          }}
+        >
+          <h2 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "32px",
+            fontWeight: "400",
+            color: "var(--white)",
+            marginBottom: "8px"
+          }}>Create account</h2>
         
         <p style={{
           color: "var(--text-secondary)",
@@ -161,7 +180,8 @@ export default function Signup() {
             />
           </div>
 
-          <button 
+          <motion.button 
+            whileTap={{ scale: 0.97 }}
             type="submit" 
             disabled={isSubmitting}
             style={{
@@ -176,22 +196,21 @@ export default function Signup() {
               fontWeight: "500",
               letterSpacing: "0.15em",
               cursor: "pointer",
-              transition: "background 0.2s, transform 0.1s",
+              transition: "background 0.2s",
               marginTop: "12px"
             }}
             onMouseOver={(e) => e.target.style.background = "var(--rose-dark)"}
             onMouseOut={(e) => e.target.style.background = "var(--rose)"}
-            onMouseDown={(e) => e.target.style.transform = "translateY(-1px)"}
-            onMouseUp={(e) => e.target.style.transform = "translateY(0)"}
           >
             {isSubmitting ? "REGISTERING..." : "SIGN UP"}
-          </button>
+          </motion.button>
         </form>
 
         <p style={{ textAlign: "center", marginTop: "32px", fontSize: "13px", color: "var(--text-secondary)" }}>
           Already have an account? <Link to="/login" style={{ color: "var(--rose)", textDecoration: "none", marginLeft: "4px" }}>Login</Link>
         </p>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import ProductCard from "../components/ProductCard";
 import TryOnExperience from "../components/vton/TryOnExperience";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -61,7 +62,12 @@ export default function ProductPage() {
         </button>
 
         {/* IMAGE GALLERY (Stacked on mobile, Sticky on Desktop) */}
-        <div className="w-full md:w-1/2 flex flex-col gap-2 relative">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="w-full md:w-1/2 flex flex-col gap-2 relative"
+        >
           <div className="w-full aspect-[3/4] md:rounded-[32px] overflow-hidden bg-[#111] relative">
             <img
               src={product.image}
@@ -78,10 +84,15 @@ export default function ProductPage() {
               </span>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* CONTENT */}
-        <div className="w-full md:w-1/2 px-4 md:px-0 py-6 flex flex-col">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="w-full md:w-1/2 px-4 md:px-0 py-6 flex flex-col"
+        >
           
           <h1 className="text-[11px] font-bold tracking-[0.2em] uppercase text-white/50 mb-2">
             {product.brand || "Metashop"}
@@ -109,29 +120,32 @@ export default function ProductPage() {
           </p>
 
           <div className="hidden md:flex flex-col gap-3 mb-8">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={() => setIsAIModalOpen(true)}
-              style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
-              className="active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', outline: 'none' }}
+              className="shadow-[0_8px_30px_rgba(232,57,90,0.3)] transition-shadow hover:shadow-[0_8px_40px_rgba(232,57,90,0.5)]"
             >
               ✨ SEE THIS ON YOU
-            </button>
+            </motion.button>
             
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               disabled={product.stock <= 0}
               onClick={() => toast.promise(addToCart(product._id), { loading: 'Adding...', success: 'Added', error: 'Failed' })}
-              style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
-              className="active:scale-[0.98] disabled:opacity-50"
+              style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', outline: 'none' }}
+              className="disabled:opacity-50"
             >
               ADD TO BAG
-            </button>
+            </motion.button>
 
-            <button
-              style={{ background: 'transparent', color: 'var(--white)', border: '0.5px solid var(--border-hover)', borderRadius: 'var(--radius-xl)', padding: '16px', width: '100%', fontSize: '13px', letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
-              className="active:scale-[0.98]"
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              style={{ background: 'transparent', color: 'var(--white)', border: '0.5px solid var(--border-active)', borderRadius: 'var(--radius-xl)', padding: '16px', width: '100%', fontSize: '13px', letterSpacing: '0.15em', cursor: 'pointer', outline: 'none' }}
+              className="hover:border-white transition-colors"
             >
               WISHLIST
-            </button>
+            </motion.button>
           </div>
 
           <div className="w-full h-px bg-white/10 mb-6 md:my-6"></div>
@@ -153,7 +167,7 @@ export default function ProductPage() {
             <div className="flex items-center gap-3"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg> Pay on delivery available</div>
             <div className="flex items-center gap-3"><svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg> Easy 14 days returns</div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* RELATED PRODUCTS */}
@@ -169,27 +183,32 @@ export default function ProductPage() {
       )}
 
       {/* MOBILE STICKY BOTTOM CTA */}
-      <div 
+      <motion.div 
+        initial={{ y: 150 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
         className="md:hidden fixed bottom-0 left-0 w-full z-[100] flex flex-col gap-3 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]"
         style={{ background: 'var(--black)', padding: '16px 16px env(safe-area-inset-bottom,16px) 16px', borderTop: '0.5px solid var(--border)' }}
       >
-        <button
+        <motion.button
+          whileTap={{ scale: 0.96 }}
           onClick={() => setIsAIModalOpen(true)}
-          style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', transition: 'transform 0.1s' }}
-          className="active:scale-[0.98]"
+          style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.1em', cursor: 'pointer', outline: 'none' }}
+          className="shadow-[0_8px_30px_rgba(232,57,90,0.3)]"
         >
           ✨ SEE THIS ON YOU
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
+          whileTap={{ scale: 0.96 }}
           disabled={product.stock <= 0}
           onClick={() => toast.promise(addToCart(product._id), { loading: 'Adding...', success: 'Added', error: 'Failed' })}
-          style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', transition: 'transform 0.1s' }}
-          className="active:scale-[0.98] disabled:opacity-50"
+          style={{ background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', fontWeight: 500, letterSpacing: '0.15em', cursor: 'pointer', outline: 'none' }}
+          className="disabled:opacity-50"
         >
           ADD TO BAG
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {product && (
         <TryOnExperience

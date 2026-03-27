@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import { AnimatePresence } from "framer-motion";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -21,11 +22,13 @@ import AdminInventory from "./pages/admin/AdminInventory";
 import AdminOrders from "./pages/admin/AdminOrders";
 
 function App() {
+  const location = useLocation();
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
@@ -53,7 +56,8 @@ function App() {
         <Route path="/seller/orders" element={<SellerOrders />} />
 
         <Route path="/order-success/:id" element={<OrderSuccess />} />
-      </Routes>
+        </Routes>
+      </AnimatePresence>
     </>
   );
 }

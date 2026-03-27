@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { getProducts } from "../api/productService";
 import axios from "axios";
 import useDebounce from "../hooks/useDebounce";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -65,75 +66,104 @@ export default function Home() {
   return (
     <div className="bg-[#0a0a0a] pb-6 font-body overflow-x-hidden text-white w-full min-h-screen">
       {/* HERO SECTION */}
-      <section className="relative w-full h-[100svh] min-h-[600px] bg-black overflow-hidden flex flex-col justify-end">
-        <img
-          src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1080&q=80"
-          alt="Fashion Model"
-          className="absolute inset-0 w-full h-full object-cover animate-slow-zoom"
+      <div style={{
+        height: '100svh', width: '100%', position: 'relative', overflow: 'hidden', background: 'var(--black)'
+      }}>
+        {/* Background image */}
+        <motion.div
+          initial={{ scale: 1.08 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 1.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'url(https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1080&q=80)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top'
+          }}
         />
 
-        {/* TOP RIGHT BADGE (moved from left) */}
-        <div className="absolute top-6 right-5 z-[20] flex items-center gap-2 bg-[#1a1a1a]/80 backdrop-blur-md border border-rose/50 text-[9px] font-bold text-rose px-3 py-1.5 uppercase tracking-widest shadow-lg">
-          <div className="w-1.5 h-1.5 bg-rose rounded-full animate-pulse-soft shadow-[0_0_10px_rgba(232,57,90,1)]"></div>
-          AI TRY-ON LIVE
-        </div>
+        {/* Gradient overlay */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0.1) 100%)'
+        }} />
 
-        {/* TOP LEFT FLOATING SCANNER WIDGET (moved from right, rotation removed) */}
-        <div className="absolute top-[7%] md:top-[12%] left-4 md:left-[8%] z-[20] w-[115px] md:w-[160px] bg-[#1a1a1a]/95 backdrop-blur-xl rounded-[20px] border border-white/10 p-3 shadow-2xl">
-          {/* Earpiece Slit */}
-          <div className="flex justify-center mb-2">
-            <div className="w-6 h-1 bg-white/20 rounded-full"></div>
-          </div>
-          <p className="text-[7px] md:text-[9px] text-center text-white/60 font-bold tracking-[0.15em] uppercase mb-2">METASHOP AI</p>
+        {/* AI badge — top left */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          style={{
+            position: 'absolute', top: '72px', left: '20px',
+            display: 'flex', alignItems: 'center', gap: '7px',
+            background: 'rgba(232,57,90,0.12)',
+            border: '0.5px solid rgba(232,57,90,0.5)',
+            borderRadius: '20px',
+            padding: '6px 14px'
+          }}>
+          <motion.div
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity }}
+            style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--rose)' }}
+          />
+          <span style={{ fontSize: '10px', letterSpacing: '0.15em', color: 'var(--rose)', fontWeight: 500 }}>
+            AI TRY-ON LIVE
+          </span>
+        </motion.div>
 
-          {/* Screen Area */}
-          <div className="w-full aspect-[4/5] bg-gradient-to-b from-black/80 to-rose/30 rounded-lg relative overflow-hidden mb-2 border border-white/5">
-            <div className="absolute left-0 w-full h-[1.5px] bg-rose shadow-[0_0_15px_2px_rgba(232,57,90,0.9)] animate-scan"></div>
-            <div className="absolute inset-0 bg-rose/5 animate-pulse"></div>
-          </div>
+        {/* Text content — bottom */}
+        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px' }}>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
+            style={{ fontSize: '10px', letterSpacing: '0.25em', color: 'var(--rose)', marginBottom: '12px', fontWeight: 500 }}>
+            NEW SEASON DROP
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
+            style={{
+              fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 11vw, 56px)', fontWeight: 300,
+              color: 'var(--white)', lineHeight: 1.1, marginBottom: '28px'
+            }}>
+            Wear it<br />before you<br /><em style={{ color: 'var(--rose)', fontStyle: 'italic' }}>buy it.</em>
+          </motion.h1>
 
-          {/* Fake CTA */}
-          <div className="w-full bg-gradient-to-r from-rose to-[#ff4d6d] text-white text-[7px] md:text-[9px] font-bold py-1.5 rounded tracking-widest uppercase text-center shadow-[0_4px_10px_rgba(232,57,90,0.3)]">
-            TRY ON WITH AI
-          </div>
-          <p className="text-[6px] md:text-[7px] text-center mt-1.5 text-white/40 tracking-widest lowercase">upload → wear it</p>
-        </div>
-
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent mix-blend-multiply z-[6]"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10 z-[6]"></div>
-
-        <div className="relative z-10 px-4 py-8 md:px-8 w-full max-w-screen-xl mx-auto pb-12 mt-8">
-          <h1 className="font-display italic font-semibold text-5xl md:text-7xl text-white leading-[1.05] tracking-wide mb-8 drop-shadow-2xl">
-            Wear it<br />before you<br />buy it.
-          </h1>
-
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-            <button
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
+            style={{ display: 'flex', gap: '10px' }}>
+            <motion.button
               onClick={() => document.getElementById('ai')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full bg-gradient-to-r from-rose to-[#ff4d6d] text-white h-14 rounded-2xl font-bold text-[13px] tracking-widest uppercase transition-transform active:scale-[0.96] shadow-[0_8px_30px_rgba(232,57,90,0.35)] relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-white/30 -translate-x-[150%] skew-x-12 group-hover:animate-shimmer-slide"></div>
-              <span>✨ See this on you</span>
-            </button>
-            <button
+              whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}
+              style={{
+                flex: 1, background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: '14px',
+                padding: '16px', fontSize: '11px', letterSpacing: '0.18em', fontWeight: 500, fontFamily: 'var(--font-body)', cursor: 'pointer'
+              }}>
+              ✦ SEE THIS ON YOU
+            </motion.button>
+            <motion.button
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white h-14 rounded-2xl font-bold text-[12px] tracking-widest uppercase transition-transform active:scale-[0.96]"
-            >
-              Browse collection
-            </button>
-          </div>
+              whileTap={{ scale: 0.96 }}
+              style={{
+                padding: '16px 20px', background: 'rgba(250,250,248,0.08)', backdropFilter: 'blur(12px)',
+                color: 'var(--white)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', fontSize: '11px',
+                letterSpacing: '0.18em', fontFamily: 'var(--font-body)', cursor: 'pointer'
+              }}>
+              DISCOVER
+            </motion.button>
+          </motion.div>
         </div>
-      </section>
+      </div>
 
       {/* STRIP */}
-      <div className="bg-black text-white py-3 overflow-hidden flex whitespace-nowrap">
-        <div className="animate-[marquee_30s_linear_infinite] text-[11px] tracking-widest font-semibold uppercase flex w-max">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center">
-              <span className="mx-4">New Arrivals</span><span className="text-white/30">✦</span>
-              <span className="mx-4">AI Virtual Try-On</span><span className="text-white/30">✦</span>
-              <span className="mx-4">Free Delivery ₹499+</span><span className="text-white/30">✦</span>
-              <span className="mx-4">Easy 14 Day Returns</span><span className="text-white/30">✦</span>
+      <div style={{ overflow: 'hidden', background: 'var(--surface)', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', padding: '10px 0' }}>
+        <div className="marquee-track">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} style={{ display: 'flex' }}>
+              {['New Arrivals', 'AI Virtual Try-On', 'Free Delivery ₹499+', 'Easy 14 Day Returns', 'Pay on Delivery', 'First in India'].map((item, index) => (
+                <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-2)', padding: '0 20px', whiteSpace: 'nowrap', textTransform: 'uppercase', fontWeight: 600 }}>{item}</span>
+                  <span style={{ color: 'var(--rose)' }}>✦</span>
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -141,42 +171,27 @@ export default function Home() {
 
       <main className="max-w-screen-xl mx-auto w-full">
         {/* FILTERS */}
-        <div 
-          style={{
-            display: 'flex',
-            overflowX: 'auto',
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch',
-            padding: '0 20px',
-            gap: '8px',
-            borderBottom: '0.5px solid var(--border)',
-            marginTop: '24px',
-            marginBottom: '16px'
-          }}
-        >
+        <div style={{
+          display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+          padding: '0 16px', gap: '4px', borderBottom: '0.5px solid var(--border)', position: 'sticky',
+          top: '56px', background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(12px)', zIndex: 90
+        }}>
           {["All", "Men", "Women", "Kids"].map((cat) => (
-            <button
+            <motion.button
               key={cat}
               onClick={() => setCategory(cat)}
+              whileTap={{ scale: 0.95 }}
               style={{
-                padding: '14px 20px',
-                whiteSpace: 'nowrap',
-                fontSize: '12px',
-                letterSpacing: '0.14em',
-                color: category === cat ? 'var(--white)' : 'rgba(250,250,248,0.7)',
+                padding: '14px 18px', background: 'none', border: 'none',
                 borderBottom: category === cat ? '2px solid var(--rose)' : '2px solid transparent',
-                fontFamily: 'var(--font-body)',
-                background: 'transparent',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                cursor: 'pointer',
-                flexShrink: 0,
-                fontWeight: 'bold'
+                color: category === cat ? 'var(--white)' : 'var(--text-2)',
+                fontSize: '11px', letterSpacing: '0.14em', fontFamily: 'var(--font-body)',
+                fontWeight: category === cat ? 600 : 400, cursor: 'pointer', whiteSpace: 'nowrap',
+                flexShrink: 0, transition: 'color 0.2s, border-color 0.2s'
               }}
             >
               {cat.toUpperCase()}
-            </button>
+            </motion.button>
           ))}
         </div>
 
@@ -189,18 +204,21 @@ export default function Home() {
             </div>
           </div>
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border)' }}>
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="flex flex-col gap-2">
-                  <div className="w-full aspect-[3/4] bg-white/5 rounded-[20px] animate-pulse"></div>
-                  <div className="h-4 bg-white/5 w-3/4 rounded animate-pulse"></div>
-                  <div className="h-4 bg-white/5 w-1/2 rounded animate-pulse"></div>
+                <div key={i} style={{ background: 'var(--black)', padding: '0 0 16px' }}>
+                  <div className="skeleton" style={{ aspectRatio: '3/4', width: '100%' }} />
+                  <div style={{ padding: '12px 4px 0' }}>
+                    <div className="skeleton" style={{ height: '10px', width: '60%', marginBottom: '8px' }} />
+                    <div className="skeleton" style={{ height: '13px', width: '85%', marginBottom: '8px' }} />
+                    <div className="skeleton" style={{ height: '14px', width: '40%' }} />
+                  </div>
                 </div>
               ))}
             </div>) : products.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-                {products.map((p) => <ProductCard key={p._id} product={p} />)}
-              </div>
+              <motion.div initial="hidden" animate="visible" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border)' }}>
+                {products.map((p, i) => <ProductCard key={p._id} product={p} index={i} />)}
+              </motion.div>
             ) : null}
           {/* NO RESULTS */}
           {!loading && products.length === 0 && (

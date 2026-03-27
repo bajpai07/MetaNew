@@ -2,6 +2,7 @@ import { Link, useSearchParams, useNavigate, useLocation } from "react-router-do
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
 
 export default function Navbar() {
   const { cartCount } = useCart();
@@ -31,33 +32,44 @@ export default function Navbar() {
 
   const closeDrawer = () => setIsDrawerOpen(false);
 
+  const { scrollY } = useScroll();
+  const borderOpacity = useTransform(scrollY, [0, 50], [0, 0.18]);
+  const bgBlur = useTransform(scrollY, [0, 50], [0, 16]);
+  const borderBottom = useMotionTemplate`0.5px solid rgba(255,255,255,${borderOpacity})`;
+  const backdropFilter = useMotionTemplate`blur(${bgBlur}px)`;
+
   return (
     <>
-      <nav 
+      <motion.nav 
         style={{
           height: '56px',
-          background: 'var(--black)',
-          borderBottom: '0.5px solid var(--border)',
+          background: 'rgba(10,10,10,0.85)',
+          backdropFilter,
+          WebkitBackdropFilter: backdropFilter,
+          borderBottom,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '0 20px',
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
+          left: 0,
+          right: 0,
           zIndex: 100
         }}
       >
         {/* Left: Mobile Hamburger & Logo */}
         <div className="flex items-center gap-4">
-          <button 
-            className="md:hidden flex flex-col justify-center items-center w-6 h-6 space-y-1.5"
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            className="md:hidden flex flex-col justify-center items-center w-6 h-6 gap-[5px]"
             onClick={() => setIsDrawerOpen(true)}
             aria-label="Menu"
           >
-            <span className="block w-5 h-[1.5px] bg-white"></span>
-            <span className="block w-5 h-[1.5px] bg-white"></span>
-            <span className="block w-5 h-[1.5px] bg-white"></span>
-          </button>
+            <span className="block w-[22px] h-[1px] bg-white"></span>
+            <span className="block w-[16px] h-[1px] bg-white text-left self-start"></span>
+            <span className="block w-[22px] h-[1px] bg-white"></span>
+          </motion.button>
           
           <Link 
             to="/" 
@@ -66,7 +78,10 @@ export default function Navbar() {
               fontSize: '22px', 
               fontWeight: 600, 
               color: 'var(--white)', 
-              letterSpacing: '0.06em' 
+              letterSpacing: '0.08em',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)' 
             }}
           >
             METASHOP
@@ -94,7 +109,7 @@ export default function Navbar() {
         </div>
 
         {/* Right: Icons */}
-        <div className="flex items-center gap-1 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden md:flex items-center border border-white/20 rounded-full px-4 py-1.5">
             <input 
               type="text" 
@@ -103,21 +118,22 @@ export default function Navbar() {
               onChange={handleSearch}
               className="outline-none text-sm w-48 bg-transparent text-white placeholder-white/50"
             />
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
           </div>
 
-          <button onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)} className="md:hidden flex items-center justify-center w-11 h-11 text-white">
+          <motion.button whileTap={{ scale: 0.85 }} onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)} className="md:hidden flex items-center justify-center w-10 h-10 text-white">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/></svg>
-          </button>
+          </motion.button>
 
-          <Link to="/cart" className="relative flex items-center justify-center w-11 h-11 text-white">
-             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-            {cartCount > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 bg-rose rounded-full"></span>
-            )}
+          <Link to="/cart">
+            <motion.div whileTap={{ scale: 0.85 }} className="relative flex items-center justify-center w-10 h-10 text-white">
+              <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              {cartCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose rounded-full"></span>
+              )}
+            </motion.div>
           </Link>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Mobile Inline Search Bar */}
       {isMobileSearchOpen && (
@@ -180,37 +196,58 @@ export default function Navbar() {
         </div>
       </div>
       {/* Bottom Navigation (Mobile) */}
-      <div 
-        className="md:hidden fixed bottom-0 left-0 w-full z-[100]"
+      <motion.div 
+        className="md:hidden"
         style={{
-          height: 'calc(64px + env(safe-area-inset-bottom))',
-          background: 'var(--black)',
+          position: 'fixed',
+          bottom: 0, left: 0, right: 0,
+          height: '60px',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          background: 'rgba(10,10,10,0.95)',
+          backdropFilter: 'blur(20px)',
           borderTop: '0.5px solid var(--border)',
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
-          paddingBottom: 'env(safe-area-inset-bottom)'
+          zIndex: 100
         }}
       >
-        <Link to="/" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: location.pathname === '/' ? 'var(--rose)' : 'var(--text-muted)' }}>
-          <svg width="20" height="20" fill={location.pathname === '/' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Home</span>
-        </Link>
-        <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: isMobileSearchOpen || location.pathname.includes('/search') ? 'var(--rose)' : 'var(--text-muted)' }}>
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={isMobileSearchOpen || location.pathname.includes('/search') ? '2.5' : '1.5'} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.4-4.4"/></svg>
-          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Search</span>
-        </button>
-        <Link to="/try-on" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95" style={{ color: 'var(--rose)' }}>
-          <svg width="20" height="20" fill={location.pathname.includes('/try-on') ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
-          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Try AI</span>
-        </Link>
-        <Link to="/cart" className="flex flex-col items-center justify-center gap-1 transition-transform active:scale-95 relative" style={{ color: location.pathname === '/cart' ? 'var(--rose)' : 'var(--text-muted)' }}>
-          <div className="relative">
-            <svg width="20" height="20" fill={location.pathname === '/cart' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
-            {cartCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--rose)] border border-[var(--black)] rounded-full"></span>}
-          </div>
-          <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', textTransform: 'uppercase' }}>Bag</span>
-        </Link>
-      </div>
+        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
+          <Link to="/" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/' ? 'var(--white)' : 'var(--text-3)' }}>
+            <motion.span animate={{ scale: location.pathname === '/' ? 1.15 : 1 }} style={{ fontSize: '18px' }} >
+              <svg width="20" height="20" fill={location.pathname === '/' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            </motion.span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>HOME</span>
+          </Link>
+        </motion.div>
+
+        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
+          <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: isMobileSearchOpen || location.pathname.includes('/search') ? 'var(--white)' : 'var(--text-3)' }}>
+            <motion.span animate={{ scale: isMobileSearchOpen || location.pathname.includes('/search') ? 1.15 : 1 }} style={{ fontSize: '18px' }} >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={isMobileSearchOpen || location.pathname.includes('/search') ? '2.5' : '1.5'} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.4-4.4"/></svg>
+            </motion.span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>SEARCH</span>
+          </button>
+        </motion.div>
+
+        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
+          <Link to="/try-on" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname.includes('/try-on') ? 'var(--rose)' : 'var(--text-3)' }}>
+            <motion.span animate={{ scale: location.pathname.includes('/try-on') ? 1.15 : 1, color: location.pathname.includes('/try-on') ? '#E8395A' : 'inherit' }} style={{ fontSize: '18px' }} >
+              <svg width="20" height="20" fill={location.pathname.includes('/try-on') ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
+            </motion.span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', color: location.pathname.includes('/try-on') ? 'var(--rose)' : 'inherit' }}>TRY AI</span>
+          </Link>
+        </motion.div>
+
+        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full relative">
+          <Link to="/cart" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/cart' ? 'var(--white)' : 'var(--text-3)' }}>
+            <motion.span animate={{ scale: location.pathname === '/cart' ? 1.15 : 1 }} style={{ fontSize: '18px' }} className="relative" >
+              <svg width="20" height="20" fill={location.pathname === '/cart' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+              {cartCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--rose)] border-2 border-[var(--black)] rounded-full"></span>}
+            </motion.span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>BAG</span>
+          </Link>
+        </motion.div>
+      </motion.div>
     </>
   );
 }
