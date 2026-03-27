@@ -77,50 +77,50 @@ export default function Checkout() {
   }
 
   return (
-    <div style={{ display: "flex", gap: "40px", padding: "40px", maxWidth: "1200px", margin: "0 auto", alignItems: "flex-start", flexWrap: "wrap" }}>
+    <div style={{ display: "flex", gap: "40px", padding: "100px 40px 40px", maxWidth: "1200px", margin: "0 auto", alignItems: "flex-start", flexWrap: "wrap", minHeight: "100vh", background: "var(--black)", color: "var(--white)" }}>
       
       {/* LEFT PANE: SHIPPING FORM */}
-      <div style={{ flex: "1 1 500px", background: "#fff", padding: "30px", borderRadius: "8px", border: "1px solid #eaeaec" }}>
-        <h2 style={{ marginBottom: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>Shipping Details</h2>
+      <div style={{ flex: "1 1 500px", background: "var(--surface)", padding: "40px", borderRadius: "16px", border: "0.5px solid var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "32px", paddingBottom: "16px", borderBottom: "0.5px solid var(--border)", fontSize: "28px", fontWeight: 400 }}>Shipping Details</h2>
         
-        <form onSubmit={handlePlaceOrder} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <form onSubmit={handlePlaceOrder} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "5px", fontSize: "14px", color: "#666" }}>Street Address</label>
-            <input type="text" required placeholder="123 Main St" value={shippingAddress.address} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} style={{ width: "100%", padding: "12px", border: "1px solid #d4d5d9", borderRadius: "4px" }} />
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Street Address</label>
+            <input type="text" required placeholder="123 Main St" value={shippingAddress.address} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
           </div>
 
-          <div style={{ display: "flex", gap: "15px" }}>
+          <div style={{ display: "flex", gap: "20px" }}>
              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "5px", fontSize: "14px", color: "#666" }}>City</label>
-                <input type="text" required placeholder="Mumbai" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} style={{ width: "100%", padding: "12px", border: "1px solid #d4d5d9", borderRadius: "4px" }} />
+                <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>City</label>
+                <input type="text" required placeholder="Mumbai" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
              </div>
              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "5px", fontSize: "14px", color: "#666" }}>Pincode</label>
-                <input type="text" required placeholder="400001" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})} style={{ width: "100%", padding: "12px", border: "1px solid #d4d5d9", borderRadius: "4px" }} />
+                <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Pincode</label>
+                <input type="text" required placeholder="400001" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
              </div>
           </div>
 
-          <button type="submit" style={{ marginTop: "20px", padding: "15px", background: "#FF3F6C", color: "white", border: "none", borderRadius: "4px", fontSize: "16px", fontWeight: "bold", cursor: "pointer", width: "100%" }}>
-            PAY AND PLACE ORDER
+          <button type="submit" style={{ marginTop: "16px", padding: "18px", background: "linear-gradient(135deg, #E8395A, #c42d4a)", color: "var(--white)", border: "none", borderRadius: "14px", fontSize: "13px", letterSpacing: "0.15em", fontWeight: "500", cursor: "pointer", width: "100%", boxShadow: "0 8px 24px rgba(232,57,90,0.3)" }}>
+            PROCEED TO PAYMENT
           </button>
         </form>
       </div>
 
       {/* RIGHT PANE: ORDER SUMMARY */}
-      <div style={{ flex: "1 1 400px", background: "#fafafa", padding: "30px", borderRadius: "8px", border: "1px solid #eaeaec" }}>
-        <h2 style={{ marginBottom: "20px", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>Order Summary</h2>
+      <div style={{ flex: "1 1 400px", background: "var(--surface)", padding: "40px", borderRadius: "16px", border: "0.5px solid var(--border)" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "32px", paddingBottom: "16px", borderBottom: "0.5px solid var(--border)", fontSize: "28px", fontWeight: 400 }}>Order Summary</h2>
         
-        <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "10px" }}>
+        <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "16px" }}>
           {cartItems.map((item) => {
              const product = item.product || {};
              return (
-              <div key={item._id} style={{ display: "flex", alignItems: "center", marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #eaeaea" }}>
-                {product.image && <img src={product.image} alt={product.name} style={{ width: "60px", height: "80px", objectFit: "cover", borderRadius: "4px", marginRight: "15px" }} />}
+              <div key={item._id} style={{ display: "flex", alignItems: "center", marginBottom: "24px", paddingBottom: "24px", borderBottom: "0.5px solid var(--border)" }}>
+                {product.image && <img src={product.image} alt={product.name} style={{ width: "70px", height: "90px", objectFit: "cover", borderRadius: "8px", marginRight: "20px" }} />}
                 <div style={{ flex: 1 }}>
-                  <h5 style={{ margin: "0 0 5px 0", fontSize: "14px" }}>{product.name || 'Product'}</h5>
-                  <p style={{ margin: 0, fontSize: "12px", color: "#666" }}>Qty: {item.qty}</p>
+                  <h5 style={{ margin: "0 0 6px 0", fontSize: "14px", fontWeight: 400 }}>{product.name || 'Product'}</h5>
+                  <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Qty: {item.qty}</p>
                 </div>
-                <div style={{ fontWeight: "bold" }}>
+                <div style={{ fontWeight: "500", fontSize: "15px" }}>
                   ₹{item.priceAtPurchase * item.qty}
                 </div>
               </div>
@@ -128,9 +128,9 @@ export default function Checkout() {
           })}
         </div>
 
-        <div style={{ marginTop: "20px", paddingTop: "20px", borderTop: "2px dashed #ccc", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>Total Amount:</h3>
-          <h2 style={{ margin: 0, color: "#282c3f" }}>₹{total}</h2>
+        <div style={{ marginTop: "8px", paddingTop: "24px", borderTop: "1px dashed var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h3 style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.15em" }}>Total Amount</h3>
+          <h2 style={{ fontFamily: "var(--font-display)", margin: 0, color: "var(--white)", fontSize: "36px", fontWeight: 400 }}>₹{total}</h2>
         </div>
       </div>
 
