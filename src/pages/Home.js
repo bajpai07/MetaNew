@@ -112,19 +112,19 @@ export default function Home() {
         </motion.div>
 
         {/* Text content — bottom */}
-        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px' }}>
+        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 4px 30px rgba(0,0,0,0.8)' }}>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
-            style={{ fontSize: '10px', letterSpacing: '0.25em', color: 'var(--rose)', marginBottom: '12px', fontWeight: 500 }}>
+            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#ffb3c1', marginBottom: '12px', fontWeight: 700 }}>
             NEW SEASON DROP
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
             style={{
-              fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 11vw, 56px)', fontWeight: 300,
-              color: 'var(--white)', lineHeight: 1.1, marginBottom: '28px'
+              fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 12vw, 64px)', fontWeight: 500,
+              color: 'var(--white)', lineHeight: 1.05, marginBottom: '28px', textShadow: '0 4px 24px rgba(0,0,0,0.9)'
             }}>
-            Wear it<br />before you<br /><em style={{ color: 'var(--rose)', fontStyle: 'italic' }}>buy it.</em>
+            Wear it<br />before you<br /><em style={{ color: '#ff4d6d', fontStyle: 'italic', fontWeight: 600 }}>buy it.</em>
           </motion.h1>
 
           <motion.div
@@ -134,8 +134,9 @@ export default function Home() {
               onClick={() => document.getElementById('ai')?.scrollIntoView({ behavior: 'smooth' })}
               whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}
               style={{
-                flex: 1, background: 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: '14px',
-                padding: '16px', fontSize: '11px', letterSpacing: '0.18em', fontWeight: 500, fontFamily: 'var(--font-body)', cursor: 'pointer'
+                flex: 1, background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: '14px',
+                padding: '16px', fontSize: '12px', letterSpacing: '0.18em', fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer',
+                boxShadow: '0 8px 30px rgba(232,57,90,0.4)', textShadow: 'none'
               }}>
               ✦ SEE THIS ON YOU
             </motion.button>
