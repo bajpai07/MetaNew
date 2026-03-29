@@ -96,8 +96,9 @@ export default function Home() {
           style={{
             position: 'absolute', top: '72px', left: '20px',
             display: 'flex', alignItems: 'center', gap: '7px',
-            background: 'rgba(232,57,90,0.12)',
-            border: '0.5px solid rgba(232,57,90,0.5)',
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(232,57,90,0.8)',
             borderRadius: '20px',
             padding: '6px 14px'
           }}>
@@ -106,16 +107,16 @@ export default function Home() {
             transition={{ duration: 1.6, repeat: Infinity }}
             style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--rose)' }}
           />
-          <span style={{ fontSize: '10px', letterSpacing: '0.15em', color: 'var(--rose)', fontWeight: 500 }}>
+          <span style={{ fontSize: '10px', letterSpacing: '0.15em', color: '#ff4d6d', fontWeight: 700 }}>
             AI TRY-ON LIVE
           </span>
         </motion.div>
 
         {/* Text content — bottom */}
-        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 4px 30px rgba(0,0,0,0.8)' }}>
+        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 2px 10px rgba(0,0,0,1), 0 4px 30px rgba(0,0,0,0.8)' }}>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
-            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#ffb3c1', marginBottom: '12px', fontWeight: 700 }}>
+            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#ff4d6d', marginBottom: '12px', fontWeight: 800, textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
             NEW SEASON DROP
           </motion.p>
           <motion.h1
@@ -185,9 +186,9 @@ export default function Home() {
               style={{
                 padding: '14px 18px', background: 'none', border: 'none',
                 borderBottom: category === cat ? '2.5px solid #E8395A' : '2.5px solid transparent',
-                color: category === cat ? '#fafaf8' : 'rgba(250,250,248,0.35)',
+                color: category === cat ? '#fafaf8' : 'rgba(255,255,255,0.8)',
                 fontSize: '11px', letterSpacing: '0.14em', fontFamily: 'var(--font-body)',
-                fontWeight: category === cat ? 500 : 400, cursor: 'pointer', whiteSpace: 'nowrap',
+                fontWeight: category === cat ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap',
                 flexShrink: 0, transition: 'color 0.2s, border-color 0.2s'
               }}
             >
@@ -242,23 +243,6 @@ export default function Home() {
                     <div style={{ borderRight: i % 2 === 0 ? '0.5px solid rgba(255,255,255,0.06)' : 'none', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
                       <ProductCard product={p} index={i} />
                     </div>
-                    {i === 3 && (
-                      <div style={{
-                        gridColumn: '1 / -1', margin: '0', padding: '36px 24px',
-                        background: 'linear-gradient(135deg, #111111, #1a0a0f)',
-                        borderTop: '0.5px solid rgba(255,255,255,0.06)', borderBottom: '0.5px solid rgba(255,255,255,0.06)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px'
-                      }}>
-                        <p style={{ fontSize: '9px', letterSpacing: '0.25em', color: '#E8395A', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>— INDIA FIRST</p>
-                        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 300, fontStyle: 'italic', color: '#fafaf8', lineHeight: 1.2 }}>
-                          The Fitting Room<br />of the Future
-                        </h3>
-                        <p style={{ fontSize: '13px', color: 'rgba(250,250,248,0.5)', lineHeight: 1.7, maxWidth: '280px' }}>
-                          See any outfit on your body before you spend a rupee.
-                        </p>
-                        <motion.button whileTap={{ scale: 0.97 }} onClick={() => navigate('/3d-tryon')} style={{ marginTop: '4px', background: '#E8395A', color: '#fafaf8', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '11px', letterSpacing: '0.16em', fontWeight: 500, fontFamily: "'DM Sans', sans-serif", cursor: 'pointer' }}>✦ TRY IT NOW</motion.button>
-                      </div>
-                    )}
                   </React.Fragment>
                 ))}
               </div>

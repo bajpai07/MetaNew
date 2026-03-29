@@ -100,7 +100,8 @@ export default function Navbar() {
                 fontFamily: 'var(--font-body)',
                 fontSize: '11px',
                 letterSpacing: '0.14em',
-                color: 'var(--text-secondary)',
+                color: 'rgba(255,255,255,0.85)',
+                fontWeight: 600,
                 textTransform: 'uppercase'
               }}
               className="hover:text-white transition-colors"
