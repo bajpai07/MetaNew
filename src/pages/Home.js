@@ -113,10 +113,10 @@ export default function Home() {
         </motion.div>
 
         {/* Text content — bottom */}
-        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 2px 10px rgba(0,0,0,1), 0 4px 30px rgba(0,0,0,0.8)' }}>
+        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
-            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#ff4d6d', marginBottom: '12px', fontWeight: 800, textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
+            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#fafaf8', marginBottom: '12px', fontWeight: 700, textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
             NEW SEASON DROP
           </motion.p>
           <motion.h1
