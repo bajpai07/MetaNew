@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -21,6 +21,16 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminOrders from "./pages/admin/AdminOrders";
 
+const PageWrapper = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+  >
+    {children}
+  </motion.div>
+);
+
 function App() {
   const location = useLocation();
   return (
@@ -28,34 +38,34 @@ function App() {
       <Navbar />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<Orders />} />
+          <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
+        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
+        <Route path="/signup" element={<PageWrapper><Signup /></PageWrapper>} />
+        <Route path="/cart" element={<PageWrapper><Cart /></PageWrapper>} />
+        <Route path="/checkout" element={<PageWrapper><Checkout /></PageWrapper>} />
+        <Route path="/orders" element={<PageWrapper><Orders /></PageWrapper>} />
 
         {/* Product */}
-        <Route path="/products/:id" element={<ProductPage />} />
+        <Route path="/products/:id" element={<PageWrapper><ProductPage /></PageWrapper>} />
 
         {/* ✅ AR ROUTE */}
-        <Route path="/ar/:model" element={<ARViewer />} />
+        <Route path="/ar/:model" element={<PageWrapper><ARViewer /></PageWrapper>} />
 
         {/* ✅ 3D Try-On Route */}
-        <Route path="/3d-tryon" element={<ThreeDTryOnPage />} />
+        <Route path="/3d-tryon" element={<PageWrapper><ThreeDTryOnPage /></PageWrapper>} />
 
         {/* ✅ Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="inventory" element={<AdminInventory />} />
-          <Route path="orders" element={<AdminOrders />} />
+          <Route index element={<PageWrapper><AdminDashboard /></PageWrapper>} />
+          <Route path="inventory" element={<PageWrapper><AdminInventory /></PageWrapper>} />
+          <Route path="orders" element={<PageWrapper><AdminOrders /></PageWrapper>} />
         </Route>
 
         {/* Seller */}
-        <Route path="/seller/dashboard" element={<SellerDashboard />} />
-        <Route path="/seller/orders" element={<SellerOrders />} />
+        <Route path="/seller/dashboard" element={<PageWrapper><SellerDashboard /></PageWrapper>} />
+        <Route path="/seller/orders" element={<PageWrapper><SellerOrders /></PageWrapper>} />
 
-        <Route path="/order-success/:id" element={<OrderSuccess />} />
+        <Route path="/order-success/:id" element={<PageWrapper><OrderSuccess /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
     </>

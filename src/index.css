@@ -40,12 +40,15 @@ html {
   scroll-behavior: smooth;
 }
 
-::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
 html { scrollbar-width: none; }
 
 body {
   background: var(--black);
-  padding-bottom: 72px; /* bottom nav space */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 input, select, textarea, button {

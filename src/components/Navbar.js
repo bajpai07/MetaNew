@@ -211,40 +211,52 @@ export default function Navbar() {
           zIndex: 100
         }}
       >
-        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
-          <Link to="/" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/' ? 'var(--white)' : 'var(--text-3)' }}>
+        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
+          <Link to="/" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/' ? '#fafaf8' : 'rgba(250,250,248,0.3)' }}>
             <motion.span animate={{ scale: location.pathname === '/' ? 1.15 : 1 }} style={{ fontSize: '18px' }} >
-              <svg width="20" height="20" fill={location.pathname === '/' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              {location.pathname === '/' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L2 12h3v8h5v-6h4v6h5v-8h3L12 3z"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+              )}
             </motion.span>
-            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>HOME</span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname === '/' ? 500 : 400 }}>HOME</span>
           </Link>
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
-          <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: isMobileSearchOpen || location.pathname.includes('/search') ? 'var(--white)' : 'var(--text-3)' }}>
+        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
+          <button onClick={() => { setIsMobileSearchOpen(true); window.scrollTo(0,0); }} className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: isMobileSearchOpen || location.pathname.includes('/search') ? '#fafaf8' : 'rgba(250,250,248,0.3)' }}>
             <motion.span animate={{ scale: isMobileSearchOpen || location.pathname.includes('/search') ? 1.15 : 1 }} style={{ fontSize: '18px' }} >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={isMobileSearchOpen || location.pathname.includes('/search') ? '2.5' : '1.5'} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.4-4.4"/></svg>
+              {isMobileSearchOpen || location.pathname.includes('/search') ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.4-4.4"/></svg>
+              )}
             </motion.span>
-            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>SEARCH</span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: isMobileSearchOpen || location.pathname.includes('/search') ? 500 : 400 }}>SEARCH</span>
           </button>
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full">
-          <Link to="/try-on" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname.includes('/try-on') ? 'var(--rose)' : 'var(--text-3)' }}>
-            <motion.span animate={{ scale: location.pathname.includes('/try-on') ? 1.15 : 1, color: location.pathname.includes('/try-on') ? '#E8395A' : 'inherit' }} style={{ fontSize: '18px' }} >
-              <svg width="20" height="20" fill={location.pathname.includes('/try-on') ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
+        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
+          <Link to="/try-on" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: '#E8395A' }}>
+            <motion.span animate={{ scale: location.pathname.includes('/try-on') ? 1.15 : 1 }} style={{ fontSize: '18px', color: '#E8395A' }} >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
             </motion.span>
-            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', color: location.pathname.includes('/try-on') ? 'var(--rose)' : 'inherit' }}>TRY AI</span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname.includes('/try-on') ? 500 : 400 }}>TRY AI</span>
           </Link>
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.85 }} className="flex h-full w-full relative">
-          <Link to="/cart" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/cart' ? 'var(--white)' : 'var(--text-3)' }}>
+        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full relative">
+          <Link to="/cart" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/cart' ? '#fafaf8' : 'rgba(250,250,248,0.3)' }}>
             <motion.span animate={{ scale: location.pathname === '/cart' ? 1.15 : 1 }} style={{ fontSize: '18px' }} className="relative" >
-              <svg width="20" height="20" fill={location.pathname === '/cart' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
-              {cartCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[var(--rose)] border-2 border-[var(--black)] rounded-full"></span>}
+              {location.pathname === '/cart' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H2v16h20V6h-6zm-6-2h4v2h-4V4zm10 18H4V8h16v14z"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/></svg>
+              )}
+              {cartCount > 0 && <div style={{ position: 'absolute', top: '-2px', right: '-4px', width: '8px', height: '8px', borderRadius: '50%', background: '#E8395A' }} />}
             </motion.span>
-            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>BAG</span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname === '/cart' ? 500 : 400 }}>BAG</span>
           </Link>
         </motion.div>
       </motion.div>

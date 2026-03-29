@@ -86,7 +86,8 @@ export default function ProductPage() {
           aspectRatio: '3/4',
           background: '#111111',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          marginTop: '56px'
         }}>
           <motion.img
             key={currentImage}
@@ -118,7 +119,7 @@ export default function ProductPage() {
             onClick={() => navigate(-1)}
             style={{
               position: 'absolute',
-              top: '16px', left: '16px',
+              top: '12px', left: '16px',
               width: '40px', height: '40px',
               borderRadius: '50%',
               background: 'rgba(10,10,10,0.6)',
@@ -141,7 +142,7 @@ export default function ProductPage() {
             onClick={() => setIsWishlisted(!isWishlisted)}
             style={{
               position: 'absolute',
-              top: '16px', right: '16px',
+              top: '12px', right: '16px',
               width: '40px', height: '40px',
               borderRadius: '50%',
               background: 'rgba(10,10,10,0.6)',
@@ -166,7 +167,7 @@ export default function ProductPage() {
           {product.discount > 0 && (
             <div style={{
               position: 'absolute',
-              top: '16px',
+              top: '12px',
               left: '50%',
               transform: 'translateX(-50%)',
               background: '#E8395A',
@@ -219,7 +220,7 @@ export default function ProductPage() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          style={{ padding: '20px 20px 0' }}>
+          style={{ padding: '20px 20px 160px' }}>
 
           {/* Brand */}
           <p style={{

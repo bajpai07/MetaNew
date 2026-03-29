@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { getProducts } from "../api/productService";
@@ -174,20 +174,20 @@ export default function Home() {
         {/* FILTERS */}
         <div style={{
           display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-          padding: '0 16px', gap: '4px', borderBottom: '0.5px solid var(--border)', position: 'sticky',
-          top: '56px', background: 'rgba(10,10,10,0.9)', backdropFilter: 'blur(12px)', zIndex: 90
+          padding: '0 16px', gap: '4px', borderBottom: '0.5px solid rgba(255,255,255,0.07)', position: 'sticky',
+          top: '56px', background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 90
         }}>
           {["All", "Men", "Women", "Kids"].map((cat) => (
             <motion.button
               key={cat}
               onClick={() => setCategory(cat)}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.96 }}
               style={{
                 padding: '14px 18px', background: 'none', border: 'none',
-                borderBottom: category === cat ? '2px solid var(--rose)' : '2px solid transparent',
-                color: category === cat ? 'var(--white)' : 'var(--text-2)',
+                borderBottom: category === cat ? '2.5px solid #E8395A' : '2.5px solid transparent',
+                color: category === cat ? '#fafaf8' : 'rgba(250,250,248,0.35)',
                 fontSize: '11px', letterSpacing: '0.14em', fontFamily: 'var(--font-body)',
-                fontWeight: category === cat ? 600 : 400, cursor: 'pointer', whiteSpace: 'nowrap',
+                fontWeight: category === cat ? 500 : 400, cursor: 'pointer', whiteSpace: 'nowrap',
                 flexShrink: 0, transition: 'color 0.2s, border-color 0.2s'
               }}
             >
@@ -198,11 +198,30 @@ export default function Home() {
 
         {/* PRODUCT GRID */}
         <section id="products" className="py-12 px-4 md:px-8 max-w-screen-xl mx-auto w-full bg-[#0a0a0a]">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="font-display font-semibold text-3xl md:text-4xl text-white tracking-wide">New Arrivals</h2>
-              <p className="text-sm text-white/60 mt-2 font-bold uppercase tracking-widest">Handpicked for you</p>
-            </div>
+          <div style={{ 
+            padding: '28px 20px 20px',
+            borderBottom: '0.5px solid rgba(255,255,255,0.06)'
+          }}>
+            <p style={{
+              fontSize: '10px',
+              letterSpacing: '0.25em',
+              color: '#E8395A',
+              marginBottom: '8px',
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 500
+            }}>
+              ✦ HANDPICKED FOR YOU
+            </p>
+            <h2 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: '32px',
+              fontWeight: 300,
+              color: '#fafaf8',
+              lineHeight: 1.1,
+              letterSpacing: '-0.01em'
+            }}>
+              New Arrivals
+            </h2>
           </div>
           {loading ? (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border)' }}>
@@ -217,9 +236,32 @@ export default function Home() {
                 </div>
               ))}
             </div>) : products.length > 0 ? (
-              <motion.div initial="hidden" animate="visible" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border)' }}>
-                {products.map((p, i) => <ProductCard key={p._id} product={p} index={i} />)}
-              </motion.div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', background: '#0a0a0a' }}>
+                {products.map((p, i) => (
+                  <React.Fragment key={p._id}>
+                    <div style={{ borderRight: i % 2 === 0 ? '0.5px solid rgba(255,255,255,0.06)' : 'none', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                      <ProductCard product={p} index={i} />
+                    </div>
+                    {i === 3 && (
+                      <div style={{
+                        gridColumn: '1 / -1', margin: '0', padding: '36px 24px',
+                        background: 'linear-gradient(135deg, #111111, #1a0a0f)',
+                        borderTop: '0.5px solid rgba(255,255,255,0.06)', borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '12px'
+                      }}>
+                        <p style={{ fontSize: '9px', letterSpacing: '0.25em', color: '#E8395A', fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>— INDIA FIRST</p>
+                        <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '28px', fontWeight: 300, fontStyle: 'italic', color: '#fafaf8', lineHeight: 1.2 }}>
+                          The Fitting Room<br />of the Future
+                        </h3>
+                        <p style={{ fontSize: '13px', color: 'rgba(250,250,248,0.5)', lineHeight: 1.7, maxWidth: '280px' }}>
+                          See any outfit on your body before you spend a rupee.
+                        </p>
+                        <motion.button whileTap={{ scale: 0.97 }} onClick={() => navigate('/3d-tryon')} style={{ marginTop: '4px', background: '#E8395A', color: '#fafaf8', border: 'none', borderRadius: '12px', padding: '12px 24px', fontSize: '11px', letterSpacing: '0.16em', fontWeight: 500, fontFamily: "'DM Sans', sans-serif", cursor: 'pointer' }}>✦ TRY IT NOW</motion.button>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
             ) : null}
           {/* NO RESULTS */}
           {!loading && products.length === 0 && (
