@@ -8,6 +8,7 @@ const BagPage = () => {
   const navigate = useNavigate();
 
   const cartItems = (Array.isArray(contextCartItems) ? contextCartItems : []).map((item) => {
+    const product = item.product || item;
     const prodId = (typeof product === 'object' && product !== null) ? product._id : product;
     return {
       _id: item._id,
