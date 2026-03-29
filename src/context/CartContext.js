@@ -69,7 +69,7 @@ export const CartProvider = ({ children }) => {
 
   const updateQty = async (productId, qty) => {
     try {
-      const response = await axios.patch(`${API_URL}/update`, { productId, qty, userId });
+      const response = await axios.put(`${API_URL}/update`, { productId, qty, userId });
       if (response.status === 200) {
         setCartItems(response.data.items);
         const count = response.data.items.reduce((acc, item) => acc + item.qty, 0);

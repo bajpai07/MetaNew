@@ -63,8 +63,9 @@ export const addToCart = async (req, res) => {
     }
 
     await cart.save();
-    await cart.populate("items.product");
-    res.status(200).json(cart);
+    // Use findById instead of cart.populate to guarantee subdocument population success
+    const freshCart = await Cart.findById(cart._id).populate("items.product");
+    res.status(200).json(freshCart);
   } catch (err) {
     res.status(500).json({ message: "Error adding to cart", error: err.message });
   }
@@ -125,9 +126,9 @@ export const updateCartItemQty = async (req, res) => {
       cart.items[itemIndex].qty = qty;
       cart.items[itemIndex].priceAtPurchase = product.price; // Freshen the snapshot optionally
       await cart.save();
-      // Repopulate explicitly to return full item data to the frontend
-      await cart.populate("items.product");
-      res.status(200).json(cart);
+      
+      const freshCart = await Cart.findById(cart._id).populate("items.product");
+      res.status(200).json(freshCart);
     } else {
       res.status(404).json({ message: "Item not found in cart" });
     }
