@@ -142,8 +142,13 @@ export default function Navbar() {
       {/* Mobile Inline Search Bar */}
       {showSearch && (
         <div style={{
-          padding: '10px 16px 0',
           background: '#0a0a0a',
+          padding: '10px 16px 12px',
+          width: '100%',
+          boxSizing: 'border-box',
+          position: 'relative',
+          zIndex: 50,
+          borderBottom: '0.5px solid rgba(255,255,255,0.07)',
           marginTop: '56px'
         }}>
           <input
@@ -155,11 +160,14 @@ export default function Navbar() {
               background: '#111111',
               border: '0.5px solid rgba(255,255,255,0.1)',
               borderRadius: '12px',
-              padding: '13px 16px 13px 40px',
+              padding: '13px 16px',
               color: '#fafaf8',
               fontSize: '14px',
               fontFamily: "'DM Sans', sans-serif",
               outline: 'none',
+              boxSizing: 'border-box',
+              display: 'block',
+              margin: 0,
               transition: 'border-color 0.2s'
             }}
             onFocus={e => e.target.style.borderColor = '#E8395A'}
