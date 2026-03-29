@@ -199,8 +199,10 @@ const ProductCard = ({ product, index }) => {
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          marginTop: '6px'
         }}>
+          {/* Current Price */}
           <span style={{
             fontSize: '15px',
             fontWeight: 600,
@@ -210,6 +212,8 @@ const ProductCard = ({ product, index }) => {
           }}>
             ₹{product.price?.toLocaleString('en-IN') || product.price}
           </span>
+
+          {/* MRP strikethrough */}
           {product.mrp && product.mrp > product.price && (
             <span style={{
               fontSize: '11px',
@@ -220,6 +224,8 @@ const ProductCard = ({ product, index }) => {
               ₹{product.mrp?.toLocaleString('en-IN') || product.mrp}
             </span>
           )}
+
+          {/* Discount % */}
           {product.discount > 0 && (
             <span style={{
               fontSize: '10px',

@@ -15,6 +15,8 @@ export default function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
+  const showSearch = location.pathname === '/' || location.pathname === '/search';
+
   useEffect(() => {
     setSearchTerm(searchParams.get("q") || "");
   }, [searchParams]);
@@ -110,15 +112,17 @@ export default function Navbar() {
 
         {/* Right: Icons */}
         <div className="flex items-center gap-2 md:gap-4">
-          <div className="hidden md:flex items-center border border-white/20 rounded-full px-4 py-1.5">
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              value={searchTerm}
-              onChange={handleSearch}
-              className="outline-none text-sm w-48 bg-transparent text-white placeholder-white/50"
-            />
-          </div>
+          {showSearch && (
+            <div className="hidden md:flex items-center border border-white/20 rounded-full px-4 py-1.5">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={searchTerm}
+                onChange={handleSearch}
+                className="outline-none text-sm w-48 bg-transparent text-white placeholder-white/50"
+              />
+            </div>
+          )}
 
           <motion.button whileTap={{ scale: 0.85 }} onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)} className="md:hidden flex items-center justify-center w-10 h-10 text-white">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.4-4.4"/></svg>
@@ -136,15 +140,30 @@ export default function Navbar() {
       </motion.nav>
 
       {/* Mobile Inline Search Bar */}
-      {isMobileSearchOpen && (
-        <div className="md:hidden sticky top-14 z-40 bg-[#111] border-b border-white/10 px-4 py-3 flex items-center shadow-lg">
-          <input 
-            type="text" 
-            placeholder="Search for products..." 
+      {showSearch && (
+        <div style={{
+          padding: '10px 16px 0',
+          background: '#0a0a0a',
+          marginTop: '56px'
+        }}>
+          <input
+            placeholder="Search for products..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full bg-white/10 rounded-xl h-11 px-4 outline-none text-[13px] font-bold text-white placeholder:text-white/40 focus:ring-1 focus:ring-rose"
-            autoFocus
+            style={{
+              width: '100%',
+              background: '#111111',
+              border: '0.5px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              padding: '13px 16px 13px 40px',
+              color: '#fafaf8',
+              fontSize: '14px',
+              fontFamily: "'DM Sans', sans-serif",
+              outline: 'none',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={e => e.target.style.borderColor = '#E8395A'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
           />
         </div>
       )}

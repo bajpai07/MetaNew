@@ -275,17 +275,55 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage, garment
               <button 
                 onClick={generateLook}
                 disabled={!userImage}
-                style={{ background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: 'var(--radius-xl)', padding: '18px', width: '100%', fontSize: '13px', letterSpacing: '0.15em', fontWeight: 500, textTransform: 'uppercase', cursor: 'pointer', transition: 'transform 0.1s' }}
-                className="active:scale-[0.98] disabled:opacity-50"
+                style={{
+                  width: '100%',
+                  background: 'linear-gradient(135deg, #E8395A, #c42d4a)',
+                  color: '#fafaf8',
+                  border: 'none',
+                  borderRadius: '16px',
+                  padding: '18px',
+                  fontSize: '13px',
+                  letterSpacing: '0.2em',
+                  fontWeight: 500,
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  opacity: 1,
+                  filter: 'none',
+                  WebkitFilter: 'none'
+                }}
+                className="active:scale-[0.98]"
               >
-                {!userImage ? "✨ Generate My Look" : "✨ Generate My Look"}
+                <span>✦ GENERATE MY LOOK</span>
               </button>
             )}
             
             {step === 'processing' && (
-               <button disabled className="w-full h-14 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 text-white/50 font-bold text-sm tracking-widest uppercase flex items-center justify-center gap-3 cursor-wait">
+              <button disabled style={{
+                width: '100%',
+                background: 'linear-gradient(135deg, #E8395A, #c42d4a)',
+                color: '#fafaf8',
+                border: 'none',
+                borderRadius: '16px',
+                padding: '18px',
+                fontSize: '13px',
+                letterSpacing: '0.2em',
+                fontWeight: 500,
+                fontFamily: "'DM Sans', sans-serif",
+                cursor: 'wait',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: 0.7,
+                filter: 'none',
+                WebkitFilter: 'none'
+              }}>
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                Processing...
+                <span>✦ GENERATING YOUR LOOK...</span>
               </button>
             )}
 
