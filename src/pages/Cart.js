@@ -8,18 +8,18 @@ const BagPage = () => {
   const navigate = useNavigate();
 
   const cartItems = (Array.isArray(contextCartItems) ? contextCartItems : []).map((item) => {
-    const product = item.product || item;
+    const prodId = (typeof product === 'object' && product !== null) ? product._id : product;
     return {
       _id: item._id,
-      product_id: product._id,
+      product_id: prodId || item.product_id || item.productId,
       name: product.name || item.name || 'Product',
       image: product.image || item.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
       price: Number(item.priceAtPurchase || product.price || item.price || 0),
       mrp: Number(product.originalPrice || Math.round((item.priceAtPurchase || product.price || item.price || 0) * 1.5)),
-      quantity: item.qty || 1,
+      quantity: item.qty || item.quantity || 1,
       size: item.size || product.size || null,
       color: item.color || product.color || null,
-      maxStock: product.stock || 10
+      maxStock: product.stock > 0 ? product.stock : 10
     };
   });
 
@@ -28,15 +28,25 @@ const BagPage = () => {
   const totalSavings = cartItems.reduce((acc, item) => acc + ((item.mrp - item.price) * item.quantity), 0);
   const finalTotal = subtotal + delivery;
 
-  const decreaseQty = (item) => {
+  const decreaseQty = async (item) => {
     if (item.quantity > 1) {
-      updateQty(item.product_id, item.quantity - 1);
+      try {
+        await toast.promise(
+          updateQty(item.product_id, item.quantity - 1),
+          { loading: 'Updating...', success: 'Cart updated', error: (e) => e.response?.data?.message || 'Could not update' }
+        );
+      } catch (e) {}
     }
   };
 
-  const increaseQty = (item) => {
+  const increaseQty = async (item) => {
     if (item.quantity < item.maxStock) {
-      updateQty(item.product_id, item.quantity + 1);
+      try {
+        await toast.promise(
+          updateQty(item.product_id, item.quantity + 1),
+          { loading: 'Updating...', success: 'Cart updated', error: (e) => e.response?.data?.message || 'Could not update' }
+        );
+      } catch (e) {}
     } else {
       toast.error(`Only ${item.maxStock} available`);
     }

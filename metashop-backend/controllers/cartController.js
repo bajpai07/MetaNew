@@ -108,7 +108,10 @@ export const updateCartItemQty = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
     
-    if (product.stock < qty) return res.status(400).json({ message: "Quantity exceeds available stock" });
+    // Only block if stock is explicitly defined and strictly less than requested qty
+    if (product.stock !== undefined && product.stock !== null && product.stock < qty && product.stock > 0) {
+      return res.status(400).json({ message: `Only ${product.stock} items left in stock` });
+    }
 
     let cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ message: "Cart not found" });
