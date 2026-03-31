@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { generateTryOn } from '../controllers/vtonController.js';
+import { generateTryOn, checkVTONStatus } from '../controllers/vtonController.js';
 
 const router = express.Router();
 const upload = multer({ 
@@ -14,5 +14,7 @@ router.post('/generate',
   ]),
   generateTryOn
 );
+
+router.get('/status/:id', checkVTONStatus);
 
 export default router;
