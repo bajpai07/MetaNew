@@ -8,10 +8,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const result = dotenv.config({ path: path.join(__dirname, '.env') });
-if (result.error) {
-  console.error('CRITICAL: Could not find .env file. Please check the backend root.');
-}
+dotenv.config({ path: path.join(__dirname, '.env') });
 console.log('--- PATH CHECK: Current Dir is', __dirname);
 
 import { connectDB } from "./config/db.js";
@@ -80,7 +77,7 @@ app.get("/", (req, res) => {
 connectDB(process.env.MONGO_URI);
 
 /* server */
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
