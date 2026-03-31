@@ -116,10 +116,10 @@ export const generateTryOn = async (req, res) => {
     const result = await client.predict("/tryon", [
       { background: humanBlob, layers: [], composite: null }, // human image dict
       garmentBlob,   // garment image
-      "A person wearing the garment",  // description
+      "Photorealistic full body shot, highly detailed, perfectly fitted dress preserving natural hands, natural legs, and natural body shape, cinematic lighting.",  // description
       true,          // is_checked
-      true,          // is_checked_crop
-      30,            // denoise_steps
+      false,         // is_checked_crop (Set to false to prevent cropping legs/feet)
+      50,            // denoise_steps (Increased to 50 for much better hand and fabric details)
       42             // seed
     ]);
 
