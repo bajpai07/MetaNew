@@ -119,7 +119,7 @@ export const generateTryOn = async (req, res) => {
       "Photorealistic full body shot, highly detailed, perfectly fitted dress preserving natural hands, natural legs, and natural body shape, cinematic lighting.",  // description
       true,          // is_checked
       false,         // is_checked_crop (Set to false to prevent cropping legs/feet)
-      50,            // denoise_steps (Increased to 50 for much better hand and fabric details)
+      40,            // denoise_steps (Maximum allowed is 40)
       42             // seed
     ]);
 
