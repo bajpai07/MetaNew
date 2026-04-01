@@ -20,7 +20,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
-import vtonRoutes from "./routes/vtonRoutes.js";
+import tryonRoutes from "./routes/tryonRoutes.js";
 
 const app = express();
 
@@ -66,7 +66,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/vton", vtonRoutes);
+app.use("/api/tryon", tryonRoutes);
 
 /* root */
 app.get("/", (req, res) => {
