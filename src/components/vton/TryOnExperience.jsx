@@ -233,8 +233,8 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
 
                       {/* Fallback Toast Message */}
                       {isFallback && (
-                         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 backdrop-blur-md px-4 py-3 rounded-xl text-xs text-center shadow-lg font-medium">
-                            Showing instant preview while HD render is unavailable.
+                         <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max max-w-[85%] bg-[#1a1a1a]/90 text-white border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-full text-[10px] tracking-wide text-center shadow-xl font-medium flex items-center gap-2 z-50">
+                            <span className="text-yellow-400">⚡</span> Instant preview active (HD limits reached)
                          </div>
                       )}
                     </div>
@@ -243,8 +243,8 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                     <img src={resultImage} alt="AI Result" className="w-full h-full object-cover" />
                   )}
 
-                  <div className="absolute bottom-[30px] left-0 w-full text-center px-4 z-10">
-                    <div className="bg-black/60 backdrop-blur-lg border border-white/20 rounded-full p-1 mx-auto w-max flex gap-1">
+                  <div className="absolute bottom-[20px] left-0 w-full text-center px-4 z-10">
+                    <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-full p-1.5 mx-auto w-max flex gap-1 shadow-2xl">
                       <button 
                         onClick={() => setPreviewMode(true)}
                         className={`px-4 py-2 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 ${previewMode ? 'bg-white text-black' : 'text-white/70 hover:text-white'}`}
