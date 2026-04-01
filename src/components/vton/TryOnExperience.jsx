@@ -243,7 +243,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                     <img src={resultImage} alt="AI Result" className="w-full h-full object-cover" />
                   )}
 
-                  <div className="absolute bottom-[20px] left-0 w-full text-center px-4 z-10">
+                  <div className="absolute bottom-[90px] left-0 w-full text-center px-4 z-10">
                     <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-full p-1.5 mx-auto w-max flex gap-1 shadow-2xl">
                       <button 
                         onClick={() => setPreviewMode(true)}
