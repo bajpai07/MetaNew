@@ -1,6 +1,10 @@
 import { fal } from "@fal-ai/client";
 import fs from "fs";
 
+fal.config({
+  credentials: process.env.FAL_KEY
+});
+
 export const generateTryOn = async (req, res) => {
   try {
     let userImage = req.body.humanImage;
@@ -14,7 +18,19 @@ export const generateTryOn = async (req, res) => {
       fs.unlinkSync(userImageFile.path);
     }
 
-    const result = await fal.subscribe("flux-kontext/dev", {
+    // VALIDATE INPUT BEFORE CALL
+    if (!userImage || !productImage) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "humanImage and garmentImageUrl are required" 
+      });
+    }
+
+    // ADD DEBUG LOGGING
+    console.log("FAL KEY:", process.env.FAL_KEY ? "Loaded" : "Missing");
+    console.log("Calling fal model...");
+
+    const result = await fal.subscribe("fal-ai/flux-kontext/dev", {
       input: {
         image_url: userImage,
         reference_image_url: productImage,
@@ -22,13 +38,20 @@ export const generateTryOn = async (req, res) => {
       }
     });
 
-    // Handle common fal.ai response structures
-    const outputUrl = result.data?.image?.url || result.data?.image_url || result.data?.images?.[0]?.url;
+    // Ensure fallback safety for different fal JSON structures
+    const finalUrl = result?.data?.images?.[0]?.url || result?.data?.image?.url || result?.data?.image_url;
 
-    return res.json({ resultUrl: outputUrl });
+    return res.json({ 
+      success: true, 
+      imageUrl: finalUrl,
+      resultUrl: finalUrl // Retained securely for frontend compatibility since frontend changes were forbidden
+    });
 
-  } catch (error) {
-    console.error("Fal API Error:", error.message || error);
-    return res.status(500).json({ error: error.message || "Failed to generate Try-On" });
+  } catch (err) {
+    console.error("FAL ERROR:", err);
+    return res.status(500).json({ 
+      success: false, 
+      error: err.message || "Fal API failed" 
+    });
   }
 };
