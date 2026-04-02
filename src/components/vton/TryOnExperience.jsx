@@ -44,7 +44,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
       const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/tryon`, 
       formData, 
       { 
-        timeout: 60000, // 60s timeout for raw API
+        timeout: 180000, // 3 minutes timeout for heavy API queue
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
