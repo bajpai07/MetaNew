@@ -1,73 +1,34 @@
-import { aiService } from '../services/aiService.js';
-import fs from 'fs';
-
-// Memory cache for session rate tracking (In production, replace with Redis)
-const sessionUsageMap = new Map();
-const MAX_AI_CALLS_PER_SESSION = 5;
-
-// Cache for identical requests (userImageHash + garmentUrl) -> resultUrl
-const cacheMap = new Map();
+import { fal } from "@fal-ai/client";
+import fs from "fs";
 
 export const generateTryOn = async (req, res) => {
   try {
-    const sessionId = req.ip || 'anonymous';
-    const currentUsage = sessionUsageMap.get(sessionId) || 0;
-
-    // 1. INPUT PARSING
+    let userImage = req.body.humanImage;
+    const productImage = req.body.garmentImageUrl;
     const userImageFile = req.files?.humanImage?.[0];
-    let userImageBase64 = req.body.humanImage;
-    const garmentImageUrl = req.body.garmentImageUrl;
 
-    if (!garmentImageUrl) {
-      return res.json({ status: "fallback", message: "Missing garment image" });
-    }
-    if (!userImageFile && !userImageBase64) {
-      return res.json({ status: "fallback", message: "Missing user image" });
-    }
-
-    // Process multipart file to base64 if it came as a file upload
-    if (userImageFile && !userImageBase64) {
+    // Read local file upload to base64 Data URI if needed
+    if (userImageFile && !userImage) {
       const buffer = fs.readFileSync(userImageFile.path);
-      userImageBase64 = `data:${userImageFile.mimetype};base64,${buffer.toString('base64')}`;
-      fs.unlinkSync(userImageFile.path); // cleanup temp file immediately
+      userImage = `data:${userImageFile.mimetype};base64,${buffer.toString("base64")}`;
+      fs.unlinkSync(userImageFile.path);
     }
 
-    // 2. CACHE CHECK
-    const cacheKey = `${sessionId}_${garmentImageUrl}`;
-    if (cacheMap.has(cacheKey)) {
-      console.log('Returning cached result instantly.');
-      return res.json({ 
-        status: "success", 
-        image: cacheMap.get(cacheKey) 
-      });
-    }
+    const result = await fal.subscribe("flux-kontext/dev", {
+      input: {
+        image_url: userImage,
+        reference_image_url: productImage,
+        prompt: "A highly realistic photo of the same person wearing the selected outfit. Preserve face, body, and pose. Apply clothing naturally with proper alignment, realistic folds, and lighting. No distortion, no extra limbs, no cartoon style."
+      }
+    });
 
-    // 3. RATE LIMITING LOGIC (Graceful Fallback)
-    if (currentUsage >= MAX_AI_CALLS_PER_SESSION) {
-      console.log(`[Rate Limit] Session ${sessionId} exceeded max calls. Returning fallback.`);
-      return res.json({ 
-        status: "fallback", 
-        message: "Using preview mode" 
-      });
-    }
+    // Handle common fal.ai response structures
+    const outputUrl = result.data?.image?.url || result.data?.image_url || result.data?.images?.[0]?.url;
 
-    // 4. EXTERNAL AI SERVICE CALL
-    const result = await aiService.generateTryOn(userImageBase64, garmentImageUrl);
-
-    // 5. POST-PROCESSING
-    if (result.status === 'success') {
-      // Increment session usage counter only on success
-      sessionUsageMap.set(sessionId, currentUsage + 1);
-      
-      // Store in short-term cache
-      cacheMap.set(cacheKey, result.image);
-    }
-
-    return res.json(result);
+    return res.json({ resultUrl: outputUrl });
 
   } catch (error) {
-    console.error("❌ Critical Try-On Controller Error:", error);
-    // Ultimate safety net: ensure API never crashes or returns HTTP 500
-    return res.json({ status: "fallback", message: "Using preview mode" });
+    console.error("Fal API Error:", error.message || error);
+    return res.status(500).json({ error: error.message || "Failed to generate Try-On" });
   }
 };

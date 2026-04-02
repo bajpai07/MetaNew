@@ -9,7 +9,7 @@
     "seed": "node addSample.js"
   },
   "dependencies": {
-    "@gradio/client": "^2.1.0",
+    "@fal-ai/client": "^1.9.5",
     "axios": "^1.13.6",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.9.0",

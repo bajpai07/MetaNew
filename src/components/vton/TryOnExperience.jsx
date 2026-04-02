@@ -7,9 +7,6 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
   const [step, setStep] = useState('upload'); // 'upload' | 'processing' | 'result'
   const [userImage, setUserImage] = useState(null);
   const [resultImage, setResultImage] = useState(null);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [isFallback, setIsFallback] = useState(false);
-
   const fileInputRef = useRef(null);
 
   // Reset state on open
@@ -18,8 +15,6 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
       setStep('upload');
       setUserImage(null);
       setResultImage(null);
-      setPreviewMode(false);
-      setIsFallback(false);
     }
   }, [isOpen]);
 
@@ -32,68 +27,39 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
     }
   };
 
-  /**
-   * Frontend Integration Data Service
-   * Clean abstraction layer calling the new WearFits-based /api/tryon route
-   */
-  const generateTryOnData = async (userImgBase64, productImgUrl) => {
+  const handleGenerate = async () => {
+    if (!userImage) return toast.error("Please upload a photo first");
+    
+    setStep('processing');
+
     try {
       // Convert base64 to Blob for multipart upload
-      const fetched = await fetch(userImgBase64);
+      const fetched = await fetch(userImage);
       const blob = await fetched.blob();
       
       const formData = new FormData();
       formData.append('humanImage', blob, 'user_image.jpg');
-      formData.append('garmentImageUrl', productImgUrl);
+      formData.append('garmentImageUrl', garmentImage);
 
       const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/tryon`, 
       formData, 
       { 
-        timeout: 55000, // 55 sec timeout to avoid server crash hanging
+        timeout: 60000, // 60s timeout for raw API
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      return res.data; // Expects { status: 'success' | 'fallback', image?, message? }
+      if (res.data.resultUrl) {
+        setResultImage(res.data.resultUrl);
+        setStep('result');
+      } else {
+        toast.error("Generation failed. No image returned.");
+        setStep('upload');
+      }
     } catch (err) {
-      console.error("Frontend API Communication Error:", err);
-      // NEVER throw error in UI -> Always return structured fallback
-      return { status: "fallback", message: "Network or Server limits reached" };
+      console.error("Frontend API Error:", err);
+      toast.error(err.response?.data?.error || "AI generation failed.");
+      setStep('upload');
     }
-  };
-
-  /**
-   * "High Quality Try-On ✨" Handler
-   */
-  const handleHighQualityRender = async () => {
-    if (!userImage) return toast.error("Please upload a photo first");
-    
-    setStep('processing');
-    setPreviewMode(false);
-    setIsFallback(false);
-
-    // Call abstraction layer
-    const result = await generateTryOnData(userImage, garmentImage);
-
-    if (result.status === 'success' && result.image) {
-      setResultImage(result.image);
-      setPreviewMode(false);
-      setStep('result');
-    } else {
-      // Fallback -> API failed, timed out, or rate limits exceeded
-      setIsFallback(true);
-      setPreviewMode(true);
-      setStep('result');
-    }
-  };
-
-  /**
-   * "Instant Preview ⚡" Handler
-   */
-  const handleInstantPreview = () => {
-    if (!userImage) return toast.error("Please upload a photo first");
-    setPreviewMode(true);
-    setIsFallback(false);
-    setStep('result');
   };
 
   if (!isOpen) return null;
@@ -116,13 +82,13 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="text-[13px] tracking-[0.2em] uppercase font-semibold">WearFits Try-On</h1>
+            <h1 className="text-[13px] tracking-[0.2em] uppercase font-semibold">Virtual Try-On</h1>
             <div className="w-10"></div>
           </div>
 
           <div className="flex-1 overflow-y-auto relative">
             
-            {/* STEP 1: UPLOAD & Dual Buttons */}
+            {/* STEP 1: UPLOAD */}
             {step === 'upload' && (
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -133,7 +99,6 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                   <p className="text-white/50 text-sm mt-1">Clear front-facing photos work best</p>
                 </div>
 
-                {/* Upload Box */}
                 <div 
                   className="relative w-full max-h-[45vh] mx-auto overflow-hidden cursor-pointer bg-white/5 border border-white/10 rounded-2xl flex flex-col items-center justify-center transition-all hover:bg-white/10"
                   style={{ aspectRatio: '3/4' }}
@@ -150,34 +115,23 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
                 </div>
                 
-                <div className="mt-8 text-center text-[11px] text-white/40 uppercase tracking-widest flex items-center justify-center gap-2">
-                   🔒 100% Private & Secure Processing
-                </div>
-
-                {/* DUAL MODE UX BUTTONS */}
                 {userImage && (
                   <motion.div 
                     initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
                     className="fixed bottom-0 left-0 w-full px-4 py-6 bg-[#0a0a0a]/90 backdrop-blur-xl border-t border-white/10 z-[300] flex flex-col gap-3"
                   >
                     <button 
-                      onClick={handleInstantPreview}
-                      className="w-full bg-white/10 text-white font-medium py-4 rounded-xl text-sm border border-white/20 active:bg-white/20 transition-all flex justify-center items-center gap-2"
-                    >
-                      Instant Preview ⚡
-                    </button>
-                    <button 
-                      onClick={handleHighQualityRender}
+                      onClick={handleGenerate}
                       className="w-full bg-gradient-to-r from-[#E8395A] to-[#c42d4a] text-white font-medium py-4 rounded-xl text-sm shadow-[0_4px_20px_rgba(232,57,90,0.4)] active:scale-[0.98] transition-all flex justify-center items-center gap-2"
                     >
-                      High Quality Try-On ✨
+                      Generate AI Look ✨
                     </button>
                   </motion.div>
                 )}
               </motion.div>
             )}
 
-            {/* STEP 2: LOADING SKELETON */}
+            {/* STEP 2: LOADING */}
             {step === 'processing' && (
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -185,10 +139,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
               >
                 <div className="w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden relative shadow-2xl border border-white/10">
                   <div className="absolute inset-0 bg-white/5 animate-pulse"></div>
-                  
                   {userImage && <img src={userImage} className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-screen blur-sm" alt="" />}
-                  
-                  {/* Sweep logic */}
                   <div className="absolute top-0 left-0 w-full h-[200%] bg-gradient-to-b from-transparent via-white/10 to-transparent animate-[shimmer-slide_2.5s_infinite]"></div>
                   
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -197,14 +148,14 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                 </div>
 
                 <div className="mt-8 text-center px-4">
-                  <p className="text-lg font-medium tracking-wide">Generating your AI look</p>
-                  <p className="text-white/40 text-[13px] mt-1">(30–60 seconds)</p>
+                  <p className="text-lg font-medium tracking-wide">Processing your image...</p>
+                  <p className="text-white/40 text-[13px] mt-1">This may take 30-60 seconds</p>
                 </div>
               </motion.div>
             )}
 
             {/* STEP 3: RESULT UX */}
-            {step === 'result' && (
+            {step === 'result' && resultImage && (
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 className="h-[100svh] w-full flex flex-col absolute inset-0 bg-black z-50 pb-[calc(100px+env(safe-area-inset-bottom))]"
@@ -216,55 +167,7 @@ export default function TryOnExperience({ isOpen, onClose, garmentImage }) {
                 </div>
 
                 <div className="w-full h-full relative border border-white/10 rounded-b-3xl overflow-hidden bg-white/5">
-                  {previewMode ? (
-                    /* INSTANT PREVIEW (Fallback or Selected) */
-                    <div className="w-full h-full relative flex items-center justify-center p-4">
-                      <div className="w-full h-full relative max-w-md mx-auto aspect-[3/4] overflow-hidden rounded-2xl bg-black shadow-lg border border-white/10 flex">
-                         {/* Split View */}
-                         <div className="w-1/2 h-full border-r border-white/20 relative">
-                            <img src={userImage} className="w-full h-full object-cover" alt="User" />
-                            <div className="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-[10px] backdrop-blur-md">You</div>
-                         </div>
-                         <div className="w-1/2 h-full relative bg-white">
-                            <img src={garmentImage} className="w-full h-full object-contain p-2" alt="Product" />
-                            <div className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 text-white rounded text-[10px] backdrop-blur-md">Garment</div>
-                         </div>
-                      </div>
-
-                      {/* Fallback Toast Message */}
-                      {isFallback && (
-                         <div className="absolute top-6 left-1/2 -translate-x-1/2 w-max max-w-[85%] bg-[#1a1a1a]/90 text-white border border-white/10 backdrop-blur-md px-4 py-2.5 rounded-full text-[10px] tracking-wide text-center shadow-xl font-medium flex items-center gap-2 z-50">
-                            <span className="text-yellow-400">⚡</span> Instant preview active (HD limits reached)
-                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    /* HIGH QUALITY SUCCESS */
-                    <img src={resultImage} alt="AI Result" className="w-full h-full object-cover" />
-                  )}
-
-                  <div className="absolute bottom-[90px] left-0 w-full text-center px-4 z-10">
-                    <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-full p-1.5 mx-auto w-max flex gap-1 shadow-2xl">
-                      <button 
-                        onClick={() => setPreviewMode(true)}
-                        className={`px-4 py-2 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 ${previewMode ? 'bg-white text-black' : 'text-white/70 hover:text-white'}`}
-                      >
-                        Preview
-                      </button>
-                      <button 
-                        onClick={() => {
-                          if (resultImage) {
-                            setPreviewMode(false);
-                          } else {
-                            toast("HD Render not generated yet", { icon: '⚠️' });
-                          }
-                        }}
-                        className={`px-4 py-2 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all duration-300 ${!previewMode ? 'bg-white text-black' : 'text-white/70 hover:text-white'}`}
-                      >
-                        HD AI Fit
-                      </button>
-                    </div>
-                  </div>
+                   <img src={resultImage} alt="AI Result" className="w-full h-full object-cover" />
                 </div>
 
                 {/* Bottom Actions for Result */}
