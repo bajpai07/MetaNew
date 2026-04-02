@@ -18,7 +18,6 @@ export const generateTryOn = async (req, res) => {
       fs.unlinkSync(userImageFile.path);
     }
 
-    // VALIDATE INPUT BEFORE CALL
     if (!userImage || !productImage) {
       return res.status(400).json({ 
         success: false, 
@@ -26,25 +25,23 @@ export const generateTryOn = async (req, res) => {
       });
     }
 
-    // ADD DEBUG LOGGING
     console.log("FAL KEY:", process.env.FAL_KEY ? "Loaded" : "Missing");
-    console.log("Calling fal model...");
+    console.log("Calling true fal-ai IDM-VTON model...");
 
-    const result = await fal.subscribe("fal-ai/flux-kontext/dev", {
+    const result = await fal.subscribe("fal-ai/idm-vton", {
       input: {
-        image_url: userImage,
-        reference_image_url: productImage,
-        prompt: "A highly realistic photo of the same person wearing the selected outfit. Preserve face, body, and pose. Apply clothing naturally with proper alignment, realistic folds, and lighting. No distortion, no extra limbs, no cartoon style."
+        human_image_url: userImage,
+        garment_image_url: productImage,
+        description: "A highly realistic photo of the same person wearing the selected outfit. Preserve face, body, and pose. Apply clothing naturally with proper alignment, realistic folds, and lighting. No distortion, no extra limbs, no cartoon style."
       }
     });
 
-    // Ensure fallback safety for different fal JSON structures
-    const finalUrl = result?.data?.images?.[0]?.url || result?.data?.image?.url || result?.data?.image_url;
+    const finalUrl = result?.data?.image?.url || result?.data?.image_url || result?.data?.images?.[0]?.url || result?.data?.url;
 
     return res.json({ 
       success: true, 
       imageUrl: finalUrl,
-      resultUrl: finalUrl // Retained securely for frontend compatibility since frontend changes were forbidden
+      resultUrl: finalUrl
     });
 
   } catch (err) {
