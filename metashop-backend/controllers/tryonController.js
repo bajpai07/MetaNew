@@ -28,15 +28,31 @@ export const generateTryOn = async (req, res) => {
     console.log("FAL KEY:", process.env.FAL_KEY ? "Loaded" : "Missing");
     console.log("Calling true fal-ai IDM-VTON model...");
 
-    const result = await fal.subscribe("fal-ai/idm-vton", {
-      input: {
-        human_image_url: userImage,
-        garment_image_url: productImage,
-        description: "A highly realistic photo of the same person wearing the selected outfit. Preserve face, body, and pose. Apply clothing naturally with proper alignment, realistic folds, and lighting. No distortion, no extra limbs, no cartoon style."
+    const result = await fal.subscribe(
+      "fal-ai/fashn/tryon/v1.6",
+      {
+        input: {
+          model_image: userImage,
+          garment_image: productImage,
+          category: "auto",
+          mode: "quality",
+          garment_photo_type: "auto",
+          nsfw_filter: true,
+          adjust_hands: true,
+          restore_background: true,
+          restore_clothes: true
+        },
+        logs: true,
+        onQueueUpdate: (update) => {
+          console.log("Status:", update.status);
+        }
       }
-    });
+    );
 
-    const finalUrl = result?.data?.image?.url || result?.data?.image_url || result?.data?.images?.[0]?.url || result?.data?.url;
+    const finalUrl =
+      result.data?.images?.[0]?.url ||
+      result.data?.image?.url ||
+      result.data?.output?.[0];
 
     return res.json({ 
       success: true, 
