@@ -152,28 +152,33 @@ function cleanupFile(filePath) {
 // ─── Main Controller ─────────────────────
 
 export const generateTryOn = async (req, res) => {
-  const humanImageFile = 
-    req.files?.humanImage?.[0];
+  const requestId = `vton_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+  console.log(`[${requestId}] Step: request start`);
+  
+  const humanImageFile = req.files?.humanImage?.[0];
   const startTime = Date.now();
   
-  console.log("=== VTON REQUEST START ===");
-  console.log("Time:", new Date().toISOString());
-  console.log("FAL_KEY set:", !!process.env.FAL_KEY);
-
   try {
     // ── Validate inputs ──────────────────
-    validateImageFile(humanImageFile);
-    validateGarmentUrl(req.body.garmentImageUrl);
+    try {
+      validateImageFile(humanImageFile);
+      validateGarmentUrl(req.body.garmentImageUrl);
+    } catch (err) {
+      console.log(`[${requestId}] Step: validation failure - ${err.message}`);
+      return res.status(400).json({
+        success: false,
+        errorType: "VALIDATION_ERROR",
+        error: "Use a clear front-facing full-body photo.",
+        message: err.message,
+        retryable: false,
+        requestId
+      });
+    }
     
     const garmentImageUrl = req.body.garmentImageUrl;
-    console.log("✅ Inputs validated");
-    console.log("File:", humanImageFile.originalname);
-    console.log("Size:", humanImageFile.size, "bytes");
-    console.log("Garment:", garmentImageUrl);
+    console.log(`[${requestId}] Step: validation success`);
 
     // ── Convert images ───────────────────
-    console.log("Converting images to base64...");
-    
     let modelUri, garmentUri;
     
     try {
@@ -185,15 +190,16 @@ export const generateTryOn = async (req, res) => {
       cleanupFile(humanImageFile?.path);
       return res.status(400).json({
         success: false,
-        error: "Image processing failed",
-        message: err.message
+        errorType: "VALIDATION_ERROR",
+        error: "Could not process your images.",
+        message: err.message,
+        retryable: false,
+        requestId
       });
     }
-    
-    console.log("✅ Images converted");
 
     // ── Call fal.ai with timeout ─────────
-    console.log("Calling fal.ai FASHN v1.6...");
+    console.log(`[${requestId}] Step: fal call start`);
     
     const FAL_TIMEOUT = 120000; // 2 minutes
     
@@ -215,51 +221,58 @@ export const generateTryOn = async (req, res) => {
         },
         logs: true,
         onQueueUpdate: (update) => {
-          console.log(
-            "FAL Status:", 
-            update.status,
-            update.position 
-              ? `| Queue: ${update.position}` 
-              : ''
-          );
+          console.log(`[${requestId}] Step: fal queue - ${update.status}`);
         }
       }
     );
     
     const timeoutPromise = new Promise((_, reject) => 
       setTimeout(
-        () => reject(
-          new Error("AI generation timed out. Please try again.")
-        ), 
+        () => reject(new Error("AI generation timed out.")), 
         FAL_TIMEOUT
       )
     );
     
     let result;
     try {
-      result = await Promise.race([
-        falPromise, 
-        timeoutPromise
-      ]);
+      result = await Promise.race([falPromise, timeoutPromise]);
     } catch (err) {
       cleanupFile(humanImageFile?.path);
       
       const isTimeout = err.message.includes('timed out');
-      const isQuota = err.message?.includes('quota') || 
-                      err.message?.includes('billing');
+      const isQuota = err.message?.includes('quota') || err.message?.includes('billing');
       
-      return res.status(500).json({
-        success: false,
-        error: isTimeout 
-          ? "Generation timed out. Please try again."
-          : isQuota
-          ? "Service temporarily unavailable."
-          : "AI generation failed. Please try again.",
-        message: err.message
+      if (isTimeout) {
+         return res.status(408).json({
+            success: false,
+            errorType: "TIMEOUT_ERROR",
+            error: "AI is taking longer than expected",
+            message: "Please try again. System is under load.",
+            retryable: true,
+            requestId
+         });
+      }
+      if (isQuota) {
+         return res.status(402).json({
+            success: false,
+            errorType: "QUOTA_ERROR",
+            error: "Service temporarily unavailable. Try later.",
+            message: err.message,
+            retryable: false,
+            requestId
+         });
+      }
+      return res.status(502).json({
+         success: false,
+         errorType: "AI_SERVICE_ERROR",
+         error: "AI generation failed. Please try again.",
+         message: err.message,
+         retryable: true,
+         requestId
       });
     }
     
-    console.log("✅ FAL result received");
+    console.log(`[${requestId}] Step: fal response received`);
 
     // ── Extract output URL ────────────────
     const outputUrl =
@@ -270,79 +283,60 @@ export const generateTryOn = async (req, res) => {
 
     if (!outputUrl) {
       cleanupFile(humanImageFile?.path);
-      console.error(
-        "No output URL. Result:", 
-        JSON.stringify(result?.data)
-      );
       return res.status(500).json({
         success: false,
+        errorType: "AI_SERVICE_ERROR",
         error: "No output generated. Please try again.",
-        debug: result?.data
+        message: "Missing output structure",
+        retryable: true,
+        requestId
       });
     }
-    
-    console.log("Output URL:", outputUrl);
 
     // ── Upload to Cloudinary ──────────────
-    console.log("Uploading to Cloudinary...");
+    console.log(`[${requestId}] Step: cloudinary upload`);
     
     let cloudinaryUrl;
     try {
-      cloudinaryUrl = await uploadToCloudinary(
-        outputUrl
-      );
+      cloudinaryUrl = await uploadToCloudinary(outputUrl);
     } catch (err) {
       cleanupFile(humanImageFile?.path);
       return res.status(500).json({
         success: false,
-        error: "Failed to save result. Please try again.",
-        message: err.message
+        errorType: "NETWORK_ERROR",
+        error: "Failed to upload result. Please try again.",
+        message: err.message,
+        retryable: true,
+        requestId
       });
     }
-    
-    console.log("✅ Cloudinary URL:", cloudinaryUrl);
 
     // ── Cleanup & respond ─────────────────
     cleanupFile(humanImageFile?.path);
     
     const duration = Date.now() - startTime;
-    console.log(`✅ VTON complete in ${duration}ms`);
+    console.log(`[${requestId}] Step: final response (took ${duration}ms)`);
 
     return res.json({
       success: true,
       resultUrl: cloudinaryUrl,
-      fitScore: Math.floor(
-        Math.random() * 8
-      ) + 88,
-      generationTime: duration
+      fitScore: Math.floor(Math.random() * 8) + 88,
+      generationTime: duration,
+      requestId
     });
 
   } catch (err) {
     cleanupFile(humanImageFile?.path);
     
-    console.error("=== VTON UNEXPECTED ERROR ===");
-    console.error("Message:", err.message);
-    console.error("Stack:", err.stack);
+    console.error(`[${requestId}] Step: unexpected error - ${err.message}`);
     
-    // Convert validation errors from 500 to 400
-    if (
-      err.message === "No image uploaded" || 
-      err.message.includes("Invalid file type") || 
-      err.message.includes("Image too large") || 
-      err.message.includes("Garment image URL missing") || 
-      err.message.includes("Invalid garment image URL")
-    ) {
-      return res.status(400).json({  
-        success: false,
-        error: err.message,
-        message: err.message
-      });
-    }
-
     return res.status(500).json({
       success: false,
-      error: "Something went wrong. Please try again.",
-      message: err.message
+      errorType: "UNKNOWN_ERROR",
+      error: "Something went wrong. Please retry.",
+      message: "Internal server crash avoided",
+      retryable: true,
+      requestId
     });
   }
 };

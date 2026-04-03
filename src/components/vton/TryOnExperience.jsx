@@ -14,6 +14,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [generationTime, setGenerationTime] = useState(null);
   const [loadingStep, setLoadingStep] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [isRetryable, setIsRetryable] = useState(false);
   
   const fileInputRef = useRef(null);
   const sliderRef = useRef(null);
@@ -119,25 +120,42 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       console.error("Generation error:", err);
       
       let errorMsg = "Generation failed. Please try again.";
+      let canRetry = true;
       
-      if (err.code === 'ECONNABORTED' || 
-          err.message?.includes('timeout')) {
-        errorMsg = "Taking too long. AI is busy — try again in 30 seconds.";
-      } else if (err.response?.status === 400) {
-        errorMsg = err.response.data?.message 
-          || "Invalid image. Use a clear front-facing photo.";
-      } else if (err.response?.status === 500) {
-        errorMsg = err.response.data?.error 
-          || "Server error. Please try again.";
+      if (err.response?.data?.errorType) {
+        const { errorType, error: uiError, retryable } = err.response.data;
+        
+        const errorMap = {
+          'TIMEOUT_ERROR': "AI is busy right now. Try again in a few seconds.",
+          'VALIDATION_ERROR': "Use a clear front-facing full-body photo.",
+          'QUOTA_ERROR': "Service temporarily unavailable. Try later.",
+          'NETWORK_ERROR': "Network issue. Check your internet.",
+          'UNKNOWN_ERROR': "Something went wrong. Please retry."
+        };
+        
+        errorMsg = errorMap[errorType] || uiError || "Something went wrong. Please retry.";
+        canRetry = retryable;
+      } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        errorMsg = "AI is busy right now. Try again in a few seconds.";
       } else if (!navigator.onLine) {
-        errorMsg = "No internet connection. Check your connection.";
+        errorMsg = "Network issue. Check your internet.";
+      }
+
+      if (canRetry && retryCount >= 3) {
+        errorMsg = "Please try again after some time";
+        canRetry = false;
       }
       
       setError(errorMsg);
+      setIsRetryable(canRetry);
+      if (!canRetry) {
+        setRetryCount(0);
+      }
     } finally {
       setIsGenerating(false);
+      setLoadingStep(0);
     }
-  }, [uploadedPhoto, product, startLoadingAnimation]);
+  }, [uploadedPhoto, product, garmentImage, startLoadingAnimation, retryCount]);
 
   // ── Download handler ──────────────────
   const handleDownload = useCallback(async () => {
@@ -192,6 +210,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setResultUrl(null);
     setFitScore(null);
     setError(null);
+    setIsRetryable(false);
     setActiveTab('yours');
     setSliderPos(50);
     setGenerationTime(null);
@@ -959,37 +978,86 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         }}>
 
           {!resultUrl ? (
-            /* Generate button */
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              onClick={handleGenerate}
-              disabled={isGenerating || !uploadedPhoto}
-              style={{
-                width: '100%',
-                background: uploadedPhoto
-                  ? 'linear-gradient(135deg, #E8395A, #c42d4a)'
-                  : 'rgba(255,255,255,0.08)',
-                color: uploadedPhoto
-                  ? '#fafaf8'
-                  : 'rgba(250,250,248,0.3)',
-                border: 'none',
-                borderRadius: '16px',
-                padding: '18px',
-                fontSize: '12px',
-                letterSpacing: '0.2em',
-                fontWeight: 500,
-                fontFamily: "'DM Sans', sans-serif",
-                cursor: uploadedPhoto 
-                  ? 'pointer' 
-                  : 'not-allowed',
-                transition: 'all 0.3s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
-              }}>
-              ✦ GENERATE MY LOOK
-            </motion.button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {error && isRetryable ? (
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => { setRetryCount(p => p + 1); handleGenerate(); }}
+                  disabled={isGenerating}
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(135deg, #E8395A, #c42d4a)',
+                    color: '#fafaf8',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '18px',
+                    fontSize: '12px',
+                    letterSpacing: '0.2em',
+                    fontWeight: 500,
+                    fontFamily: "'DM Sans', sans-serif",
+                    cursor: isGenerating ? 'not-allowed' : 'pointer',
+                    opacity: isGenerating ? 0.6 : 1,
+                    transition: 'all 0.3s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}>
+                  ✦ TRY AGAIN
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleGenerate}
+                  disabled={isGenerating || !uploadedPhoto}
+                  style={{
+                    width: '100%',
+                    background: uploadedPhoto
+                      ? 'linear-gradient(135deg, #E8395A, #c42d4a)'
+                      : 'rgba(255,255,255,0.08)',
+                    color: uploadedPhoto
+                      ? '#fafaf8'
+                      : 'rgba(250,250,248,0.3)',
+                    border: 'none',
+                    borderRadius: '16px',
+                    padding: '18px',
+                    fontSize: '12px',
+                    letterSpacing: '0.2em',
+                    fontWeight: 500,
+                    fontFamily: "'DM Sans', sans-serif",
+                    cursor: (isGenerating || !uploadedPhoto) ? 'not-allowed' : 'pointer',
+                    opacity: isGenerating ? 0.6 : 1,
+                    transition: 'all 0.3s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}>
+                  ✦ GENERATE MY LOOK
+                </motion.button>
+              )}
+              
+              {!error && uploadedPhoto && (
+                <p style={{
+                  fontSize: '10px',
+                  color: 'rgba(250,250,248,0.4)',
+                  textAlign: 'center',
+                  letterSpacing: '0.05em'
+                }}>
+                  Best results with clear front-facing photos
+                </p>
+              )}
+              {error && isRetryable && (
+                <p style={{
+                  fontSize: '10px',
+                  color: 'rgba(250,250,248,0.4)',
+                  textAlign: 'center',
+                  letterSpacing: '0.05em'
+                }}>
+                  If it fails, you can retry instantly
+                </p>
+              )}
+            </div>
           ) : (
             /* Result action buttons */
             <div style={{
