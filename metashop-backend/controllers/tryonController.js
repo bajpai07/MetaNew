@@ -312,6 +312,21 @@ export const generateTryOn = async (req, res) => {
     console.error("Message:", err.message);
     console.error("Stack:", err.stack);
     
+    // Convert validation errors from 500 to 400
+    if (
+      err.message === "No image uploaded" || 
+      err.message.includes("Invalid file type") || 
+      err.message.includes("Image too large") || 
+      err.message.includes("Garment image URL missing") || 
+      err.message.includes("Invalid garment image URL")
+    ) {
+      return res.status(400).json({  
+        success: false,
+        error: err.message,
+        message: err.message
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: "Something went wrong. Please try again.",
