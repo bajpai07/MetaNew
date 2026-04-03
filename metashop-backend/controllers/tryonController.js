@@ -37,13 +37,16 @@ function validateImageFile(file) {
 }
 
 function validateGarmentUrl(url) {
-  if (!url) {
-    throw new Error("Garment image URL missing");
+  if (!url || url === "undefined" || url === "null") {
+    throw new Error("Garment image URL missing. Ensure the product has an image.");
   }
-  try {
-    new URL(url);
-  } catch {
-    throw new Error("Invalid garment image URL");
+  // Try to parse as URL if it starts with http, otherwise we treat it as a path/relative URL
+  if (url.startsWith("http")) {
+    try {
+      new URL(url);
+    } catch {
+      throw new Error("Invalid garment image URL format");
+    }
   }
 }
 
@@ -51,6 +54,15 @@ function validateGarmentUrl(url) {
 
 async function toDataUri(source) {
   try {
+    if (typeof source === 'string' && (source === "null" || source === "undefined" || source === "")) {
+       throw new Error("Source string is invalid null/undefined");
+    }
+
+    // Attempt to handle relative paths from the backend public folder
+    if (typeof source === 'string' && source.startsWith('/')) {
+      source = `http://localhost:${process.env.PORT || 10000}${source}`;
+    }
+
     if (
       typeof source === 'string' && 
       source.startsWith('http')
