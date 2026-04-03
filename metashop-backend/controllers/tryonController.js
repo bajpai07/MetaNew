@@ -209,15 +209,14 @@ export const generateTryOn = async (req, res) => {
         input: {
           model_image: modelUri,
           garment_image: garmentUri,
-          category: "auto",
-          mode: "balanced",
-          garment_photo_type: "auto",
-          nsfw_filter: true,
+          mode: "quality",
           adjust_hands: true,
           restore_background: true,
           restore_clothes: true,
           flat_lay: false,
-          long_top: false
+          nsfw_filter: true,
+          garment_photo_type: "auto",
+          category: "auto"
         },
         logs: true,
         onQueueUpdate: (update) => {
