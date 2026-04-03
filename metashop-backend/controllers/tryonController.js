@@ -6,18 +6,31 @@ import { Readable } from 'stream';
 import sharp from 'sharp';
 
 async function preprocessImage(filePath) {
-  const outputPath = filePath + '_processed.jpg';
-  
-  await sharp(filePath)
-    .rotate()           // fix phone rotation
-    .resize(768, 1024, {
-      fit: 'contain',
-      background: { r: 255, g: 255, b: 255 }
-    })
-    .jpeg({ quality: 95 })
-    .toFile(outputPath);
+  try {
+    const outputPath = filePath + '_p.jpg';
     
-  return outputPath;
+    await sharp(filePath)
+      .rotate()
+      .resize(768, 1024, {
+        fit: 'contain',
+        background: { 
+          r: 255, g: 255, b: 255, alpha: 1 
+        },
+        position: 'top'
+      })
+      .jpeg({ quality: 95 })
+      .toFile(outputPath);
+      
+    console.log("✅ Image preprocessed");
+    return outputPath;
+    
+  } catch (err) {
+    console.warn(
+      "Preprocessing failed, using original:", 
+      err.message
+    );
+    return filePath;
+  }
 }
 
 fal.config({
@@ -194,12 +207,22 @@ export const generateTryOn = async (req, res) => {
     const garmentImageUrl = req.body.garmentImageUrl;
     console.log(`[${requestId}] Step: validation success`);
 
+    let processedPath = null;
+    try {
+      processedPath = await preprocessImage(
+        humanImageFile.path
+      );
+    } catch (err) {
+      console.warn("Using original:", err.message);
+      processedPath = humanImageFile.path;
+    }
+
     // ── Convert images ───────────────────
     let modelUri, garmentUri;
     
     try {
       [modelUri, garmentUri] = await Promise.all([
-        toDataUri(humanImageFile.path),
+        toDataUri(processedPath),
         toDataUri(garmentImageUrl)
       ]);
     } catch (err) {
@@ -328,6 +351,11 @@ export const generateTryOn = async (req, res) => {
 
     // ── Cleanup & respond ─────────────────
     cleanupFile(humanImageFile?.path);
+    if (processedPath && 
+        processedPath !== humanImageFile.path &&
+        fs.existsSync(processedPath)) {
+      fs.unlinkSync(processedPath);
+    }
     
     const duration = Date.now() - startTime;
     console.log(`[${requestId}] Step: final response (took ${duration}ms)`);
