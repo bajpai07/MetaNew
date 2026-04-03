@@ -13,5 +13,6 @@ const upload = multer({
  * Generates AI Try-On using abstract aiService. Fallback protected.
  */
 router.post('/', upload.fields([{ name: 'humanImage', maxCount: 1 }]), generateTryOn);
+router.post('/generate', upload.fields([{ name: 'humanImage', maxCount: 1 }]), generateTryOn);
 
 export default router;

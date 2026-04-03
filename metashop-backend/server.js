@@ -67,6 +67,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/seller", sellerRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/tryon", tryonRoutes);
+app.use("/api/vton", tryonRoutes);
 
 /* root */
 app.get("/", (req, res) => {

@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
-const TryOnExperience = ({ product, isOpen, onClose }) => {
+const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [resultUrl, setResultUrl] = useState(null);
@@ -83,12 +83,16 @@ const TryOnExperience = ({ product, isOpen, onClose }) => {
     try {
       const formData = new FormData();
       formData.append('humanImage', uploadedPhoto);
-      // Fallback for getting garment parameter
-      const garmentUrl = product?.image || product?.imageUrl || (typeof product === "string" ? product : null);
+      // Explicitly follow user request for garmentImageUrl extraction
+      const garmentUrl = garmentImage || product?.image || product?.imageUrl || product?.images?.[0];
       formData.append('garmentImageUrl', garmentUrl);
 
+      console.log("Product:", product);
+      console.log("Garment URL:", product?.image || product?.imageUrl || product?.images?.[0]);
+      console.log("API URL:", process.env.REACT_APP_API_URL);
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/tryon`,
+        `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/vton/generate`,
         formData,
         {
           headers: { 
