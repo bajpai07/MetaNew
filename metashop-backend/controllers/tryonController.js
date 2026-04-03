@@ -3,6 +3,22 @@ import fs from 'fs';
 import axios from 'axios';
 import cloudinary from '../utils/cloudinary.js';
 import { Readable } from 'stream';
+import sharp from 'sharp';
+
+async function preprocessImage(filePath) {
+  const outputPath = filePath + '_processed.jpg';
+  
+  await sharp(filePath)
+    .rotate()           // fix phone rotation
+    .resize(768, 1024, {
+      fit: 'contain',
+      background: { r: 255, g: 255, b: 255 }
+    })
+    .jpeg({ quality: 95 })
+    .toFile(outputPath);
+    
+  return outputPath;
+}
 
 fal.config({
   credentials: process.env.FAL_KEY
