@@ -22,6 +22,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import tryonRoutes from "./routes/tryonRoutes.js";
 import historyRoutes from "./routes/historyRoutes.js";
+import { getMetrics } from "./controllers/tryonController.js";
 
 const app = express();
 
@@ -70,6 +71,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/tryon", tryonRoutes);
 app.use("/api/vton", tryonRoutes);
 app.use("/api/history", historyRoutes);
+app.get("/api/metrics", getMetrics);
 
 /* root */
 app.get("/", (req, res) => {

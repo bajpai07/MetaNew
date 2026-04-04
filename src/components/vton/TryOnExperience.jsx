@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import OutfitRecommendations from '../OutfitRecommendations';
+import MetricsPanel from '../MetricsPanel';
 
 const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [currentProduct, setCurrentProduct] = useState(product);
@@ -1339,6 +1340,10 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               </motion.button>
             </div>
           )}
+
+          <div className="mt-8">
+            <MetricsPanel />
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>

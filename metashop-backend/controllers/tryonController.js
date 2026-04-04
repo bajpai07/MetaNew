@@ -11,7 +11,8 @@ const metrics = {
   totalRequests: 0,
   successCount: 0,
   failureCount: 0,
-  totalGenerationTime: 0
+  totalGenerationTime: 0,
+  avgGenerationTime: 0
 };
 
 // In-memory job store
@@ -441,12 +442,11 @@ async function processJob(
     metrics.successCount++;
     metrics.totalGenerationTime += duration;
 
-    const avgTime = metrics.successCount > 0
-      ? Math.round(
-          metrics.totalGenerationTime / 
-          metrics.successCount
-        )
-      : 0;
+    metrics.avgGenerationTime = Math.round(
+      metrics.totalGenerationTime / metrics.successCount
+    );
+
+    const avgTime = metrics.avgGenerationTime;
 
     // Mark job as completed
     updateJob(jobId, {
@@ -749,4 +749,17 @@ export const getVtonStats = async (req, res) => {
       error: "Could not fetch stats"
     });
   }
+};
+
+export const getMetrics = async (req, res) => {
+  return res.json({
+    success: true,
+    totalRequests: metrics.totalRequests,
+    successCount: metrics.successCount,
+    failureCount: metrics.failureCount,
+    successRate: metrics.totalRequests > 0 
+      ? Math.round((metrics.successCount / metrics.totalRequests) * 100)
+      : 0,
+    avgGenerationTime: metrics.avgGenerationTime || 0
+  });
 };
