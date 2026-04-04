@@ -3,6 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import LookViewerModal from '../components/LookViewerModal';
 
 const HistoryPage = () => {
   const [history, setHistory] = useState([]);
@@ -10,6 +11,7 @@ const HistoryPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
+  const [selectedLook, setSelectedLook] = useState(null);
 
   const { user, token } = useAuth();
 
@@ -131,11 +133,12 @@ const HistoryPage = () => {
             </Link>
           </div>
         ) : history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4">
+          <div className="flex flex-col items-center justify-center py-24 text-center opacity-70">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-6 mx-auto text-white/40">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
-            <p className="text-sm tracking-widest uppercase">No history found</p>
+            <p className="text-sm font-medium tracking-widest uppercase mb-1">No saved looks yet ✨</p>
+            <p className="text-xs text-white/50 tracking-wider">Try your first AI outfit</p>
           </div>
         ) : (
           <>
@@ -149,7 +152,8 @@ const HistoryPage = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     key={item._id}
-                    className="relative group bg-[#111] rounded-2xl overflow-hidden border border-white/10"
+                    onClick={() => setSelectedLook(item)}
+                    className="relative group bg-[#111] rounded-2xl overflow-hidden border border-white/10 cursor-pointer active:scale-[0.98] transition-transform"
                   >
                     <div className="aspect-[3/4] relative">
                       <img
@@ -161,7 +165,7 @@ const HistoryPage = () => {
                       
                       {/* Delete Button */}
                       <button
-                        onClick={() => handleDelete(item._id)}
+                        onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }}
                         className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-black/60 rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -189,7 +193,7 @@ const HistoryPage = () => {
                       {/* Download */}
                       {item.status === 'completed' && item.resultUrl && (
                         <button
-                          onClick={() => handleDownload(item.resultUrl)}
+                          onClick={(e) => { e.stopPropagation(); handleDownload(item.resultUrl); }}
                           className="absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-md border border-white/20 transition-colors"
                         >
                           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -236,6 +240,14 @@ const HistoryPage = () => {
           </>
         )}
       </div>
+
+      {selectedLook && (
+        <LookViewerModal
+          look={selectedLook}
+          onClose={() => setSelectedLook(null)}
+          onDownload={handleDownload}
+        />
+      )}
     </div>
   );
 };
