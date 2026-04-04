@@ -5,6 +5,56 @@ import cloudinary from '../utils/cloudinary.js';
 import { Readable } from 'stream';
 import sharp from 'sharp';
 
+const metrics = {
+  totalRequests: 0,
+  successCount: 0,
+  failureCount: 0,
+  totalGenerationTime: 0
+};
+
+async function validateImageSmart(filePath) {
+  const warnings = [];
+  let shouldBlock = false;
+  let blockReason = null;
+
+  try {
+    const meta = await sharp(filePath).metadata();
+    const fileSize = fs.statSync(filePath).size;
+
+    if (!meta || !meta.width || !meta.height) {
+      return { shouldBlock: false, blockReason: null, warnings: [] };
+    }
+
+    console.log("Validating image:", { width: meta.width, height: meta.height, size: fileSize });
+
+    if (meta.width < 150 || meta.height < 150) {
+      shouldBlock = true;
+      blockReason = "Image is too small. Please upload a clearer photo for better results.";
+    }
+
+    if (!shouldBlock) {
+      const ratio = meta.height / meta.width;
+
+      if (ratio < 0.8) {
+        warnings.push("For best results, upload a clear front-facing full body photo.");
+      }
+
+      if (meta.width < 300 || meta.height < 300) {
+        warnings.push("For sharper results, use a higher resolution image with good lighting.");
+      }
+
+      if (fileSize < 10000) {
+        warnings.push("Image quality seems low — try using a clearer and well-lit photo.");
+      }
+    }
+
+    return { shouldBlock, blockReason, warnings };
+  } catch (err) {
+    console.warn("Validation error:", err.message);
+    return { shouldBlock: false, blockReason: null, warnings: [] };
+  }
+}
+
 async function preprocessImage(filePath) {
   try {
     const outputPath = filePath + '_p.jpg';
@@ -181,6 +231,7 @@ function cleanupFile(filePath) {
 // ─── Main Controller ─────────────────────
 
 export const generateTryOn = async (req, res) => {
+  metrics.totalRequests++;
   const requestId = `vton_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
   console.log(`[${requestId}] Step: request start`);
   
@@ -194,6 +245,11 @@ export const generateTryOn = async (req, res) => {
       validateGarmentUrl(req.body.garmentImageUrl);
     } catch (err) {
       console.log(`[${requestId}] Step: validation failure - ${err.message}`);
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
       return res.status(400).json({
         success: false,
         errorType: "VALIDATION_ERROR",
@@ -207,6 +263,27 @@ export const generateTryOn = async (req, res) => {
     const garmentImageUrl = req.body.garmentImageUrl;
     console.log(`[${requestId}] Step: validation success`);
 
+    const validation = await validateImageSmart(humanImageFile.path);
+    if (validation.shouldBlock) {
+      cleanupFile(humanImageFile?.path);
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
+      return res.status(400).json({
+        success: false,
+        errorType: "VALIDATION_ERROR",
+        error: validation.blockReason,
+        retryable: false,
+        requestId
+      });
+    }
+
+    const imageWarnings = validation.warnings;
+    if (imageWarnings.length > 0) {
+      console.log(`[${requestId}] Image warnings:`, imageWarnings);
+    }
     let processedPath = null;
     try {
       processedPath = await preprocessImage(
@@ -227,6 +304,11 @@ export const generateTryOn = async (req, res) => {
       ]);
     } catch (err) {
       cleanupFile(humanImageFile?.path);
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
       return res.status(400).json({
         success: false,
         errorType: "VALIDATION_ERROR",
@@ -280,6 +362,12 @@ export const generateTryOn = async (req, res) => {
       const isTimeout = err.message.includes('timed out');
       const isQuota = err.message?.includes('quota') || err.message?.includes('billing');
       
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
+
       if (isTimeout) {
          return res.status(408).json({
             success: false,
@@ -321,6 +409,11 @@ export const generateTryOn = async (req, res) => {
 
     if (!outputUrl) {
       cleanupFile(humanImageFile?.path);
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
       return res.status(500).json({
         success: false,
         errorType: "AI_SERVICE_ERROR",
@@ -339,6 +432,11 @@ export const generateTryOn = async (req, res) => {
       cloudinaryUrl = await uploadToCloudinary(outputUrl);
     } catch (err) {
       cleanupFile(humanImageFile?.path);
+      metrics.failureCount++;
+      console.log("TRYON_FAILURE", {
+        totalRequests: metrics.totalRequests,
+        failureCount: metrics.failureCount
+      });
       return res.status(500).json({
         success: false,
         errorType: "NETWORK_ERROR",
@@ -372,6 +470,12 @@ export const generateTryOn = async (req, res) => {
     cleanupFile(humanImageFile?.path);
     
     console.error(`[${requestId}] Step: unexpected error - ${err.message}`);
+    
+    metrics.failureCount++;
+    console.log("TRYON_FAILURE", {
+      totalRequests: metrics.totalRequests,
+      failureCount: metrics.failureCount
+    });
     
     return res.status(500).json({
       success: false,

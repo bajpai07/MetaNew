@@ -16,6 +16,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [retryCount, setRetryCount] = useState(0);
   const [isRetryable, setIsRetryable] = useState(false);
   const [warnings, setWarnings] = useState([]);
+  const [avgGenerationTime, setAvgGenerationTime] = useState(null);
   
   const fileInputRef = useRef(null);
   const sliderRef = useRef(null);
@@ -112,6 +113,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         setFitScore(response.data.fitScore);
         setGenerationTime(response.data.generationTime);
         setWarnings(response.data.warnings || []);
+        if (response.data.metrics?.avgGenerationTime) {
+          setAvgGenerationTime(response.data.metrics.avgGenerationTime);
+        }
         setActiveTab('ai');
         setRetryCount(0);
       } else {
@@ -822,6 +826,18 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               </div>
             )}
 
+            {/* Average time metric */}
+            {avgGenerationTime && (
+              <p style={{
+                textAlign: 'center',
+                fontSize: '10px',
+                color: 'rgba(250,250,248,0.3)',
+                letterSpacing: '0.05em',
+                marginTop: '10px'
+              }}>
+                ⚡ Avg generation time: {(avgGenerationTime/1000).toFixed(1)}s
+              </p>
+            )}
             {/* Warnings block */}
             {warnings && warnings.length > 0 && (
               <div style={{
