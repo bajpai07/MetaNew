@@ -21,6 +21,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import tryonRoutes from "./routes/tryonRoutes.js";
+import historyRoutes from "./routes/historyRoutes.js";
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/seller", sellerRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/tryon", tryonRoutes);
 app.use("/api/vton", tryonRoutes);
+app.use("/api/history", historyRoutes);
 
 /* root */
 app.get("/", (req, res) => {

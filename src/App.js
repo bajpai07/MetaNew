@@ -14,6 +14,7 @@ import SellerOrders from "./pages/SellerOrders";
 import ProductPage from "./pages/ProductPage";
 import ARViewer from "./pages/ARViewer";
 import ThreeDTryOnPage from "./pages/ThreeDTryOnPage";
+import HistoryPage from "./pages/HistoryPage";
 
 // ✅ Admin
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -53,6 +54,9 @@ function App() {
 
         {/* ✅ 3D Try-On Route */}
         <Route path="/3d-tryon" element={<PageWrapper><ThreeDTryOnPage /></PageWrapper>} />
+
+        {/* ✅ History Route */}
+        <Route path="/history" element={<PageWrapper><HistoryPage /></PageWrapper>} />
 
         {/* ✅ Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>

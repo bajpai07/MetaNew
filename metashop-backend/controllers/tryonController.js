@@ -4,6 +4,7 @@ import axios from 'axios';
 import cloudinary from '../utils/cloudinary.js';
 import { Readable } from 'stream';
 import sharp from 'sharp';
+import TryOnHistory from '../models/TryOnHistory.js';
 
 const metrics = {
   totalRequests: 0,
@@ -340,7 +341,8 @@ async function processJob(
   jobId, 
   humanImageFile, 
   garmentImageUrl,
-  imageWarnings
+  imageWarnings,
+  meta
 ) {
   const startTime = Date.now();
   
@@ -461,6 +463,25 @@ async function processJob(
       }
     });
 
+    try {
+      if (meta?.userId) {
+        await TryOnHistory.create({
+          userId: meta.userId,
+          productId: meta.productId || null,
+          productName: meta.productName || null,
+          productImage: garmentImageUrl || null,
+          productPrice: meta.productPrice ? Number(meta.productPrice) : null,
+          resultUrl: cloudinaryUrl,
+          fitScore,
+          generationTime: duration,
+          status: 'completed'
+        });
+        console.log("✅ History saved:", meta.userId);
+      }
+    } catch (err) {
+      console.warn("History save failed:", err.message);
+    }
+
     console.log(JSON.stringify({
       event: "VTON_SUCCESS",
       jobId,
@@ -509,6 +530,20 @@ async function processJob(
       retryCount: 2,
       failedAt: Date.now()
     });
+
+    try {
+      if (meta?.userId) {
+        await TryOnHistory.create({
+          userId: meta.userId,
+          productId: meta.productId || null,
+          productName: meta.productName || null,
+          productImage: garmentImageUrl || null,
+          status: 'failed'
+        });
+      }
+    } catch (e) {
+      console.warn("Failed to log failure history");
+    }
 
     // Cleanup files
     cleanupFile(humanImageFile?.path);
@@ -565,7 +600,13 @@ export const generateTryOn = async (req, res) => {
       job.jobId,
       humanImageFile,
       garmentImageUrl,
-      validation.warnings
+      validation.warnings,
+      {
+        userId: req.userId || req.user?._id,
+        productId: req.body.productId,
+        productName: req.body.productName,
+        productPrice: req.body.productPrice
+      }
     ).catch(err => {
       console.error(
         "Background job failed:", 

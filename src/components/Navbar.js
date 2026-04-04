@@ -235,7 +235,7 @@ export default function Navbar() {
           backdropFilter: 'blur(20px)',
           borderTop: '0.5px solid var(--border)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(5, 1fr)',
           zIndex: 100
         }}
       >
@@ -271,6 +271,19 @@ export default function Navbar() {
               <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
             </motion.span>
             <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname.includes('/try-on') ? 500 : 400 }}>TRY AI</span>
+          </Link>
+        </motion.div>
+
+        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
+          <Link to="/history" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/history' ? '#fafaf8' : 'rgba(250,250,248,0.3)' }}>
+            <motion.span animate={{ scale: location.pathname === '/history' ? 1.15 : 1 }} style={{ fontSize: '18px' }} >
+              {location.pathname === '/history' ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 12.41V7h2v4.59l3.71 3.71-1.42 1.41z"/></svg>
+              ) : (
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+              )}
+            </motion.span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname === '/history' ? 500 : 400 }}>HISTORY</span>
           </Link>
         </motion.div>
 

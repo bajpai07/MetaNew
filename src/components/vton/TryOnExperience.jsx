@@ -193,6 +193,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         currentProduct?.imageUrl ||
         currentProduct?.images?.[0]
       );
+      formData.append('productId', currentProduct?._id || '');
+      formData.append('productName', currentProduct?.name || '');
+      formData.append('productPrice', currentProduct?.price || '');
 
       // This returns INSTANTLY with jobId
       const response = await axios.post(
