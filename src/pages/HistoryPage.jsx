@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const HistoryPage = () => {
   const [history, setHistory] = useState([]);
@@ -9,10 +11,16 @@ const HistoryPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
 
+  const { user, token } = useAuth();
+
   useEffect(() => {
-    fetchHistory(page);
+    if (token) {
+      fetchHistory(page);
+    } else {
+      setIsLoading(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
+  }, [page, token]);
 
   const fetchHistory = async (pageNumber) => {
     if (pageNumber === 1) setIsLoading(true);
@@ -111,6 +119,16 @@ const HistoryPage = () => {
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-2xl"></div>
             ))}
+          </div>
+        ) : !token ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center opacity-70">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4 text-[#E8395A]">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <p className="text-sm tracking-widest uppercase mb-4">Please sign in to view history</p>
+            <Link to="/login" className="px-8 py-3 bg-[#E8395A] hover:bg-[#c42d4a] text-white rounded-full text-xs tracking-widest uppercase transition-colors font-bold">
+              Sign In
+            </Link>
           </div>
         ) : history.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center opacity-50">
