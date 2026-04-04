@@ -688,6 +688,7 @@ export default function ProductPage() {
         <TryOnExperience
           isOpen={isAIModalOpen}
           onClose={() => setIsAIModalOpen(false)}
+          product={product}
           garmentImage={product.image}
           garmentDescription={`${product.brand} ${product.name} ${product.category}`}
           garmentCategory={product.category}

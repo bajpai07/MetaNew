@@ -12,7 +12,10 @@ const OutfitRecommendations = ({
   const [basedOn, setBasedOn] = useState(null);
 
   useEffect(() => {
-    if (!productId) return;
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
     fetchRecommendations();
   }, [productId]);
 
