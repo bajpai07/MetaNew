@@ -15,6 +15,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [loadingStep, setLoadingStep] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetryable, setIsRetryable] = useState(false);
+  const [warnings, setWarnings] = useState([]);
   
   const fileInputRef = useRef(null);
   const sliderRef = useRef(null);
@@ -54,6 +55,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setError(null);
     setResultUrl(null);
     setFitScore(null);
+    setWarnings([]);
     setUploadedPhoto(file);
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
@@ -79,6 +81,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setIsGenerating(true);
     setError(null);
     setResultUrl(null);
+    setWarnings([]);
     startLoadingAnimation();
 
     try {
@@ -108,6 +111,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         setResultUrl(response.data.resultUrl);
         setFitScore(response.data.fitScore);
         setGenerationTime(response.data.generationTime);
+        setWarnings(response.data.warnings || []);
         setActiveTab('ai');
         setRetryCount(0);
       } else {
@@ -210,6 +214,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setResultUrl(null);
     setFitScore(null);
     setError(null);
+    setWarnings([]);
     setIsRetryable(false);
     setActiveTab('yours');
     setSliderPos(50);
@@ -814,6 +819,41 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     </p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Warnings block */}
+            {warnings && warnings.length > 0 && (
+              <div style={{
+                margin: '16px 20px 0',
+                background: 'rgba(234, 179, 8, 0.1)',
+                border: '0.5px solid rgba(234, 179, 8, 0.3)',
+                borderRadius: '12px',
+                padding: '14px 16px'
+              }}>
+                <p style={{
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  color: 'rgba(234, 179, 8, 0.8)',
+                  marginBottom: '8px',
+                  fontWeight: 600
+                }}>
+                  FOR BETTER RESULTS
+                </p>
+                {warnings.map((warning, i) => (
+                  <p key={i} style={{
+                    fontSize: '12px',
+                    color: 'rgba(250,250,248,0.7)',
+                    marginBottom: '4px',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '6px',
+                    lineHeight: 1.4
+                  }}>
+                    <span style={{ color: 'rgba(234, 179, 8, 0.6)' }}>•</span>
+                    {warning}
+                  </p>
+                ))}
               </div>
             )}
 
