@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import OutfitRecommendations from '../OutfitRecommendations';
 
 const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
+  const [currentProduct, setCurrentProduct] = useState(product);
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [resultUrl, setResultUrl] = useState(null);
@@ -17,6 +19,18 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [isRetryable, setIsRetryable] = useState(false);
   const [warnings, setWarnings] = useState([]);
   const [avgGenerationTime, setAvgGenerationTime] = useState(null);
+  
+  const handleTryThis = (newProduct) => {
+    setResultUrl(null);
+    setPreviewUrl(null);
+    setUploadedPhoto(null);
+    setFitScore(null);
+    setError(null);
+    setActiveTab('yours');
+    setSliderPos(50);
+    setCurrentProduct(newProduct);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   const fileInputRef = useRef(null);
   const sliderRef = useRef(null);
@@ -89,11 +103,11 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       const formData = new FormData();
       formData.append('humanImage', uploadedPhoto);
       // Explicitly follow user request for garmentImageUrl extraction
-      const garmentUrl = garmentImage || product?.image || product?.imageUrl || product?.images?.[0];
+      const garmentUrl = garmentImage || currentProduct?.image || currentProduct?.imageUrl || currentProduct?.images?.[0];
       formData.append('garmentImageUrl', garmentUrl);
 
-      console.log("Product:", product);
-      console.log("Garment URL:", product?.image || product?.imageUrl || product?.images?.[0]);
+      console.log("Product:", currentProduct);
+      console.log("Garment URL:", currentProduct?.image || currentProduct?.imageUrl || currentProduct?.images?.[0]);
       console.log("API URL:", process.env.REACT_APP_API_URL);
 
       const response = await axios.post(
@@ -898,7 +912,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   color: '#fafaf8',
                   fontWeight: 400
                 }}>
-                  {product?.name || "Garment preview"}
+                  {currentProduct?.name || "Garment preview"}
                 </p>
               </div>
               <p style={{
@@ -906,9 +920,14 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                 fontWeight: 600,
                 color: '#fafaf8'
               }}>
-                {product?.price ? `₹${product.price.toLocaleString('en-IN')}` : ''}
+                {currentProduct?.price ? `₹${currentProduct.price.toLocaleString('en-IN')}` : ''}
               </p>
             </div>
+
+            <OutfitRecommendations
+              productId={currentProduct?._id}
+              onTryThis={handleTryThis}
+            />
           </>
         )}
 

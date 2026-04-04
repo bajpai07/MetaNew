@@ -204,3 +204,74 @@ export const getSellerProducts = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch seller products" });
   }
 };
+
+/**
+ * =========================
+ * PUBLIC: Get recommendations
+ * =========================
+ */
+export const getRecommendations = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const limit = 3;
+
+    // Get current product
+    const currentProduct = await Product.findById(productId);
+
+    if (!currentProduct) {
+      return res.status(404).json({
+        success: false,
+        error: "Product not found"
+      });
+    }
+
+    console.log("Getting recommendations for:", {
+      id: productId,
+      category: currentProduct.category,
+      name: currentProduct.name
+    });
+
+    // Strategy 1: Same category, different product
+    let recommendations = await Product.find({
+      _id: { $ne: productId },
+      category: currentProduct.category
+    })
+    .limit(limit)
+    .select('name price mrp discount image category');
+
+    // Strategy 2: If not enough same category, fill with other products
+    if (recommendations.length < limit) {
+      const existing = recommendations.map(r => r._id.toString());
+      existing.push(productId);
+
+      const fillProducts = await Product.find({
+        _id: { $nin: existing }
+      })
+      .limit(limit - recommendations.length)
+      .select('name price mrp discount image category');
+
+      recommendations = [
+        ...recommendations, 
+        ...fillProducts
+      ];
+    }
+
+    console.log("Recommendations found:", recommendations.length);
+
+    return res.json({
+      success: true,
+      recommendations,
+      basedOn: {
+        category: currentProduct.category,
+        name: currentProduct.name
+      }
+    });
+
+  } catch (err) {
+    console.error("Recommendations error:", err.message);
+    return res.status(500).json({
+      success: false,
+      error: "Could not fetch recommendations"
+    });
+  }
+};
