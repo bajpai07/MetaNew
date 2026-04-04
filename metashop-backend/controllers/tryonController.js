@@ -12,6 +12,60 @@ const metrics = {
   totalGenerationTime: 0
 };
 
+// In-memory job store
+// Resets on server restart — acceptable
+// for demo/portfolio
+
+const jobStore = new Map();
+
+const JOB_STATUS = {
+  PENDING: 'pending',
+  PROCESSING: 'processing', 
+  COMPLETED: 'completed',
+  FAILED: 'failed'
+};
+
+function createJob() {
+  const jobId = Math.random()
+    .toString(36)
+    .substring(2, 10) + 
+    Date.now().toString(36);
+    
+  const job = {
+    jobId,
+    status: JOB_STATUS.PENDING,
+    createdAt: Date.now(),
+    resultUrl: null,
+    fitScore: null,
+    generationTime: null,
+    warnings: [],
+    error: null
+  };
+  
+  jobStore.set(jobId, job);
+  console.log("Job created:", jobId);
+  return job;
+}
+
+function updateJob(jobId, updates) {
+  const job = jobStore.get(jobId);
+  if (job) {
+    Object.assign(job, updates);
+    jobStore.set(jobId, job);
+  }
+}
+
+// Auto cleanup jobs older than 1 hour
+setInterval(() => {
+  const oneHourAgo = Date.now() - 3600000;
+  for (const [jobId, job] of jobStore) {
+    if (job.createdAt < oneHourAgo) {
+      jobStore.delete(jobId);
+      console.log("Cleaned up job:", jobId);
+    }
+  }
+}, 3600000); // run every hour
+
 async function validateImageSmart(filePath) {
   const warnings = [];
   let shouldBlock = false;
@@ -230,99 +284,47 @@ function cleanupFile(filePath) {
 
 // ─── Main Controller ─────────────────────
 
-export const generateTryOn = async (req, res) => {
-  metrics.totalRequests++;
-  const requestId = `vton_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
-  console.log(`[${requestId}] Step: request start`);
-  
-  const humanImageFile = req.files?.humanImage?.[0];
+async function processJob(
+  jobId, 
+  humanImageFile, 
+  garmentImageUrl,
+  imageWarnings
+) {
   const startTime = Date.now();
   
   try {
-    // ── Validate inputs ──────────────────
-    try {
-      validateImageFile(humanImageFile);
-      validateGarmentUrl(req.body.garmentImageUrl);
-    } catch (err) {
-      console.log(`[${requestId}] Step: validation failure - ${err.message}`);
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
-      return res.status(400).json({
-        success: false,
-        errorType: "VALIDATION_ERROR",
-        error: "Use a clear front-facing full-body photo.",
-        message: err.message,
-        retryable: false,
-        requestId
-      });
-    }
+    // Update status to processing
+    updateJob(jobId, { 
+      status: JOB_STATUS.PROCESSING 
+    });
     
-    const garmentImageUrl = req.body.garmentImageUrl;
-    console.log(`[${requestId}] Step: validation success`);
+    console.log("Processing job:", jobId);
 
-    const validation = await validateImageSmart(humanImageFile.path);
-    if (validation.shouldBlock) {
-      cleanupFile(humanImageFile?.path);
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
-      return res.status(400).json({
-        success: false,
-        errorType: "VALIDATION_ERROR",
-        error: validation.blockReason,
-        retryable: false,
-        requestId
-      });
-    }
-
-    const imageWarnings = validation.warnings;
-    if (imageWarnings.length > 0) {
-      console.log(`[${requestId}] Image warnings:`, imageWarnings);
-    }
+    // Preprocess images
     let processedPath = null;
     try {
       processedPath = await preprocessImage(
         humanImageFile.path
       );
     } catch (err) {
-      console.warn("Using original:", err.message);
+      console.warn(
+        "Preprocessing failed:", 
+        err.message
+      );
       processedPath = humanImageFile.path;
     }
 
-    // ── Convert images ───────────────────
-    let modelUri, garmentUri;
-    
-    try {
-      [modelUri, garmentUri] = await Promise.all([
+    // Convert to data URIs
+    const [modelUri, garmentUri] = 
+      await Promise.all([
         toDataUri(processedPath),
         toDataUri(garmentImageUrl)
       ]);
-    } catch (err) {
-      cleanupFile(humanImageFile?.path);
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
-      return res.status(400).json({
-        success: false,
-        errorType: "VALIDATION_ERROR",
-        error: "Could not process your images.",
-        message: err.message,
-        retryable: false,
-        requestId
-      });
-    }
 
-    // ── Call fal.ai with timeout ─────────
-    console.log(`[${requestId}] Step: fal call start`);
-    
-    const FAL_TIMEOUT = 120000; // 2 minutes
+    console.log("Calling fal.ai for job:", jobId);
+
+    // Call fal.ai
+    const FAL_TIMEOUT = 120000;
     
     const falPromise = fal.subscribe(
       "fal-ai/fashn/tryon/v1.6",
@@ -330,77 +332,47 @@ export const generateTryOn = async (req, res) => {
         input: {
           model_image: modelUri,
           garment_image: garmentUri,
+          category: "auto",
           mode: "quality",
+          garment_photo_type: "auto",
+          nsfw_filter: true,
           adjust_hands: true,
           restore_background: true,
           restore_clothes: true,
           flat_lay: false,
-          nsfw_filter: true,
-          garment_photo_type: "auto",
-          category: "auto"
+          long_top: false
         },
         logs: true,
         onQueueUpdate: (update) => {
-          console.log(`[${requestId}] Step: fal queue - ${update.status}`);
+          console.log(
+            `Job ${jobId} status:`, 
+            update.status
+          );
+          // Update job with queue position
+          if (update.position) {
+            updateJob(jobId, {
+              queuePosition: update.position
+            });
+          }
         }
       }
     );
-    
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(
-        () => reject(new Error("AI generation timed out.")), 
+
+    const timeoutPromise = new Promise(
+      (_, reject) => setTimeout(
+        () => reject(
+          new Error("AI generation timed out")
+        ),
         FAL_TIMEOUT
       )
     );
-    
-    let result;
-    try {
-      result = await Promise.race([falPromise, timeoutPromise]);
-    } catch (err) {
-      cleanupFile(humanImageFile?.path);
-      
-      const isTimeout = err.message.includes('timed out');
-      const isQuota = err.message?.includes('quota') || err.message?.includes('billing');
-      
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
 
-      if (isTimeout) {
-         return res.status(408).json({
-            success: false,
-            errorType: "TIMEOUT_ERROR",
-            error: "AI is taking longer than expected",
-            message: "Please try again. System is under load.",
-            retryable: true,
-            requestId
-         });
-      }
-      if (isQuota) {
-         return res.status(402).json({
-            success: false,
-            errorType: "QUOTA_ERROR",
-            error: "Service temporarily unavailable. Try later.",
-            message: err.message,
-            retryable: false,
-            requestId
-         });
-      }
-      return res.status(502).json({
-         success: false,
-         errorType: "AI_SERVICE_ERROR",
-         error: "AI generation failed. Please try again.",
-         message: err.message,
-         retryable: true,
-         requestId
-      });
-    }
-    
-    console.log(`[${requestId}] Step: fal response received`);
+    const result = await Promise.race([
+      falPromise, 
+      timeoutPromise
+    ]);
 
-    // ── Extract output URL ────────────────
+    // Extract output URL
     const outputUrl =
       result?.data?.images?.[0]?.url ||
       result?.data?.image?.url ||
@@ -408,82 +380,260 @@ export const generateTryOn = async (req, res) => {
       result?.data?.output;
 
     if (!outputUrl) {
-      cleanupFile(humanImageFile?.path);
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
-      return res.status(500).json({
-        success: false,
-        errorType: "AI_SERVICE_ERROR",
-        error: "No output generated. Please try again.",
-        message: "Missing output structure",
-        retryable: true,
-        requestId
-      });
+      throw new Error("No output generated");
     }
 
-    // ── Upload to Cloudinary ──────────────
-    console.log(`[${requestId}] Step: cloudinary upload`);
-    
-    let cloudinaryUrl;
-    try {
-      cloudinaryUrl = await uploadToCloudinary(outputUrl);
-    } catch (err) {
-      cleanupFile(humanImageFile?.path);
-      metrics.failureCount++;
-      console.log("TRYON_FAILURE", {
-        totalRequests: metrics.totalRequests,
-        failureCount: metrics.failureCount
-      });
-      return res.status(500).json({
-        success: false,
-        errorType: "NETWORK_ERROR",
-        error: "Failed to upload result. Please try again.",
-        message: err.message,
-        retryable: true,
-        requestId
-      });
-    }
+    // Upload to Cloudinary
+    const cloudinaryUrl = 
+      await uploadToCloudinary(outputUrl);
 
-    // ── Cleanup & respond ─────────────────
-    cleanupFile(humanImageFile?.path);
-    if (processedPath && 
-        processedPath !== humanImageFile.path &&
-        fs.existsSync(processedPath)) {
-      fs.unlinkSync(processedPath);
-    }
-    
     const duration = Date.now() - startTime;
-    console.log(`[${requestId}] Step: final response (took ${duration}ms)`);
+    const fitScore = 
+      Math.floor(Math.random() * 8) + 88;
 
-    return res.json({
-      success: true,
+    // Update metrics
+    metrics.successCount++;
+    metrics.totalGenerationTime += duration;
+
+    const avgTime = metrics.successCount > 0
+      ? Math.round(
+          metrics.totalGenerationTime / 
+          metrics.successCount
+        )
+      : 0;
+
+    // Mark job as completed
+    updateJob(jobId, {
+      status: JOB_STATUS.COMPLETED,
       resultUrl: cloudinaryUrl,
-      fitScore: Math.floor(Math.random() * 8) + 88,
+      fitScore,
       generationTime: duration,
-      requestId
+      warnings: imageWarnings,
+      completedAt: Date.now(),
+      metrics: {
+        totalRequests: metrics.totalRequests,
+        successCount: metrics.successCount,
+        failureCount: metrics.failureCount,
+        avgGenerationTime: avgTime
+      }
+    });
+
+    console.log(JSON.stringify({
+      event: "VTON_SUCCESS",
+      jobId,
+      duration,
+      fitScore
+    }));
+
+    // Cleanup files
+    cleanupFile(humanImageFile.path);
+    if (processedPath && 
+        processedPath !== humanImageFile.path) {
+      cleanupFile(processedPath);
+    }
+
+  } catch (err) {
+    const duration = Date.now() - startTime;
+    
+    metrics.failureCount++;
+    
+    console.error(JSON.stringify({
+      event: "VTON_JOB_FAILED",
+      jobId,
+      error: err.message,
+      duration
+    }));
+
+    // Mark job as failed
+    updateJob(jobId, {
+      status: JOB_STATUS.FAILED,
+      error: err.message.includes('timed out')
+        ? "AI generation timed out. Please try again."
+        : err.message.includes('quota') ||
+          err.message.includes('billing')
+        ? "Service temporarily unavailable."
+        : "Generation failed. Please try again.",
+      failedAt: Date.now()
+    });
+
+    // Cleanup files
+    cleanupFile(humanImageFile?.path);
+  }
+}
+
+export const generateTryOn = async (req, res) => {
+  const humanImageFile = 
+    req.files?.humanImage?.[0];
+
+  console.log(JSON.stringify({
+    event: "VTON_REQUEST",
+    timestamp: new Date().toISOString(),
+    fileSize: humanImageFile?.size
+  }));
+
+  try {
+    // Validate inputs first
+    validateImageFile(humanImageFile);
+    validateGarmentUrl(req.body.garmentImageUrl);
+    
+    const garmentImageUrl = 
+      req.body.garmentImageUrl;
+
+    // Smart validation
+    const validation = await validateImageSmart(
+      humanImageFile.path
+    );
+
+    if (validation.shouldBlock) {
+      cleanupFile(humanImageFile?.path);
+      return res.status(400).json({
+        success: false,
+        error: validation.blockReason
+      });
+    }
+
+    // Create job immediately
+    const job = createJob();
+    
+    // Update metrics
+    metrics.totalRequests++;
+
+    // Return jobId INSTANTLY — don't wait
+    res.json({
+      success: true,
+      jobId: job.jobId,
+      status: JOB_STATUS.PENDING,
+      message: "Your look is being generated..."
+    });
+
+    // Process in background — don't await
+    processJob(
+      job.jobId,
+      humanImageFile,
+      garmentImageUrl,
+      validation.warnings
+    ).catch(err => {
+      console.error(
+        "Background job failed:", 
+        err.message
+      );
     });
 
   } catch (err) {
     cleanupFile(humanImageFile?.path);
-    
-    console.error(`[${requestId}] Step: unexpected error - ${err.message}`);
-    
     metrics.failureCount++;
-    console.log("TRYON_FAILURE", {
-      totalRequests: metrics.totalRequests,
-      failureCount: metrics.failureCount
-    });
+    
+    console.log(JSON.stringify({
+      event: "VTON_ERROR",
+      error: err.message
+    }));
     
     return res.status(500).json({
       success: false,
-      errorType: "UNKNOWN_ERROR",
-      error: "Something went wrong. Please retry.",
-      message: "Internal server crash avoided",
-      retryable: true,
-      requestId
+      error: "Something went wrong. Please try again."
+    });
+  }
+};
+
+export const checkJobStatus = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    
+    const job = jobStore.get(jobId);
+    
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        error: "Job not found or expired"
+      });
+    }
+
+    // Return different data based on status
+    if (job.status === JOB_STATUS.COMPLETED) {
+      return res.json({
+        success: true,
+        status: job.status,
+        resultUrl: job.resultUrl,
+        fitScore: job.fitScore,
+        generationTime: job.generationTime,
+        warnings: job.warnings,
+        metrics: job.metrics
+      });
+    }
+
+    if (job.status === JOB_STATUS.FAILED) {
+      return res.json({
+        success: false,
+        status: job.status,
+        error: job.error
+      });
+    }
+
+    // Still pending or processing
+    return res.json({
+      success: true,
+      status: job.status,
+      queuePosition: job.queuePosition || null,
+      message: job.status === 'processing'
+        ? "AI is generating your look..."
+        : "Job is queued..."
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: "Could not check job status"
+    });
+  }
+};
+
+export const getVtonStats = async (req, res) => {
+  try {
+    const activeJobs = Array.from(jobStore.values())
+      .filter(j => 
+        j.status === JOB_STATUS.PROCESSING ||
+        j.status === JOB_STATUS.PENDING
+      ).length;
+
+    const completedToday = Array.from(
+      jobStore.values()
+    ).filter(j => {
+      const oneDayAgo = Date.now() - 86400000;
+      return j.status === JOB_STATUS.COMPLETED &&
+             j.createdAt > oneDayAgo;
+    }).length;
+
+    const avgTime = metrics.successCount > 0
+      ? Math.round(
+          metrics.totalGenerationTime / 
+          metrics.successCount / 1000
+        )
+      : 0;
+
+    const successRate = metrics.totalRequests > 0
+      ? Math.round(
+          (metrics.successCount / 
+           metrics.totalRequests) * 100
+        )
+      : 0;
+
+    return res.json({
+      success: true,
+      stats: {
+        totalRequests: metrics.totalRequests,
+        successCount: metrics.successCount,
+        failureCount: metrics.failureCount,
+        successRate: `${successRate}%`,
+        avgGenerationTime: `${avgTime}s`,
+        activeJobs,
+        completedToday
+      }
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      error: "Could not fetch stats"
     });
   }
 };

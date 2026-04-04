@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import OutfitRecommendations from '../OutfitRecommendations';
@@ -87,6 +87,90 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   }, []);
 
   // ── Generate handler ──────────────────
+  const [jobId, setJobId] = useState(null);
+  const [jobStatus, setJobStatus] = useState(null);
+  const pollingRef = useRef(null);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  }, []);
+
+  const startPolling = useCallback((jobId) => {
+    console.log("Starting polling for:", jobId);
+    
+    let attempts = 0;
+    const MAX_ATTEMPTS = 60; // 60 * 3s = 3 min max
+    
+    pollingRef.current = setInterval(async () => {
+      attempts++;
+      
+      if (attempts > MAX_ATTEMPTS) {
+        stopPolling();
+        setIsGenerating(false);
+        setError(
+          "Taking too long. Please try again."
+        );
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/vton/status/${jobId}`
+        );
+
+        const data = response.data;
+        setJobStatus(data.status);
+
+        console.log(
+          "Job status:", 
+          data.status, 
+          "attempt:", 
+          attempts
+        );
+
+        if (data.status === 'completed') {
+          stopPolling();
+          setResultUrl(data.resultUrl);
+          setFitScore(data.fitScore);
+          setGenerationTime(data.generationTime);
+          setWarnings(data.warnings || []);
+          if (data.metrics?.avgGenerationTime) {
+            setAvgGenerationTime(data.metrics.avgGenerationTime);
+          }
+          setActiveTab('ai');
+          setIsGenerating(false);
+          
+        } else if (data.status === 'failed') {
+          stopPolling();
+          setError(
+            data.error || 
+            "Generation failed. Please try again."
+          );
+          setIsGenerating(false);
+        }
+        // If pending/processing — keep polling
+
+      } catch (err) {
+        console.error("Polling error:", err.message);
+        // Don't stop polling on network error
+        // Just retry next interval
+      }
+    }, 3000); // Poll every 3 seconds
+
+  }, [stopPolling, setWarnings, setAvgGenerationTime]);
+
   const handleGenerate = useCallback(async () => {
     if (!uploadedPhoto) {
       setError("Please upload your photo first");
@@ -96,88 +180,73 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setIsGenerating(true);
     setError(null);
     setResultUrl(null);
-    setWarnings([]);
+    setJobId(null);
+    setJobStatus(null);
     startLoadingAnimation();
 
     try {
       const formData = new FormData();
       formData.append('humanImage', uploadedPhoto);
-      // Explicitly follow user request for garmentImageUrl extraction
-      const garmentUrl = garmentImage || currentProduct?.image || currentProduct?.imageUrl || currentProduct?.images?.[0];
-      formData.append('garmentImageUrl', garmentUrl);
+      formData.append(
+        'garmentImageUrl',
+        currentProduct?.image || 
+        currentProduct?.imageUrl ||
+        currentProduct?.images?.[0]
+      );
 
-      console.log("Product:", currentProduct);
-      console.log("Garment URL:", currentProduct?.image || currentProduct?.imageUrl || currentProduct?.images?.[0]);
-      console.log("API URL:", process.env.REACT_APP_API_URL);
-
+      // This returns INSTANTLY with jobId
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/vton/generate`,
         formData,
         {
-          headers: { 
+          headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
-          timeout: 180000 // 3 min frontend timeout
+          timeout: 30000 // just 30s for initial request
         }
       );
 
-      if (response.data.success) {
-        setResultUrl(response.data.resultUrl);
-        setFitScore(response.data.fitScore);
-        setGenerationTime(response.data.generationTime);
-        setWarnings(response.data.warnings || []);
-        if (response.data.metrics?.avgGenerationTime) {
-          setAvgGenerationTime(response.data.metrics.avgGenerationTime);
-        }
-        setActiveTab('ai');
-        setRetryCount(0);
+      if (response.data.success && 
+          response.data.jobId) {
+        const newJobId = response.data.jobId;
+        setJobId(newJobId);
+        setJobStatus('pending');
+        
+        console.log("Job created:", newJobId);
+        
+        // Start polling for result
+        startPolling(newJobId);
+        
       } else {
         throw new Error(
-          response.data.error || "Generation failed"
+          response.data.error || 
+          "Failed to start generation"
         );
       }
 
     } catch (err) {
-      console.error("Generation error:", err);
+      console.error("Generate error:", err);
+      setIsGenerating(false);
       
-      let errorMsg = "Generation failed. Please try again.";
-      let canRetry = true;
+      let errorMsg = 
+        "Generation failed. Please try again.";
       
-      if (err.response?.data?.errorType) {
-        const { errorType, error: uiError, retryable } = err.response.data;
-        
-        const errorMap = {
-          'TIMEOUT_ERROR': "AI is busy right now. Try again in a few seconds.",
-          'VALIDATION_ERROR': "Use a clear front-facing full-body photo.",
-          'QUOTA_ERROR': "Service temporarily unavailable. Try later.",
-          'NETWORK_ERROR': "Network issue. Check your internet.",
-          'UNKNOWN_ERROR': "Something went wrong. Please retry."
-        };
-        
-        errorMsg = errorMap[errorType] || uiError || "Something went wrong. Please retry.";
-        canRetry = retryable;
-      } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
-        errorMsg = "AI is busy right now. Try again in a few seconds.";
+      if (err.response?.status === 400) {
+        errorMsg = err.response.data?.error 
+          || "Invalid image. Use a clear front-facing photo.";
       } else if (!navigator.onLine) {
-        errorMsg = "Network issue. Check your internet.";
-      }
-
-      if (canRetry && retryCount >= 3) {
-        errorMsg = "Please try again after some time";
-        canRetry = false;
+        errorMsg = "No internet connection.";
       }
       
       setError(errorMsg);
-      setIsRetryable(canRetry);
-      if (!canRetry) {
-        setRetryCount(0);
-      }
-    } finally {
-      setIsGenerating(false);
-      setLoadingStep(0);
     }
-  }, [uploadedPhoto, product, garmentImage, startLoadingAnimation, retryCount]);
+  }, [
+    uploadedPhoto, 
+    currentProduct, 
+    startLoadingAnimation,
+    startPolling
+  ]);
 
   // ── Download handler ──────────────────
   const handleDownload = useCallback(async () => {
@@ -1023,6 +1092,38 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   />
                 ))}
               </div>
+
+              {/* Status indicator */}
+              {jobStatus && (
+                <div style={{
+                  marginTop: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: jobStatus === 'processing'
+                      ? '#4ade80'
+                      : '#E8395A',
+                    animation: 
+                      'pulse 1.5s ease-in-out infinite'
+                  }} />
+                  <span style={{
+                    fontSize: '11px',
+                    letterSpacing: '0.1em',
+                    color: 'rgba(250,250,248,0.5)'
+                  }}>
+                    {jobStatus === 'processing'
+                      ? 'AI IS GENERATING...'
+                      : jobStatus === 'pending'
+                      ? 'QUEUED...'
+                      : 'PROCESSING...'}
+                  </span>
+                </div>
+              )}
 
               {/* Cancel hint */}
               <p style={{
