@@ -5,6 +5,7 @@ import cloudinary from '../utils/cloudinary.js';
 import { Readable } from 'stream';
 import sharp from 'sharp';
 import TryOnHistory from '../models/TryOnHistory.js';
+import jwt from 'jsonwebtoken';
 
 const metrics = {
   totalRequests: 0,
@@ -581,6 +582,23 @@ export const generateTryOn = async (req, res) => {
       });
     }
 
+    // Extract user ID manually (since route isn't protected to allow guests)
+    let extractedUserId = null;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      try {
+        const token = req.headers.authorization.split(" ")[1];
+        if (token && token !== "null") {
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          extractedUserId = decoded.id;
+        }
+      } catch (err) {
+        console.warn("Invalid token passed to generateTryOn (treated as guest)");
+      }
+    }
+
     // Create job immediately
     const job = createJob();
     
@@ -602,7 +620,7 @@ export const generateTryOn = async (req, res) => {
       garmentImageUrl,
       validation.warnings,
       {
-        userId: req.userId || req.user?._id,
+        userId: req.userId || req.user?._id || extractedUserId,
         productId: req.body.productId,
         productName: req.body.productName,
         productPrice: req.body.productPrice
