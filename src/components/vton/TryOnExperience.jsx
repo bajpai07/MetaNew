@@ -624,31 +624,52 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
                   style={{
                     margin: '16px 20px 0',
-                    background: 'rgba(232,57,90,0.1)',
-                    border: '0.5px solid rgba(232,57,90,0.3)',
-                    borderRadius: '12px',
-                    padding: '12px 16px',
+                    background: 'rgba(232,57,90,0.08)',
+                    border: '0.5px solid rgba(232,57,90,0.25)',
+                    borderRadius: '16px',
+                    padding: '16px',
                     display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px'
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '12px'
                   }}>
-                  <span style={{ 
-                    color: '#E8395A', 
-                    fontSize: '16px',
-                    flexShrink: 0
-                  }}>
-                    ✕
-                  </span>
+                  
                   <p style={{
                     fontSize: '13px',
                     color: 'rgba(250,250,248,0.8)',
-                    lineHeight: 1.5
+                    textAlign: 'center',
+                    lineHeight: 1.6
                   }}>
                     {error}
                   </p>
+
+                  {/* Retry button */}
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      setError(null);
+                      handleGenerate();
+                    }}
+                    style={{
+                      background: 
+                        'linear-gradient(135deg, #E8395A, #c42d4a)',
+                      color: '#fafaf8',
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '12px 24px',
+                      fontSize: '12px',
+                      letterSpacing: '0.15em',
+                      fontWeight: 500,
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                    ↺ TRY AGAIN
+                  </motion.button>
                 </motion.div>
               )}
             </AnimatePresence>

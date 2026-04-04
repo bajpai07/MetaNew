@@ -284,6 +284,58 @@ function cleanupFile(filePath) {
 
 // ─── Main Controller ─────────────────────
 
+async function retryAsync(
+  fn, 
+  retries = 2, 
+  delayMs = 2000
+) {
+  let lastError;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      console.warn(
+        `Attempt ${attempt + 1} failed:`,
+        err.message
+      );
+      
+      // Don't retry if quota/billing issue
+      if (err.message?.includes('quota') ||
+          err.message?.includes('billing') ||
+          err.message?.includes('forbidden')) {
+        throw err;
+      }
+      
+      if (attempt < retries) {
+        console.log(
+          `Retrying in ${delayMs}ms...`
+        );
+        await new Promise(resolve => 
+          setTimeout(resolve, delayMs)
+        );
+      }
+    }
+  }
+  
+  throw lastError;
+}
+
+function withTimeout(promise, ms = 120000) {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(
+      () => reject(
+        new Error(
+          "AI generation timed out. Please try again."
+        )
+      ),
+      ms
+    )
+  );
+  return Promise.race([promise, timeout]);
+}
+
 async function processJob(
   jobId, 
   humanImageFile, 
@@ -324,53 +376,44 @@ async function processJob(
     console.log("Calling fal.ai for job:", jobId);
 
     // Call fal.ai
-    const FAL_TIMEOUT = 120000;
-    
-    const falPromise = fal.subscribe(
-      "fal-ai/fashn/tryon/v1.6",
-      {
-        input: {
-          model_image: modelUri,
-          garment_image: garmentUri,
-          category: "auto",
-          mode: "quality",
-          garment_photo_type: "auto",
-          nsfw_filter: true,
-          adjust_hands: true,
-          restore_background: true,
-          restore_clothes: true,
-          flat_lay: false,
-          long_top: false
-        },
-        logs: true,
-        onQueueUpdate: (update) => {
-          console.log(
-            `Job ${jobId} status:`, 
-            update.status
-          );
-          // Update job with queue position
-          if (update.position) {
-            updateJob(jobId, {
-              queuePosition: update.position
-            });
+    const result = await retryAsync(
+      () => withTimeout(
+        fal.subscribe(
+          "fal-ai/fashn/tryon/v1.6",
+          {
+            input: {
+              model_image: modelUri,
+              garment_image: garmentUri,
+              category: "auto",
+              mode: "quality",
+              garment_photo_type: "auto",
+              nsfw_filter: true,
+              adjust_hands: true,
+              restore_background: true,
+              restore_clothes: true,
+              flat_lay: false,
+              long_top: false
+            },
+            logs: true,
+            onQueueUpdate: (update) => {
+              console.log(
+                `Job ${jobId} status:`, 
+                update.status
+              );
+              // Update job with queue position
+              if (update.position) {
+                updateJob(jobId, {
+                  queuePosition: update.position
+                });
+              }
+            }
           }
-        }
-      }
-    );
-
-    const timeoutPromise = new Promise(
-      (_, reject) => setTimeout(
-        () => reject(
-          new Error("AI generation timed out")
         ),
-        FAL_TIMEOUT
-      )
+        120000
+      ),
+      2,    // max 2 retries
+      2000  // 2 sec between retries
     );
-
-    const result = await Promise.race([
-      falPromise, 
-      timeoutPromise
-    ]);
 
     // Extract output URL
     const outputUrl =
@@ -445,14 +488,25 @@ async function processJob(
     }));
 
     // Mark job as failed
+    const getErrorMessage = (err) => {
+      if (err.message?.includes('timed out')) {
+        return "Generation timed out after 3 attempts. Please try again.";
+      }
+      if (err.message?.includes('quota') ||
+          err.message?.includes('billing')) {
+        return "Service temporarily unavailable. Try again in a few minutes.";
+      }
+      if (err.message?.includes('forbidden') ||
+          err.message?.includes('unauthorized')) {
+        return "Service configuration error. Please contact support.";
+      }
+      return "Generation failed after multiple attempts. Please try again.";
+    };
+    
     updateJob(jobId, {
       status: JOB_STATUS.FAILED,
-      error: err.message.includes('timed out')
-        ? "AI generation timed out. Please try again."
-        : err.message.includes('quota') ||
-          err.message.includes('billing')
-        ? "Service temporarily unavailable."
-        : "Generation failed. Please try again.",
+      error: getErrorMessage(err),
+      retryCount: 2,
       failedAt: Date.now()
     });
 
