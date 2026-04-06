@@ -58,53 +58,64 @@ const MetricsPanel = () => {
         </h3>
       </div>
       
-      <div className="flex justify-between items-end gap-2">
-        <div className="flex flex-col flex-1">
-          <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Total Try-ons</span>
-          <AnimatePresence mode="popLayout">
-            <motion.span 
-              key={metrics.totalRequests}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-bold text-white tracking-widest"
-            >
-              {loading ? '-' : metrics.totalRequests}
-            </motion.span>
-          </AnimatePresence>
+      {!loading && metrics.totalRequests === 0 ? (
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          <p className="text-sm font-medium tracking-widest uppercase text-white/90 mb-1">
+            No looks generated yet
+          </p>
+          <p className="text-[11px] text-white/50 tracking-widest uppercase">
+            Try your first AI outfit ✨
+          </p>
         </div>
+      ) : (
+        <div className="flex justify-between items-end gap-2">
+          <div className="flex flex-col flex-1">
+            <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Looks Generated</span>
+            <AnimatePresence mode="popLayout">
+              <motion.span 
+                key={metrics.totalRequests}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-lg font-bold text-white tracking-widest"
+              >
+                {loading ? '-' : `${metrics.totalRequests} Look${metrics.totalRequests === 1 ? '' : 's'}`}
+              </motion.span>
+            </AnimatePresence>
+          </div>
 
-        <div className="w-px h-8 bg-white/10 self-center"></div>
+          <div className="w-px h-8 bg-white/10 self-center"></div>
 
-        <div className="flex flex-col flex-1 pl-4">
-          <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Success Rate</span>
-          <AnimatePresence mode="popLayout">
-            <motion.span 
-              key={metrics.successRate}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-bold text-[#E8395A] tracking-wider"
-            >
-              {loading ? '-' : `${metrics.successRate}%`}
-            </motion.span>
-          </AnimatePresence>
+          <div className="flex flex-col flex-1 pl-4">
+            <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Success Rate</span>
+            <AnimatePresence mode="popLayout">
+              <motion.span 
+                key={metrics.successRate}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-lg font-bold text-[#E8395A] tracking-wider"
+              >
+                {loading ? '-' : `${metrics.successRate}%`}
+              </motion.span>
+            </AnimatePresence>
+          </div>
+
+          <div className="w-px h-8 bg-white/10 self-center"></div>
+
+          <div className="flex flex-col flex-1 pl-4">
+            <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Avg. Generation Time</span>
+            <AnimatePresence mode="popLayout">
+              <motion.span 
+                key={metrics.avgGenerationTime}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-lg font-bold text-white tracking-wider"
+              >
+                {loading ? '-' : `${(metrics.avgGenerationTime / 1000).toFixed(0)}s`}
+              </motion.span>
+            </AnimatePresence>
+          </div>
         </div>
-
-        <div className="w-px h-8 bg-white/10 self-center"></div>
-
-        <div className="flex flex-col flex-1 pl-4">
-          <span className="text-[10px] text-white/50 tracking-widest uppercase mb-1 whitespace-nowrap">Avg Time</span>
-          <AnimatePresence mode="popLayout">
-            <motion.span 
-              key={metrics.avgGenerationTime}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-bold text-white tracking-wider"
-            >
-              {loading ? '-' : `${(metrics.avgGenerationTime / 1000).toFixed(1)}s`}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

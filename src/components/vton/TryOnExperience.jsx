@@ -38,10 +38,10 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
   // ── Loading messages ──────────────────
   const loadingSteps = [
-    "Analyzing your photo...",
-    "Understanding garment details...",
-    "Fitting garment to your body...",
-    "Perfecting the details...",
+    "Optimizing your look...",
+    "Creating a realistic preview...",
+    "Applying outfit details...",
+    "Finalizing your look...",
     "Almost ready..."
   ];
 
@@ -157,7 +157,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           stopPolling();
           setError(
             data.error || 
-            "Generation failed. Please try again."
+            "Something went wrong. Please try again."
           );
           setIsGenerating(false);
         }
@@ -234,11 +234,11 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       setIsGenerating(false);
       
       let errorMsg = 
-        "Generation failed. Please try again.";
+        "Something went wrong. Please try again.";
       
       if (err.response?.status === 400) {
         errorMsg = err.response.data?.error 
-          || "Invalid image. Use a clear front-facing photo.";
+          || "Couldn't process this photo. Try a clearer image.";
       } else if (!navigator.onLine) {
         errorMsg = "No internet connection.";
       }
@@ -587,7 +587,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               color: 'rgba(250,250,248,0.28)',
               padding: '12px 20px 0'
             }}>
-              🔒 YOUR PHOTO IS PRIVATE & AUTO-DELETED
+              🔒 Private & auto-deleted within 24 hours
             </p>
 
             {/* Tips */}
@@ -1234,7 +1234,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     justifyContent: 'center',
                     gap: '8px'
                   }}>
-                  ✦ GENERATE MY LOOK
+                  ✦ GENERATE MY LOOK ✨
                 </motion.button>
               )}
               
@@ -1292,7 +1292,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     justifyContent: 'center',
                     gap: '6px'
                   }}>
-                  ↓ SAVE IMAGE
+                  ↓ SAVE LOOK
                 </motion.button>
 
                 <motion.button
@@ -1336,7 +1336,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   fontFamily: "'DM Sans', sans-serif",
                   cursor: 'pointer'
                 }}>
-                ✦ TRY ANOTHER PHOTO
+                ✦ TRY ANOTHER LOOK
               </motion.button>
             </div>
           )}
