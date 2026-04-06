@@ -4,6 +4,29 @@ import axios from 'axios';
 import OutfitRecommendations from '../OutfitRecommendations';
 import MetricsPanel from '../MetricsPanel';
 
+const LOADING_STAGES = [
+  {
+    text: "Optimizing your photo...",
+    progress: 12
+  },
+  {
+    text: "Mapping body structure...",
+    progress: 28
+  },
+  {
+    text: "Applying outfit fit...",
+    progress: 48
+  },
+  {
+    text: "Enhancing fabric details...",
+    progress: 65
+  },
+  {
+    text: "Perfecting your look...",
+    progress: 82
+  }
+];
+
 const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [currentProduct, setCurrentProduct] = useState(product);
   const [uploadedPhoto, setUploadedPhoto] = useState(null);
@@ -15,7 +38,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('yours'); // 'yours' | 'ai'
   const [sliderPos, setSliderPos] = useState(50);
   const [generationTime, setGenerationTime] = useState(null);
-  const [loadingStep, setLoadingStep] = useState(0);
+  const [stageIndex, setStageIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const stageTimerRef = useRef(null);
   const [retryCount, setRetryCount] = useState(0);
   const [isRetryable, setIsRetryable] = useState(false);
   const [warnings, setWarnings] = useState([]);
@@ -36,14 +61,40 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const fileInputRef = useRef(null);
   const sliderRef = useRef(null);
 
-  // ── Loading messages ──────────────────
-  const loadingSteps = [
-    "Optimizing your look...",
-    "Creating a realistic preview...",
-    "Applying outfit details...",
-    "Finalizing your look...",
-    "Almost ready..."
-  ];
+  // ── Loading stages animation ──────────
+  const startStages = useCallback(() => {
+    setStageIndex(0);
+    setProgress(0);
+    
+    let index = 0;
+    stageTimerRef.current = setInterval(() => {
+      index++;
+      if (index < LOADING_STAGES.length) {
+        setStageIndex(index);
+        setProgress(
+          LOADING_STAGES[index].progress
+        );
+      }
+    }, 3000);
+  }, []);
+
+  const stopStages = useCallback(() => {
+    if (stageTimerRef.current) {
+      clearInterval(stageTimerRef.current);
+      stageTimerRef.current = null;
+    }
+    // Animate to 100% on completion
+    setProgress(100);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (stageTimerRef.current) {
+        clearInterval(stageTimerRef.current);
+      }
+    };
+  }, []);
 
   // ── File upload handler ───────────────
   const handleFileChange = useCallback((e) => {
@@ -76,16 +127,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
 
-  // ── Loading steps animation ───────────
-  const startLoadingAnimation = useCallback(() => {
-    setLoadingStep(0);
-    const intervals = [0, 4000, 8000, 12000, 16000];
-    intervals.forEach((delay, i) => {
-      setTimeout(() => {
-        setLoadingStep(i);
-      }, delay);
-    });
-  }, []);
+  // ── File upload handler ───────────────
 
   // ── Generate handler ──────────────────
   const [jobId, setJobId] = useState(null);
@@ -119,6 +161,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       
       if (attempts > MAX_ATTEMPTS) {
         stopPolling();
+        stopStages();
         setIsGenerating(false);
         setError(
           "Taking too long. Please try again."
@@ -143,6 +186,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
         if (data.status === 'completed') {
           stopPolling();
+          stopStages();
           setResultUrl(data.resultUrl);
           setFitScore(data.fitScore);
           setGenerationTime(data.generationTime);
@@ -155,6 +199,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           
         } else if (data.status === 'failed') {
           stopPolling();
+          stopStages();
           setError(
             data.error || 
             "Something went wrong. Please try again."
@@ -170,7 +215,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       }
     }, 3000); // Poll every 3 seconds
 
-  }, [stopPolling, setWarnings, setAvgGenerationTime]);
+  }, [stopPolling, stopStages, setWarnings, setAvgGenerationTime]);
 
   const handleGenerate = useCallback(async () => {
     if (!uploadedPhoto) {
@@ -183,7 +228,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setResultUrl(null);
     setJobId(null);
     setJobStatus(null);
-    startLoadingAnimation();
+    startStages();
 
     try {
       const formData = new FormData();
@@ -231,6 +276,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
     } catch (err) {
       console.error("Generate error:", err);
+      stopStages();
       setIsGenerating(false);
       
       let errorMsg = 
@@ -248,7 +294,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   }, [
     uploadedPhoto, 
     currentProduct, 
-    startLoadingAnimation,
+    startStages,
     startPolling
   ]);
 
@@ -679,7 +725,13 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             </AnimatePresence>
           </>
         ) : (
-          <>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.5,
+              ease: [0.25, 0.46, 0.45, 0.94]
+            }}>
             {/* ── Result section ─────────── */}
             
             {/* Before/After Slider */}
@@ -1022,7 +1074,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               productId={currentProduct?._id}
               onTryThis={handleTryThis}
             />
-          </>
+          </motion.div>
         )}
 
         {/* ── Loading overlay ───────────── */}
@@ -1032,132 +1084,197 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               style={{
                 position: 'fixed',
                 inset: 0,
-                background: 'rgba(10,10,10,0.92)',
-                backdropFilter: 'blur(16px)',
+                background: 'rgba(10,10,10,0.94)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 zIndex: 200,
-                padding: '40px'
+                padding: '40px 32px'
               }}>
-              
-              {/* Spinner */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ 
-                  duration: 1.2, 
-                  repeat: Infinity, 
-                  ease: 'linear' 
-                }}
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: '50%',
-                  border: '2px solid rgba(255,255,255,0.1)',
-                  borderTop: '2px solid #E8395A',
-                  marginBottom: '32px'
-                }}
-              />
-              
-              {/* Step text */}
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={loadingStep}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
+
+              {/* ── Animated ring ──────────── */}
+              <div style={{
+                position: 'relative',
+                width: '80px',
+                height: '80px',
+                marginBottom: '40px'
+              }}>
+                {/* Outer slow ring */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'linear'
+                  }}
                   style={{
-                    fontFamily: 
-                      "'Cormorant Garamond', serif",
-                    fontSize: '22px',
-                    fontWeight: 300,
-                    color: '#fafaf8',
-                    textAlign: 'center',
-                    marginBottom: '12px'
-                  }}>
-                  {loadingSteps[loadingStep]}
-                </motion.p>
-              </AnimatePresence>
-              
-              <p style={{
-                fontSize: '12px',
-                color: 'rgba(250,250,248,0.35)',
-                letterSpacing: '0.1em',
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(232,57,90,0.2)',
+                    borderTop: '1px solid #E8395A'
+                  }}
+                />
+                {/* Inner fast ring */}
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: 'linear'
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: '12px',
+                    borderRadius: '50%',
+                    border: 
+                      '1px solid rgba(255,255,255,0.06)',
+                    borderBottom: 
+                      '1px solid rgba(255,255,255,0.3)'
+                  }}
+                />
+                {/* Center dot */}
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    opacity: [0.6, 1, 0.6]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: 'easeInOut'
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: '34px',
+                    borderRadius: '50%',
+                    background: '#E8395A'
+                  }}
+                />
+              </div>
+
+              {/* ── Main heading ───────────── */}
+              <h2 style={{
+                fontFamily: 
+                  "'Cormorant Garamond', serif",
+                fontSize: '26px',
+                fontWeight: 300,
+                color: '#fafaf8',
+                marginBottom: '12px',
                 textAlign: 'center'
               }}>
-                This takes 15–30 seconds
-              </p>
+                Creating your AI look
+              </h2>
 
-              {/* Progress dots */}
+              {/* ── Dynamic stage text ─────── */}
+              <div style={{
+                height: '24px',
+                overflow: 'hidden',
+                marginBottom: '32px'
+              }}>
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={stageIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      fontSize: '13px',
+                      color: 'rgba(250,250,248,0.45)',
+                      letterSpacing: '0.05em',
+                      textAlign: 'center',
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                    {LOADING_STAGES[stageIndex]?.text}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+
+              {/* ── Progress bar ───────────── */}
+              <div style={{
+                width: '200px',
+                marginBottom: '24px'
+              }}>
+                {/* Track */}
+                <div style={{
+                  height: '2px',
+                  background: 'rgba(255,255,255,0.08)',
+                  borderRadius: '2px',
+                  overflow: 'hidden'
+                }}>
+                  {/* Fill */}
+                  <motion.div
+                    animate={{ width: `${progress}%` }}
+                    transition={{
+                      duration: 0.8,
+                      ease: 'easeOut'
+                    }}
+                    style={{
+                      height: '100%',
+                      background: 
+                        'linear-gradient(90deg, #E8395A, #ff6b8a)',
+                      borderRadius: '2px'
+                    }}
+                  />
+                </div>
+                
+                {/* Percentage */}
+                <p style={{
+                  fontSize: '10px',
+                  color: 'rgba(250,250,248,0.2)',
+                  textAlign: 'right',
+                  marginTop: '6px',
+                  fontFamily: "'DM Sans', sans-serif",
+                  letterSpacing: '0.08em'
+                }}>
+                  {progress}%
+                </p>
+              </div>
+
+              {/* ── Stage dots ─────────────── */}
               <div style={{
                 display: 'flex',
-                gap: '6px',
-                marginTop: '24px'
+                gap: '8px',
+                alignItems: 'center',
+                marginBottom: '32px'
               }}>
-                {loadingSteps.map((_, i) => (
+                {LOADING_STAGES.map((_, i) => (
                   <motion.div
                     key={i}
                     animate={{
-                      background: i <= loadingStep
+                      width: i === stageIndex 
+                        ? '20px' : '6px',
+                      background: i <= stageIndex
                         ? '#E8395A'
-                        : 'rgba(255,255,255,0.15)',
-                      scale: i === loadingStep 
-                        ? 1.3 
-                        : 1
+                        : 'rgba(255,255,255,0.12)',
+                      opacity: i === stageIndex 
+                        ? 1 : 0.5
                     }}
+                    transition={{ duration: 0.3 }}
                     style={{
-                      width: '6px',
                       height: '6px',
-                      borderRadius: '50%'
+                      borderRadius: '3px'
                     }}
                   />
                 ))}
               </div>
 
-              {/* Status indicator */}
-              {jobStatus && (
-                <div style={{
-                  marginTop: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    background: jobStatus === 'processing'
-                      ? '#4ade80'
-                      : '#E8395A',
-                    animation: 
-                      'pulse 1.5s ease-in-out infinite'
-                  }} />
-                  <span style={{
-                    fontSize: '11px',
-                    letterSpacing: '0.1em',
-                    color: 'rgba(250,250,248,0.5)'
-                  }}>
-                    {jobStatus === 'processing'
-                      ? 'AI IS GENERATING...'
-                      : jobStatus === 'pending'
-                      ? 'QUEUED...'
-                      : 'PROCESSING...'}
-                  </span>
-                </div>
-              )}
-
-              {/* Cancel hint */}
+              {/* ── Bottom branding ────────── */}
               <p style={{
-                marginTop: '32px',
-                fontSize: '11px',
-                color: 'rgba(250,250,248,0.2)',
-                letterSpacing: '0.08em'
+                fontSize: '10px',
+                color: 'rgba(250,250,248,0.15)',
+                letterSpacing: '0.15em',
+                fontFamily: "'DM Sans', sans-serif"
               }}>
-                ✦ Powered by FASHN AI v1.6
+                METASHOP AI
               </p>
             </motion.div>
           )}
