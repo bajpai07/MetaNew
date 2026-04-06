@@ -362,21 +362,19 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   }, []);
 
   // ── Before/After slider ───────────────
-  const handleSliderMove = useCallback((e) => {
+  const isDraggingRef = useRef(false);
+  const dragStartPosRef = useRef({ x: 0, y: 0 });
+
+  const handleSliderMove = useCallback((clientX) => {
     if (!sliderRef.current) return;
-    const rect = sliderRef.current
-      .getBoundingClientRect();
-    const clientX = e.touches 
-      ? e.touches[0].clientX 
-      : e.clientX;
-    const pos = Math.min(
-      Math.max(
-        ((clientX - rect.left) / rect.width) * 100,
-        0
-      ),
-      100
-    );
-    setSliderPos(pos);
+    requestAnimationFrame(() => {
+      const rect = sliderRef.current.getBoundingClientRect();
+      const pos = Math.min(
+        Math.max(((clientX - rect.left) / rect.width) * 100, 0),
+        100
+      );
+      setSliderPos(pos);
+    });
   }, []);
 
   // If not open, render nothing to match original modal paradigm
@@ -741,15 +739,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               overflow: 'hidden',
               position: 'relative',
               aspectRatio: '3/4',
-              userSelect: 'none',
-              touchAction: 'none'
+              userSelect: 'none'
             }}
-              ref={sliderRef}
-              onMouseMove={(e) => {
-                if (e.buttons === 1) 
-                  handleSliderMove(e);
-              }}
-              onTouchMove={handleSliderMove}>
+              ref={sliderRef}>
               
               {/* AI result — full width */}
               <img
@@ -791,30 +783,57 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   bottom: 0,
                   left: `${sliderPos}%`,
                   transform: 'translateX(-50%)',
-                  width: '2px',
-                  background: 'rgba(255,255,255,0.9)',
-                  cursor: 'ew-resize'
+                  width: '40px',
+                  cursor: 'ew-resize',
+                  touchAction: 'pan-y',
+                  display: 'flex',
+                  justifyContent: 'center'
                 }}
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  const move = (e) => 
-                    handleSliderMove(e);
-                  const up = () => {
-                    window.removeEventListener(
-                      'mousemove', move
-                    );
-                    window.removeEventListener(
-                      'mouseup', up
-                    );
+                  isDraggingRef.current = true;
+                  const move = (ev) => {
+                    if (isDraggingRef.current) {
+                      handleSliderMove(ev.clientX);
+                    }
                   };
-                  window.addEventListener(
-                    'mousemove', move
-                  );
-                  window.addEventListener(
-                    'mouseup', up
-                  );
+                  const up = () => {
+                    isDraggingRef.current = false;
+                    window.removeEventListener('mousemove', move);
+                    window.removeEventListener('mouseup', up);
+                  };
+                  window.addEventListener('mousemove', move);
+                  window.addEventListener('mouseup', up);
                 }}
-                onTouchStart={() => {}}>
+                onTouchStart={(e) => {
+                  isDraggingRef.current = true;
+                  dragStartPosRef.current = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                  };
+                  const move = (ev) => {
+                    if (!isDraggingRef.current) return;
+                    
+                    const deltaX = Math.abs(ev.touches[0].clientX - dragStartPosRef.current.x);
+                    const deltaY = Math.abs(ev.touches[0].clientY - dragStartPosRef.current.y);
+                    
+                    if (deltaX > deltaY) {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      handleSliderMove(ev.touches[0].clientX);
+                    }
+                  };
+                  const end = () => {
+                    isDraggingRef.current = false;
+                    window.removeEventListener('touchmove', move);
+                    window.removeEventListener('touchend', end);
+                    window.removeEventListener('touchcancel', end);
+                  };
+                  window.addEventListener('touchmove', move, { passive: false });
+                  window.addEventListener('touchend', end);
+                  window.addEventListener('touchcancel', end);
+                }}>
+                <div style={{ width: '2px', height: '100%', background: 'rgba(255,255,255,0.9)' }} />
                 <div style={{
                   position: 'absolute',
                   top: '50%',
