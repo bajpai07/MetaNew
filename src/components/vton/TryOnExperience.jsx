@@ -1226,17 +1226,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   />
                 </div>
                 
-                {/* Percentage */}
-                <p style={{
-                  fontSize: '10px',
-                  color: 'rgba(250,250,248,0.2)',
-                  textAlign: 'right',
-                  marginTop: '6px',
-                  fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: '0.08em'
-                }}>
-                  {progress}%
-                </p>
+                {/* percentage removed for cleaner UX */}
               </div>
 
               {/* ── Stage dots ─────────────── */}
