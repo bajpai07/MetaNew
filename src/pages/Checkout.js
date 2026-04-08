@@ -83,24 +83,24 @@ export default function Checkout() {
       <div style={{ flex: "1 1 500px", background: "var(--surface)", padding: "40px", borderRadius: "16px", border: "0.5px solid var(--border)" }}>
         <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "32px", paddingBottom: "16px", borderBottom: "0.5px solid var(--border)", fontSize: "28px", fontWeight: 400 }}>Shipping Details</h2>
         
-        <form onSubmit={handlePlaceOrder} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+        <form onSubmit={handlePlaceOrder} style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
           <div>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Street Address</label>
-            <input type="text" required placeholder="123 Main St" value={shippingAddress.address} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
+            <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Street Address</label>
+            <input type="text" required placeholder="123 Main St" value={shippingAddress.address} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
           </div>
 
-          <div style={{ display: "flex", gap: "20px" }}>
+          <div style={{ display: "flex", gap: "24px" }}>
              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>City</label>
-                <input type="text" required placeholder="Mumbai" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
+                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>City</label>
+                <input type="text" required placeholder="Mumbai" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
              </div>
              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.1em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Pincode</label>
-                <input type="text" required placeholder="400001" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})} style={{ width: "100%", padding: "16px", border: "0.5px solid var(--border)", borderRadius: "12px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "14px" }} />
+                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Pincode</label>
+                <input type="text" required placeholder="400001" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
              </div>
           </div>
 
-          <button type="submit" style={{ marginTop: "16px", padding: "18px", background: "linear-gradient(135deg, #E8395A, #c42d4a)", color: "var(--white)", border: "none", borderRadius: "14px", fontSize: "13px", letterSpacing: "0.15em", fontWeight: "500", cursor: "pointer", width: "100%", boxShadow: "0 8px 24px rgba(232,57,90,0.3)" }}>
+          <button type="submit" style={{ marginTop: "24px", padding: "20px", background: "linear-gradient(135deg, #E8395A, #c42d4a)", color: "var(--white)", border: "none", borderRadius: "16px", fontSize: "13px", letterSpacing: "0.2em", fontWeight: "500", cursor: "pointer", width: "100%", boxShadow: "0 8px 24px rgba(232,57,90,0.3)", fontFamily: "var(--font-body)" }}>
             PROCEED TO PAYMENT
           </button>
         </form>

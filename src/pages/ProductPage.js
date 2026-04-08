@@ -220,14 +220,14 @@ export default function ProductPage() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          style={{ padding: '20px 20px 160px' }}>
+          style={{ padding: '24px 24px 160px' }}>
 
           {/* Brand */}
           <p style={{
             fontSize: '10px',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.24em',
             color: 'rgba(250,250,248,0.4)',
-            marginBottom: '6px',
+            marginBottom: '8px',
             textTransform: 'uppercase'
           }}>
             {product.brand || "METASHOP EXCLUSIVE"}
@@ -236,11 +236,12 @@ export default function ProductPage() {
           {/* Product name */}
           <h1 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(24px, 6vw, 32px)',
+            fontSize: 'clamp(24px, 6vw, 30px)',
             fontWeight: 400,
             color: '#fafaf8',
-            lineHeight: 1.2,
-            marginBottom: '16px'
+            lineHeight: 1.25,
+            marginBottom: '18px',
+            letterSpacing: '-0.01em'
           }}>
             {product.name}
           </h1>
@@ -249,19 +250,20 @@ export default function ProductPage() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            marginBottom: '16px'
+            gap: '12px',
+            marginBottom: '18px'
           }}>
             <span style={{
-              fontSize: '24px',
+              fontSize: '26px',
               fontWeight: 500,
-              color: '#fafaf8'
+              color: '#fafaf8',
+              letterSpacing: '-0.03em'
             }}>
               ₹{product.price}
             </span>
             {product.mrp && (
               <span style={{
-                fontSize: '15px',
+                fontSize: '16px',
                 color: 'rgba(250,250,248,0.3)',
                 textDecoration: 'line-through'
               }}>
@@ -274,7 +276,7 @@ export default function ProductPage() {
                 color: '#E8395A',
                 border: '0.5px solid rgba(232,57,90,0.3)',
                 borderRadius: '20px',
-                padding: '3px 10px',
+                padding: '4px 12px',
                 fontSize: '11px',
                 fontWeight: 500
               }}>
@@ -287,7 +289,7 @@ export default function ProductPage() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '7px',
+            gap: '8px',
             marginBottom: '24px'
           }}>
             <motion.div
@@ -302,7 +304,7 @@ export default function ProductPage() {
             <span style={{
               fontSize: '12px',
               color: '#4ade80',
-              letterSpacing: '0.1em'
+              letterSpacing: '0.12em'
             }}>
               IN STOCK
             </span>
@@ -312,20 +314,20 @@ export default function ProductPage() {
           <div style={{
             height: '0.5px',
             background: 'rgba(255,255,255,0.07)',
-            marginBottom: '24px'
+            margin: '20px 0'
           }} />
 
           {/* ── SIZE SELECTOR ── */}
-          <div style={{ marginBottom: '28px' }}>
+          <div style={{ marginBottom: '32px' }}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginBottom: '14px'
+              marginBottom: '16px'
             }}>
               <p style={{
                 fontSize: '11px',
-                letterSpacing: '0.15em',
+                letterSpacing: '0.2em',
                 color: 'rgba(250,250,248,0.55)',
                 textTransform: 'uppercase'
               }}>
@@ -334,7 +336,7 @@ export default function ProductPage() {
               <span style={{
                 fontSize: '11px',
                 color: '#E8395A',
-                letterSpacing: '0.05em',
+                letterSpacing: '0.06em',
                 cursor: 'pointer',
                 textDecoration: 'underline',
                 textUnderlineOffset: '3px'
@@ -345,7 +347,7 @@ export default function ProductPage() {
 
             <div style={{
               display: 'flex',
-              gap: '8px',
+              gap: '10px',
               flexWrap: 'wrap'
             }}>
               {sizes.map(size => (
@@ -354,9 +356,9 @@ export default function ProductPage() {
                   whileTap={{ scale: 0.92 }}
                   onClick={() => setSelectedSize(size)}
                   style={{
-                    width: '52px',
-                    height: '52px',
-                    borderRadius: '12px',
+                    width: '58px',
+                    height: '58px',
+                    borderRadius: '14px',
                     background: selectedSize === size
                       ? '#E8395A'
                       : 'rgba(255,255,255,0.04)',
@@ -366,7 +368,8 @@ export default function ProductPage() {
                     color: selectedSize === size
                       ? '#fafaf8'
                       : 'rgba(250,250,248,0.7)',
-                    fontSize: '12px',
+                    fontSize: '13px',
+                    letterSpacing: '0.05em',
                     fontWeight: selectedSize === size ? 500 : 400,
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: 'pointer',
@@ -396,11 +399,10 @@ export default function ProductPage() {
             </AnimatePresence>
           </div>
 
-          {/* Divider */}
           <div style={{
             height: '0.5px',
             background: 'rgba(255,255,255,0.07)',
-            marginBottom: '24px'
+            margin: '20px 0'
           }} />
 
           {/* ── PRODUCT TABS ── */}
@@ -416,7 +418,7 @@ export default function ProductPage() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   style={{
-                    padding: '10px 20px',
+                    padding: '14px 24px',
                     background: 'none',
                     border: 'none',
                     borderBottom: activeTab === tab
@@ -426,7 +428,7 @@ export default function ProductPage() {
                       ? '#fafaf8'
                       : 'rgba(250,250,248,0.4)',
                     fontSize: '11px',
-                    letterSpacing: '0.12em',
+                    letterSpacing: '0.14em',
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: 'pointer',
                     textTransform: 'uppercase',
@@ -443,12 +445,14 @@ export default function ProductPage() {
                   key="details"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}>
+                  exit={{ opacity: 0 }}
+                  style={{ paddingTop: '20px' }}>
                   <p style={{
                     fontSize: '14px',
                     color: 'rgba(250,250,248,0.6)',
-                    lineHeight: 1.8,
-                    marginBottom: '16px'
+                    lineHeight: 1.85,
+                    marginBottom: '20px',
+                    letterSpacing: '0.02em'
                   }}>
                     {product.description || "Minimal. Editorial. Confident. Expertly tailored from premium materials, designed to slot seamlessly into your wardrobe."}
                   </p>
@@ -462,20 +466,20 @@ export default function ProductPage() {
                     <div key={spec.label} style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      padding: '10px 0',
+                      padding: '13px 0',
                       borderBottom:
-                        '0.5px solid rgba(255,255,255,0.05)'
+                        '0.5px solid rgba(255,255,255,0.05)',
+                      fontSize: '13px'
                     }}>
                       <span style={{
-                        fontSize: '12px',
                         color: 'rgba(250,250,248,0.4)',
-                        letterSpacing: '0.08em'
+                        letterSpacing: '0.04em'
                       }}>
                         {spec.label}
                       </span>
                       <span style={{
-                        fontSize: '12px',
-                        color: 'rgba(250,250,248,0.7)'
+                        color: 'rgba(250,250,248,0.7)',
+                        letterSpacing: '0.02em'
                       }}>
                         {spec.value}
                       </span>
@@ -489,7 +493,8 @@ export default function ProductPage() {
                   key="delivery"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}>
+                  exit={{ opacity: 0 }}
+                  style={{ paddingTop: '20px' }}>
                   {[
                     { icon: '🚚', title: 'Standard Delivery',
                       sub: '3-5 business days • FREE above ₹499' },
@@ -533,7 +538,8 @@ export default function ProductPage() {
                   key="returns"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}>
+                  exit={{ opacity: 0 }}
+                  style={{ paddingTop: '20px' }}>
                   {[
                     { icon: '↩', title: '14 Day Returns',
                       sub: 'Easy no-questions-asked returns' },
@@ -591,9 +597,9 @@ export default function ProductPage() {
           style={{
             position: 'fixed',
             bottom: 0, left: 0, right: 0,
-            padding: '12px 20px',
+            padding: '16px 24px',
             paddingBottom:
-              'calc(12px + env(safe-area-inset-bottom))',
+              'calc(16px + env(safe-area-inset-bottom))',
             background: 'rgba(10,10,10,0.95)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -602,7 +608,7 @@ export default function ProductPage() {
             zIndex: 100,
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '10px'
           }}>
 
           {/* SEE THIS ON YOU */}
@@ -616,9 +622,9 @@ export default function ProductPage() {
               color: '#fafaf8',
               border: 'none',
               borderRadius: '16px',
-              padding: '16px',
+              padding: '18px',
               fontSize: '12px',
-              letterSpacing: '0.18em',
+              letterSpacing: '0.2em',
               fontWeight: 500,
               fontFamily: "'DM Sans', sans-serif",
               cursor: 'pointer',
@@ -631,7 +637,7 @@ export default function ProductPage() {
           </motion.button>
 
           {/* ADD TO BAG + WISHLIST row */}
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => {
@@ -647,9 +653,9 @@ export default function ProductPage() {
                 color: '#0a0a0a',
                 border: 'none',
                 borderRadius: '14px',
-                padding: '15px',
+                padding: '17px',
                 fontSize: '11px',
-                letterSpacing: '0.15em',
+                letterSpacing: '0.18em',
                 fontWeight: 500,
                 fontFamily: "'DM Sans', sans-serif",
                 cursor: 'pointer'

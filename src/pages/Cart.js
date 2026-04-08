@@ -81,7 +81,7 @@ const BagPage = () => {
 
       {/* ── HEADER ── */}
       <div style={{
-        padding: '20px 20px 16px',
+        padding: '24px 24px 18px',
         borderBottom: '0.5px solid rgba(255,255,255,0.07)',
         display: 'flex',
         alignItems: 'baseline',
@@ -92,14 +92,16 @@ const BagPage = () => {
           fontSize: '28px',
           fontWeight: 400,
           color: '#fafaf8',
-          letterSpacing: '0.02em'
+          lineHeight: 1.2,
+          letterSpacing: '-0.01em'
         }}>
           Shopping Bag
         </h1>
         <span style={{
-          fontSize: '12px',
+          fontSize: '13px',
           color: 'rgba(250,250,248,0.4)',
-          letterSpacing: '0.1em'
+          letterSpacing: '0.06em',
+          marginLeft: '10px'
         }}>
           {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
         </span>
@@ -170,7 +172,7 @@ const BagPage = () => {
 
       {/* ── CART ITEMS LIST ── */}
       {cartItems.length > 0 && (
-        <div style={{ padding: '0 20px' }}>
+        <div style={{ padding: '0 24px' }}>
           <AnimatePresence>
             {cartItems.map((item, index) => (
               <motion.div
@@ -181,17 +183,17 @@ const BagPage = () => {
                 transition={{ delay: index * 0.06 }}
                 style={{
                   display: 'flex',
-                  gap: '14px',
-                  padding: '20px 0',
+                  gap: '16px',
+                  padding: '22px 0',
                   borderBottom: '0.5px solid rgba(255,255,255,0.07)',
                   position: 'relative'
                 }}>
 
                 {/* Product Image */}
                 <div style={{
-                  width: '100px',
-                  height: '130px',
-                  borderRadius: '12px',
+                  width: '108px',
+                  height: '138px',
+                  borderRadius: '14px',
                   overflow: 'hidden',
                   background: '#181818',
                   flexShrink: 0
@@ -220,9 +222,9 @@ const BagPage = () => {
                     {/* Brand */}
                     <p style={{
                       fontSize: '10px',
-                      letterSpacing: '0.15em',
+                      letterSpacing: '0.2em',
                       color: 'rgba(250,250,248,0.4)',
-                      marginBottom: '4px',
+                      marginBottom: '5px',
                       textTransform: 'uppercase'
                     }}>
                       METASHOP
@@ -230,11 +232,11 @@ const BagPage = () => {
 
                     {/* Name */}
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '15px',
                       color: '#fafaf8',
                       fontWeight: 400,
-                      lineHeight: 1.3,
-                      marginBottom: '6px',
+                      lineHeight: 1.4,
+                      marginBottom: '8px',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
@@ -245,7 +247,7 @@ const BagPage = () => {
                     {/* Size + Color tags */}
                     <div style={{
                       display: 'flex',
-                      gap: '6px',
+                      gap: '8px',
                       marginBottom: '10px'
                     }}>
                       {item.size && (
@@ -255,8 +257,8 @@ const BagPage = () => {
                           color: 'rgba(250,250,248,0.5)',
                           background: 'rgba(255,255,255,0.06)',
                           border: '0.5px solid rgba(255,255,255,0.1)',
-                          borderRadius: '6px',
-                          padding: '3px 8px'
+                          borderRadius: '8px',
+                          padding: '4px 10px'
                         }}>
                           {item.size}
                         </span>
@@ -268,8 +270,8 @@ const BagPage = () => {
                           color: 'rgba(250,250,248,0.5)',
                           background: 'rgba(255,255,255,0.06)',
                           border: '0.5px solid rgba(255,255,255,0.1)',
-                          borderRadius: '6px',
-                          padding: '3px 8px'
+                          borderRadius: '8px',
+                          padding: '4px 10px'
                         }}>
                           {item.color}
                         </span>
@@ -283,9 +285,10 @@ const BagPage = () => {
                       gap: '8px'
                     }}>
                       <span style={{
-                        fontSize: '16px',
+                        fontSize: '17px',
                         fontWeight: 500,
-                        color: '#fafaf8'
+                        color: '#fafaf8',
+                        letterSpacing: '-0.02em'
                       }}>
                         ₹{item.price}
                       </span>
@@ -315,7 +318,7 @@ const BagPage = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    marginTop: '12px'
+                    marginTop: '14px'
                   }}>
 
                     {/* Quantity control */}
@@ -332,10 +335,10 @@ const BagPage = () => {
                         whileTap={{ scale: 0.85 }}
                         onClick={() => decreaseQty(item)}
                         style={{
-                          width: '34px', height: '34px',
+                          width: '38px', height: '38px',
                           background: 'none', border: 'none',
                           color: '#fafaf8', cursor: 'pointer',
-                          fontSize: '16px',
+                          fontSize: '18px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center'
@@ -344,9 +347,9 @@ const BagPage = () => {
                       </motion.button>
 
                       <span style={{
-                        width: '28px',
+                        width: '32px',
                         textAlign: 'center',
-                        fontSize: '14px',
+                        fontSize: '15px',
                         color: '#fafaf8',
                         fontWeight: 500
                       }}>
@@ -357,10 +360,10 @@ const BagPage = () => {
                         whileTap={{ scale: 0.85 }}
                         onClick={() => increaseQty(item)}
                         style={{
-                          width: '34px', height: '34px',
+                          width: '38px', height: '38px',
                           background: 'none', border: 'none',
                           color: '#fafaf8', cursor: 'pointer',
-                          fontSize: '16px',
+                          fontSize: '18px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center'
@@ -378,7 +381,7 @@ const BagPage = () => {
                         border: 'none',
                         color: 'rgba(250,250,248,0.35)',
                         fontSize: '11px',
-                        letterSpacing: '0.1em',
+                        letterSpacing: '0.12em',
                         cursor: 'pointer',
                         fontFamily: "'DM Sans', sans-serif",
                         padding: '8px 0',
@@ -399,18 +402,18 @@ const BagPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             style={{
-              marginTop: '24px',
+              margin: '28px 24px 0',
               background: '#111111',
               border: '0.5px solid rgba(255,255,255,0.07)',
               borderRadius: '20px',
-              padding: '20px'
+              padding: '22px'
             }}>
 
             <p style={{
-              fontSize: '11px',
-              letterSpacing: '0.18em',
+              fontSize: '10px',
+              letterSpacing: '0.22em',
               color: 'rgba(250,250,248,0.4)',
-              marginBottom: '16px',
+              marginBottom: '18px',
               textTransform: 'uppercase'
             }}>
               Order Summary
@@ -439,16 +442,17 @@ const BagPage = () => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '12px'
+                marginBottom: '14px'
               }}>
                 <span style={{
-                  fontSize: '13px',
+                  fontSize: '14px',
+                  lineHeight: 1.5,
                   color: 'rgba(250,250,248,0.55)'
                 }}>
                   {row.label}
                 </span>
                 <span style={{
-                  fontSize: '13px',
+                  fontSize: '14px',
                   color: row.valueColor || '#fafaf8',
                   fontWeight: 500
                 }}>
@@ -461,7 +465,7 @@ const BagPage = () => {
             <div style={{
               height: '0.5px',
               background: 'rgba(255,255,255,0.07)',
-              margin: '16px 0'
+              margin: '18px 0'
             }} />
 
             {/* Total */}
@@ -472,16 +476,18 @@ const BagPage = () => {
             }}>
               <span style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontSize: '18px',
+                fontSize: '19px',
                 color: '#fafaf8',
+                letterSpacing: '-0.01em',
                 fontWeight: 400
               }}>
                 Total
               </span>
               <span style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontSize: '22px',
+                fontSize: '24px',
                 color: '#fafaf8',
+                letterSpacing: '-0.02em',
                 fontWeight: 400
               }}>
                 ₹{finalTotal}
@@ -490,11 +496,12 @@ const BagPage = () => {
 
             {/* Free delivery progress bar */}
             {subtotal > 0 && subtotal < 499 && (
-              <div style={{ marginTop: '16px' }}>
+              <div style={{ marginTop: '18px' }}>
                 <p style={{
-                  fontSize: '11px',
+                  fontSize: '12px',
+                  lineHeight: 1.5,
                   color: 'rgba(250,250,248,0.45)',
-                  marginBottom: '8px'
+                  marginBottom: '10px'
                 }}>
                   Add ₹{499 - subtotal} more for FREE delivery
                 </p>
@@ -523,9 +530,9 @@ const BagPage = () => {
 
           {/* ── COUPON INPUT ── */}
           <div style={{
-            marginTop: '16px',
+            margin: '18px 24px 0',
             display: 'flex',
-            gap: '8px'
+            gap: '10px'
           }}>
             <input
               placeholder="Enter coupon code"
@@ -533,10 +540,10 @@ const BagPage = () => {
                 flex: 1,
                 background: '#111111',
                 border: '0.5px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                padding: '14px 16px',
+                borderRadius: '14px',
+                padding: '16px 18px',
                 color: '#fafaf8',
-                fontSize: '13px',
+                fontSize: '14px',
                 fontFamily: "'DM Sans', sans-serif",
                 outline: 'none'
               }}
@@ -551,11 +558,11 @@ const BagPage = () => {
               style={{
                 background: 'rgba(255,255,255,0.06)',
                 border: '0.5px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px',
-                padding: '14px 18px',
+                borderRadius: '14px',
+                padding: '16px 20px',
                 color: '#fafaf8',
-                fontSize: '11px',
-                letterSpacing: '0.1em',
+                fontSize: '12px',
+                letterSpacing: '0.12em',
                 fontFamily: "'DM Sans', sans-serif",
                 cursor: 'pointer',
                 whiteSpace: 'nowrap'
@@ -576,14 +583,15 @@ const BagPage = () => {
           style={{
             position: 'fixed',
             bottom: 0, left: 0, right: 0,
-            padding: '16px 20px',
+            padding: '18px 24px',
             paddingBottom: 
-              'calc(16px + env(safe-area-inset-bottom))',
+              'calc(18px + env(safe-area-inset-bottom))',
             background: 'rgba(10,10,10,0.95)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             borderTop: '0.5px solid rgba(255,255,255,0.07)',
-            zIndex: 100
+            zIndex: 100,
+            gap: '14px'
           }}>
 
           {/* Total preview in CTA area */}
@@ -591,19 +599,20 @@ const BagPage = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '12px'
+            marginBottom: '14px'
           }}>
             <span style={{
-              fontSize: '12px',
+              fontSize: '13px',
               color: 'rgba(250,250,248,0.5)',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.06em'
             }}>
               {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
             </span>
             <span style={{
-              fontSize: '16px',
+              fontSize: '17px',
               fontWeight: 500,
-              color: '#fafaf8'
+              color: '#fafaf8',
+              letterSpacing: '-0.02em'
             }}>
               ₹{finalTotal}
             </span>
@@ -620,16 +629,16 @@ const BagPage = () => {
               color: '#fafaf8',
               border: 'none',
               borderRadius: '16px',
-              padding: '18px',
+              padding: '19px',
               fontSize: '12px',
-              letterSpacing: '0.2em',
+              letterSpacing: '0.22em',
               fontWeight: 500,
               fontFamily: "'DM Sans', sans-serif",
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px'
+              gap: '10px'
             }}>
             PROCESS ORDER
             <span style={{ fontSize: '14px' }}>→</span>
@@ -639,8 +648,8 @@ const BagPage = () => {
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '20px',
-            marginTop: '12px'
+            gap: '24px',
+            marginTop: '14px'
           }}>
             {[
               '🔒 Secure checkout',
@@ -649,7 +658,7 @@ const BagPage = () => {
             ].map(badge => (
               <span key={badge} style={{
                 fontSize: '9px',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.08em',
                 color: 'rgba(250,250,248,0.3)'
               }}>
                 {badge}

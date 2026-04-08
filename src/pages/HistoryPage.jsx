@@ -103,13 +103,13 @@ const HistoryPage = () => {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-32 pt-24 px-4 md:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-display text-2xl tracking-widest uppercase">My Looks</h1>
+        <div className="flex items-center justify-between mb-10">
+          <h1 className="font-display text-2xl tracking-[0.04em] uppercase">My Looks</h1>
           {history.length > 0 && (
             <button
               onClick={handleClearAll}
               disabled={isClearing}
-              className="text-xs tracking-widest text-[#E8395A] uppercase hover:opacity-80 disabled:opacity-50"
+              className="text-[11px] tracking-[0.12em] text-[#E8395A] uppercase hover:opacity-80 disabled:opacity-50"
             >
               Clear All
             </button>
@@ -134,15 +134,15 @@ const HistoryPage = () => {
           </div>
         ) : history.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center opacity-70">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-6 mx-auto text-white/40">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-8 mx-auto text-white/40">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
-            <p className="text-sm font-medium tracking-widest uppercase mb-1">No saved looks yet ✨</p>
-            <p className="text-xs text-white/50 tracking-wider">Try your first AI outfit</p>
+            <p className="text-sm font-medium tracking-[0.08em] uppercase mb-3">No saved looks yet ✨</p>
+            <p className="text-xs text-white/50 tracking-[0.06em]">Try your first AI outfit</p>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               <AnimatePresence>
                 {history.map((item) => (
                   <motion.div
@@ -203,18 +203,18 @@ const HistoryPage = () => {
                       )}
                     </div>
                     
-                    <div className="p-4">
+                    <div className="p-6">
                       {item.productName ? (
-                        <h3 className="text-xs font-bold tracking-widest uppercase truncate mb-1 text-white/90">
+                        <h3 className="text-[13px] font-bold tracking-[0.05em] uppercase truncate mb-2 text-white/90">
                           {item.productName}
                         </h3>
                       ) : (
-                        <h3 className="text-xs font-bold tracking-widest uppercase mb-1 text-white/50">
+                        <h3 className="text-[13px] font-bold tracking-[0.05em] uppercase mb-2 text-white/50">
                           Custom Try-On
                         </h3>
                       )}
                       
-                      <div className="flex items-center justify-between mt-2 text-[10px] font-body text-white/40 uppercase tracking-widest">
+                      <div className="flex items-center justify-between mt-4 text-[11px] font-body text-white/40 uppercase tracking-[0.1em]">
                         <span>{new Date(item.createdAt).toLocaleDateString()}</span>
                         {item.generationTime > 0 && (
                           <span>{(item.generationTime / 1000).toFixed(1)}s</span>

@@ -115,28 +115,27 @@ export default function Home() {
         {/* Text content — bottom */}
         <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
           <motion.p
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
-            style={{ fontSize: '11px', letterSpacing: '0.25em', color: '#fafaf8', marginBottom: '12px', fontWeight: 700, textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
+            style={{ fontSize: '10px', letterSpacing: '0.28em', color: '#fafaf8', marginBottom: '14px', fontWeight: 700, textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
             NEW SEASON DROP
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
             style={{
-              fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 12vw, 64px)', fontWeight: 500,
-              color: 'var(--white)', lineHeight: 1.05, marginBottom: '28px', textShadow: '0 4px 24px rgba(0,0,0,0.9)'
+              fontFamily: 'var(--font-display)', fontSize: 'clamp(38px, 10vw, 52px)', fontWeight: 500,
+              color: 'var(--white)', lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: '24px', textShadow: '0 4px 24px rgba(0,0,0,0.9)'
             }}>
             Wear it<br />before you<br /><em style={{ color: '#ff4d6d', fontStyle: 'italic', fontWeight: 600 }}>buy it.</em>
           </motion.h1>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
-            style={{ display: 'flex', gap: '10px' }}>
+            style={{ display: 'flex', gap: '12px', paddingLeft: '24px', paddingRight: '24px', paddingBottom: '36px' }}>
             <motion.button
               onClick={() => document.getElementById('ai')?.scrollIntoView({ behavior: 'smooth' })}
               whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}
               style={{
                 flex: 1, background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: '14px',
-                padding: '16px', fontSize: '12px', letterSpacing: '0.18em', fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer',
+                padding: '17px 28px', fontSize: '11px', letterSpacing: '0.2em', fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer',
                 boxShadow: '0 8px 30px rgba(232,57,90,0.4)', textShadow: 'none'
               }}>
               ✦ SEE THIS ON YOU
@@ -145,9 +144,9 @@ export default function Home() {
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
               whileTap={{ scale: 0.96 }}
               style={{
-                padding: '16px 20px', background: 'rgba(250,250,248,0.08)', backdropFilter: 'blur(12px)',
+                padding: '17px 22px', background: 'rgba(250,250,248,0.08)', backdropFilter: 'blur(12px)',
                 color: 'var(--white)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', fontSize: '11px',
-                letterSpacing: '0.18em', fontFamily: 'var(--font-body)', cursor: 'pointer'
+                letterSpacing: '0.2em', fontFamily: 'var(--font-body)', cursor: 'pointer'
               }}>
               DISCOVER
             </motion.button>
@@ -156,13 +155,13 @@ export default function Home() {
       </div>
 
       {/* STRIP */}
-      <div style={{ overflow: 'hidden', background: 'var(--surface)', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', padding: '10px 0' }}>
-        <div className="marquee-track">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} style={{ display: 'flex' }}>
-              {['New Arrivals', 'AI Virtual Try-On', 'Free Delivery ₹499+', 'Easy 14 Day Returns', 'Pay on Delivery', 'First in India'].map((item, index) => (
-                <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-                  <span style={{ fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-2)', padding: '0 20px', whiteSpace: 'nowrap', textTransform: 'uppercase', fontWeight: 600 }}>{item}</span>
+        <div style={{ overflow: 'hidden', background: 'var(--surface)', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', padding: '12px 0' }}>
+          <div className="marquee-track">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} style={{ display: 'flex' }}>
+                {['New Arrivals', 'AI Virtual Try-On', 'Free Delivery ₹499+', 'Easy 14 Day Returns', 'Pay on Delivery', 'First in India'].map((item, index) => (
+                  <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: 'var(--text-2)', padding: '0 20px', whiteSpace: 'nowrap', textTransform: 'uppercase', fontWeight: 600 }}>{item}</span>
                   <span style={{ color: 'var(--rose)' }}>✦</span>
                 </div>
               ))}
@@ -175,8 +174,8 @@ export default function Home() {
         {/* FILTERS */}
         <div style={{
           display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-          padding: '0 16px', gap: '4px', borderBottom: '0.5px solid rgba(255,255,255,0.07)', position: 'sticky',
-          top: '56px', background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 90
+          padding: '0 20px', gap: '4px', borderBottom: '0.5px solid rgba(255,255,255,0.07)', position: 'sticky',
+          top: '56px', background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 90, height: '52px'
         }}>
           {["All", "Men", "Women", "Kids"].map((cat) => (
             <motion.button
@@ -184,10 +183,10 @@ export default function Home() {
               onClick={() => setCategory(cat)}
               whileTap={{ scale: 0.96 }}
               style={{
-                padding: '14px 18px', background: 'none', border: 'none',
+                padding: '16px 22px', background: 'none', border: 'none',
                 borderBottom: category === cat ? '2.5px solid #E8395A' : '2.5px solid transparent',
                 color: category === cat ? '#fafaf8' : 'rgba(255,255,255,0.8)',
-                fontSize: '11px', letterSpacing: '0.14em', fontFamily: 'var(--font-body)',
+                fontSize: '11px', letterSpacing: '0.16em', fontFamily: 'var(--font-body)',
                 fontWeight: category === cat ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap',
                 flexShrink: 0, transition: 'color 0.2s, border-color 0.2s'
               }}
@@ -200,14 +199,14 @@ export default function Home() {
         {/* PRODUCT GRID */}
         <section id="products" className="py-12 px-4 md:px-8 max-w-screen-xl mx-auto w-full bg-[#0a0a0a]">
           <div style={{ 
-            padding: '28px 20px 20px',
+            padding: '28px 24px 20px',
             borderBottom: '0.5px solid rgba(255,255,255,0.06)'
           }}>
             <p style={{
               fontSize: '10px',
-              letterSpacing: '0.25em',
+              letterSpacing: '0.28em',
               color: '#E8395A',
-              marginBottom: '8px',
+              marginBottom: '10px',
               fontFamily: "'DM Sans', sans-serif",
               fontWeight: 500
             }}>
@@ -215,10 +214,10 @@ export default function Home() {
             </p>
             <h2 style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: '32px',
+              fontSize: 'clamp(28px, 7vw, 36px)',
               fontWeight: 300,
               color: '#fafaf8',
-              lineHeight: 1.1,
+              lineHeight: 1.15,
               letterSpacing: '-0.01em'
             }}>
               New Arrivals
@@ -256,21 +255,22 @@ export default function Home() {
         </section>
 
         {/* AI SECTION */}
-        <section id="ai" className="m-3 mt-8 bg-[#0a0a0a] rounded-[24px] p-8 text-white relative overflow-hidden shadow-2xl">
+        <section id="ai" className="m-3 mt-8 bg-[#0a0a0a] rounded-[24px] text-white relative overflow-hidden shadow-2xl" style={{ padding: '40px 28px' }}>
           <div className="relative z-10 flex flex-col items-start md:items-center md:text-center">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2" style={{ marginBottom: '14px', letterSpacing: '0.28em' }}>
               <span className="w-4 h-[1px] bg-rose"></span>
-              <span className="text-[9px] tracking-widest text-rose uppercase font-bold">India First</span>
+              <span className="text-[9px] text-rose uppercase font-bold">India First</span>
             </div>
-            <h2 className="font-display italic font-semibold text-4xl md:text-5xl mb-4 text-white leading-tight">
+            <h2 className="font-display italic font-semibold text-white" style={{ fontSize: 'clamp(26px, 6.5vw, 32px)', lineHeight: 1.25, marginBottom: '14px' }}>
               The Fitting Room<br />of the Future
             </h2>
-            <p className="text-white/60 text-sm md:text-base max-w-md mb-8 leading-relaxed font-body">
+            <p className="text-white/60 max-w-md font-body" style={{ fontSize: '14px', lineHeight: 1.75, marginBottom: '24px', letterSpacing: '0.02em' }}>
               Upload your exact photo. See perfectly how any outfit looks on your body — before you spend a single rupee.
             </p>
             <button
               onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-rose text-white h-12 w-full md:w-auto md:px-10 flex items-center justify-center font-bold text-xs tracking-widest uppercase rounded-xl transition-transform active:scale-95"
+              className="bg-rose text-white w-full md:w-auto md:px-10 flex items-center justify-center font-bold uppercase rounded-xl transition-transform active:scale-95"
+              style={{ padding: '15px 28px', letterSpacing: '0.18em', fontSize: '11px' }}
             >
               Try It Now
             </button>

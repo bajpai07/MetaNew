@@ -44,7 +44,7 @@ export default function Navbar() {
     <>
       <motion.nav 
         style={{
-          height: '56px',
+          height: '72px',
           background: 'rgba(10,10,10,0.85)',
           backdropFilter,
           WebkitBackdropFilter: backdropFilter,
@@ -52,7 +52,7 @@ export default function Navbar() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 20px',
+          padding: '0 24px',
           position: 'fixed',
           top: 0,
           left: 0,
@@ -150,7 +150,7 @@ export default function Navbar() {
           position: 'relative',
           zIndex: 50,
           borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-          marginTop: '56px'
+          marginTop: '72px'
         }}>
           <input
             placeholder="Search for products..."
@@ -229,8 +229,9 @@ export default function Navbar() {
         style={{
           position: 'fixed',
           bottom: 0, left: 0, right: 0,
-          height: '60px',
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          height: '72px',
+          paddingTop: '8px',
+          paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
           background: 'rgba(10,10,10,0.95)',
           backdropFilter: 'blur(20px)',
           borderTop: '0.5px solid var(--border)',

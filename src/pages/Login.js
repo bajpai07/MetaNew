@@ -62,8 +62,7 @@ export default function Login() {
           style={{
             background: "var(--surface)",
             border: "0.5px solid var(--border)",
-            borderRadius: "var(--radius-xl)",
-            padding: "36px 28px",
+            padding: "40px 32px",
             width: "100%"
           }}
         >
@@ -81,14 +80,14 @@ export default function Login() {
           marginBottom: "32px"
         }}>Enter your details to access your account.</p>
         
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <div>
             <label style={{
               color: "var(--text-secondary)",
               fontSize: "12px",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.15em",
               fontFamily: "var(--font-body)",
-              marginBottom: "6px",
+              marginBottom: "8px",
               display: "block"
             }}>EMAIL</label>
             <input 
@@ -104,7 +103,7 @@ export default function Login() {
                 color: "var(--white)",
                 fontFamily: "var(--font-body)",
                 fontSize: "15px",
-                padding: "14px 16px",
+                padding: "16px 18px",
                 width: "100%",
                 outline: "none",
                 transition: "border-color 0.2s, background 0.2s"
@@ -118,9 +117,9 @@ export default function Login() {
             <label style={{
               color: "var(--text-secondary)",
               fontSize: "12px",
-              letterSpacing: "0.1em",
+              letterSpacing: "0.15em",
               fontFamily: "var(--font-body)",
-              marginBottom: "6px",
+              marginBottom: "8px",
               display: "block"
             }}>PASSWORD</label>
             <input 
@@ -155,15 +154,15 @@ export default function Login() {
               color: "var(--white)",
               border: "none",
               borderRadius: "var(--radius-lg)",
-              padding: "16px",
+              padding: "18px",
               width: "100%",
               fontFamily: "var(--font-body)",
               fontSize: "13px",
               fontWeight: "500",
-              letterSpacing: "0.15em",
+              letterSpacing: "0.2em",
               cursor: "pointer",
               transition: "background 0.2s",
-              marginTop: "12px"
+              marginTop: "16px"
             }}
             onMouseOver={(e) => e.target.style.background = "var(--rose-dark)"}
             onMouseOut={(e) => e.target.style.background = "var(--rose)"}

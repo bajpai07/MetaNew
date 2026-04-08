@@ -164,14 +164,14 @@ const ProductCard = ({ product, index }) => {
       </div>
 
       {/* CARD INFO */}
-      <div style={{ padding: '10px 2px 18px' }}>
+      <div style={{ padding: '14px 6px 20px' }}>
 
         {/* Brand */}
         <p style={{
           fontSize: '9px',
-          letterSpacing: '0.18em',
+          letterSpacing: '0.22em',
           color: 'rgba(250,250,248,0.35)',
-          marginBottom: '4px',
+          marginBottom: '6px',
           fontFamily: "'DM Sans', sans-serif",
           textTransform: 'uppercase'
         }}>
@@ -184,8 +184,9 @@ const ProductCard = ({ product, index }) => {
           color: '#fafaf8',
           fontFamily: "'DM Sans', sans-serif",
           fontWeight: 400,
-          lineHeight: 1.35,
-          marginBottom: '8px',
+          lineHeight: 1.45,
+          marginBottom: '10px',
+          letterSpacing: '0.01em',
           overflow: 'hidden',
           display: '-webkit-box',
           WebkitLineClamp: 2,
@@ -198,7 +199,7 @@ const ProductCard = ({ product, index }) => {
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: '8px',
           flexWrap: 'wrap',
           marginTop: '6px'
         }}>

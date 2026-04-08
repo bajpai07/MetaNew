@@ -398,7 +398,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '16px 20px',
+      padding: '18px 24px',
       borderBottom: '0.5px solid rgba(255,255,255,0.08)',
       position: 'sticky',
       top: 0,
@@ -411,13 +411,13 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       border: 'none',
       color: '#fafaf8',
       cursor: 'pointer',
-      fontSize: '20px',
-      padding: '8px',
+      fontSize: '13px',
+      padding: '10px',
       display: 'flex',
       alignItems: 'center',
-      gap: '6px',
+      gap: '8px',
       fontFamily: "'DM Sans', sans-serif",
-      letterSpacing: '0.05em'
+      letterSpacing: '0.06em'
     },
     title: {
       fontSize: '12px',
@@ -440,11 +440,11 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       gap: '5px'
     },
     uploadZone: {
-      margin: '20px',
+      margin: '0 24px',
       aspectRatio: '3/4',
       background: '#111111',
       border: '1.5px dashed rgba(255,255,255,0.15)',
-      borderRadius: '20px',
+      borderRadius: '24px',
       overflow: 'hidden',
       cursor: 'pointer',
       display: 'flex',
@@ -513,20 +513,24 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         {!resultUrl ? (
           <>
             {/* Upload section */}
-            <div style={{ padding: '20px 20px 0' }}>
+            <div style={{ padding: '22px 24px 0' }}>
               <h2 style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontSize: '26px',
+                fontSize: 'clamp(22px, 5.5vw, 28px)',
+                lineHeight: 1.25,
                 fontWeight: 400,
-                marginBottom: '6px',
-                color: '#fafaf8'
+                marginBottom: '8px',
+                color: '#fafaf8',
+                letterSpacing: '-0.01em'
               }}>
                 ✦ See yourself in this outfit
               </h2>
               <p style={{
                 fontSize: '13px',
+                lineHeight: 1.6,
+                letterSpacing: '0.02em',
                 color: 'rgba(250,250,248,0.45)',
-                marginBottom: '20px'
+                marginBottom: '22px'
               }}>
                 Use a clear front-facing full body photo
               </p>
@@ -563,11 +567,12 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   padding: '20px'
                 }}>
                   <div style={{
-                    width: '56px',
-                    height: '56px',
+                    width: '60px',
+                    height: '60px',
+                    marginBottom: '14px',
                     background: 'rgba(255,255,255,0.06)',
                     border: '0.5px solid rgba(255,255,255,0.12)',
-                    borderRadius: '16px',
+                    borderRadius: '18px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -576,14 +581,16 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     +
                   </div>
                   <p style={{
-                    fontSize: '14px',
+                    fontSize: '15px',
+                    marginBottom: '8px',
                     color: 'rgba(250,250,248,0.5)',
                     textAlign: 'center'
                   }}>
                     Upload your photo
                   </p>
                   <p style={{
-                    fontSize: '11px',
+                    fontSize: '12px',
+                    letterSpacing: '0.02em',
                     color: 'rgba(250,250,248,0.25)',
                     textAlign: 'center',
                     lineHeight: 1.5
@@ -604,9 +611,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   backdropFilter: 'blur(8px)',
                   border: '0.5px solid rgba(255,255,255,0.15)',
                   borderRadius: '20px',
-                  padding: '6px 16px',
+                  padding: '8px 20px',
                   fontSize: '11px',
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.12em',
                   color: '#fafaf8',
                   whiteSpace: 'nowrap'
                 }}>
@@ -627,26 +634,26 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             <p style={{
               textAlign: 'center',
               fontSize: '11px',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.1em',
               color: 'rgba(250,250,248,0.28)',
-              padding: '12px 20px 0'
+              padding: '14px 24px 0'
             }}>
               🔒 Private & auto-deleted within 24 hours
             </p>
 
             {/* Tips */}
             <div style={{
-              margin: '16px 20px 0',
+              margin: '18px 24px 0',
               background: 'rgba(255,255,255,0.03)',
               border: '0.5px solid rgba(255,255,255,0.06)',
-              borderRadius: '12px',
-              padding: '14px 16px'
+              borderRadius: '14px',
+              padding: '16px 18px'
             }}>
               <p style={{
-                fontSize: '11px',
-                letterSpacing: '0.1em',
+                fontSize: '10px',
+                letterSpacing: '0.2em',
                 color: 'rgba(250,250,248,0.35)',
-                marginBottom: '8px'
+                marginBottom: '10px'
               }}>
                 BEST RESULTS
               </p>
@@ -657,9 +664,11 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                 '✓ Plain background'
               ].map(tip => (
                 <p key={tip} style={{
-                  fontSize: '12px',
+                  fontSize: '13px',
+                  lineHeight: 1.6,
+                  letterSpacing: '0.01em',
                   color: 'rgba(250,250,248,0.5)',
-                  marginBottom: '4px'
+                  marginBottom: '6px'
                 }}>
                   {tip}
                 </p>
@@ -947,20 +956,21 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             {(fitScore || generationTime) && (
               <div style={{
                 display: 'flex',
-                gap: '8px',
-                margin: '16px 20px 0'
+                gap: '12px',
+                margin: '20px 24px 0'
               }}>
                 {fitScore && (
                   <div style={{
                     flex: 1,
                     background: 'rgba(74,222,128,0.06)',
                     border: '0.5px solid rgba(74,222,128,0.2)',
-                    borderRadius: '12px',
-                    padding: '14px',
+                    borderRadius: '14px',
+                    padding: '16px',
                     textAlign: 'center'
                   }}>
                     <p style={{
-                      fontSize: '22px',
+                      fontSize: '24px',
+                      letterSpacing: '-0.02em',
                       fontWeight: 600,
                       color: '#4ade80',
                       marginBottom: '2px'
@@ -981,12 +991,13 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     flex: 1,
                     background: 'rgba(255,255,255,0.03)',
                     border: '0.5px solid rgba(255,255,255,0.07)',
-                    borderRadius: '12px',
-                    padding: '14px',
+                    borderRadius: '14px',
+                    padding: '16px',
                     textAlign: 'center'
                   }}>
                     <p style={{
-                      fontSize: '22px',
+                      fontSize: '24px',
+                      letterSpacing: '-0.02em',
                       fontWeight: 600,
                       color: '#fafaf8',
                       marginBottom: '2px'
@@ -1020,7 +1031,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             {/* Warnings block */}
             {warnings && warnings.length > 0 && (
               <div style={{
-                margin: '16px 20px 0',
+                margin: '20px 24px 0',
                 background: 'rgba(234, 179, 8, 0.1)',
                 border: '0.5px solid rgba(234, 179, 8, 0.3)',
                 borderRadius: '12px',
@@ -1054,8 +1065,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
             {/* Product name */}
             <div style={{
-              margin: '16px 20px 0',
-              padding: '14px 16px',
+              margin: '20px 24px 0',
+              padding: '18px 20px',
               background: 'rgba(255,255,255,0.03)',
               border: '0.5px solid rgba(255,255,255,0.07)',
               borderRadius: '12px',
@@ -1066,14 +1077,15 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               <div>
                 <p style={{
                   fontSize: '10px',
-                  letterSpacing: '0.12em',
+                  letterSpacing: '0.18em',
                   color: 'rgba(250,250,248,0.35)',
-                  marginBottom: '3px'
+                  marginBottom: '6px'
                 }}>
                   OUTFIT TRIED
                 </p>
                 <p style={{
-                  fontSize: '14px',
+                  fontSize: '15px',
+                  letterSpacing: '0.01em',
                   color: '#fafaf8',
                   fontWeight: 400
                 }}>
@@ -1081,7 +1093,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                 </p>
               </div>
               <p style={{
-                fontSize: '16px',
+                fontSize: '17px',
+                letterSpacing: '-0.01em',
                 fontWeight: 600,
                 color: '#fafaf8'
               }}>
@@ -1295,9 +1308,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           bottom: 0,
           left: 0,
           right: 0,
-          padding: '12px 20px',
+          padding: '16px 24px',
           paddingBottom: 
-            'calc(12px + env(safe-area-inset-bottom))',
+            'calc(16px + env(safe-area-inset-bottom))',
           background: 'rgba(10,10,10,0.95)',
           backdropFilter: 'blur(20px)',
           borderTop: '0.5px solid rgba(255,255,255,0.07)',
@@ -1305,7 +1318,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
         }}>
 
           {!resultUrl ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {error && isRetryable ? (
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -1317,9 +1330,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     color: '#fafaf8',
                     border: 'none',
                     borderRadius: '16px',
-                    padding: '18px',
+                    padding: '20px',
                     fontSize: '12px',
-                    letterSpacing: '0.2em',
+                    letterSpacing: '0.24em',
                     fontWeight: 500,
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: isGenerating ? 'not-allowed' : 'pointer',
@@ -1328,7 +1341,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '10px'
                   }}>
                   ✦ TRY AGAIN
                 </motion.button>
@@ -1347,9 +1360,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                       : 'rgba(250,250,248,0.3)',
                     border: 'none',
                     borderRadius: '16px',
-                    padding: '18px',
+                    padding: '20px',
                     fontSize: '12px',
-                    letterSpacing: '0.2em',
+                    letterSpacing: '0.24em',
                     fontWeight: 500,
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: (isGenerating || !uploadedPhoto) ? 'not-allowed' : 'pointer',
@@ -1358,7 +1371,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '10px'
                   }}>
                   ✦ GENERATE MY LOOK ✨
                 </motion.button>
@@ -1390,13 +1403,13 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px'
+              gap: '12px'
             }}>
               
               {/* Download + Share row */}
               <div style={{ 
                 display: 'flex', 
-                gap: '8px' 
+                gap: '12px' 
               }}>
                 <motion.button
                   whileTap={{ scale: 0.96 }}
@@ -1407,9 +1420,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     color: '#0a0a0a',
                     border: 'none',
                     borderRadius: '14px',
-                    padding: '14px',
+                    padding: '16px',
                     fontSize: '11px',
-                    letterSpacing: '0.15em',
+                    letterSpacing: '0.18em',
                     fontWeight: 600,
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: 'pointer',
@@ -1430,9 +1443,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     color: '#fafaf8',
                     border: '0.5px solid rgba(255,255,255,0.15)',
                     borderRadius: '14px',
-                    padding: '14px',
+                    padding: '16px',
                     fontSize: '11px',
-                    letterSpacing: '0.15em',
+                    letterSpacing: '0.18em',
                     fontFamily: "'DM Sans', sans-serif",
                     cursor: 'pointer',
                     display: 'flex',
@@ -1455,9 +1468,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                   color: '#fafaf8',
                   border: 'none',
                   borderRadius: '14px',
-                  padding: '14px',
+                  padding: '16px',
                   fontSize: '11px',
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.18em',
                   fontWeight: 500,
                   fontFamily: "'DM Sans', sans-serif",
                   cursor: 'pointer'
