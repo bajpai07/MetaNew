@@ -26,21 +26,30 @@ import { getMetrics } from "./controllers/tryonController.js";
 
 const app = express();
 
-/* ✅ BULLETPROOF CORS — MUST BE AT TOP */
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-  }
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://meta-new-beige.vercel.app"
+];
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed for this origin"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
+
+app.options("*", cors());
+
+app.use((req, res, next) => {
+  console.log("Request Origin:", req.headers.origin);
   next();
 });
 
