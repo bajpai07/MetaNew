@@ -495,10 +495,6 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             onClick={onClose}>
             ← Back
           </motion.button>
-          
-          <span style={s.title}>
-            VIRTUAL TRY-ON
-          </span>
 
           {fitScore && (
             <div style={s.fitBadge}>
@@ -634,10 +630,15 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             {/* Privacy note */}
             <p style={{
               textAlign: 'center',
-              fontSize: '11px',
-              letterSpacing: '0.1em',
-              color: 'rgba(250,250,248,0.28)',
-              padding: '14px 24px 0'
+              fontSize: '12px',
+              fontWeight: 500,
+              letterSpacing: '0.08em',
+              color: 'rgba(250,250,248,0.75)',
+              margin: '18px 24px 0',
+              padding: '12px 16px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '0.5px solid rgba(255,255,255,0.08)',
+              borderRadius: '12px'
             }}>
               🔒 Private & auto-deleted within 24 hours
             </p>
