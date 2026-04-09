@@ -5,12 +5,7 @@
 > **India's first production-grade AI Virtual Try-On platform.**
 > Upload your photo → See any outfit on your body → Buy with confidence.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-E8395A)](#)
-[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?logo=github)](#)
-[![License](https://img.shields.io/badge/License-MIT-green)](#)
-
-![Metashop AI Virtual Try-On Preview](https://images.unsplash.com/photo-1445205170230-053b83016050?w=1200&q=80) 
-*(Note: Replace literal URL with actual project screenshot)*
+[[Live Demo](https://meta-new-beige.vercel.app)](#)
 
 ---
 
