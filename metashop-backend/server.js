@@ -22,6 +22,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import sellerRoutes from "./routes/sellerRoutes.js";
 import tryonRoutes from "./routes/tryonRoutes.js";
 import historyRoutes from "./routes/historyRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import { getMetrics } from "./controllers/tryonController.js";
 
 const app = express();
@@ -59,6 +60,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 /* routes */
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);

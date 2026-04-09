@@ -6,6 +6,7 @@ import ProductCard from "../components/ProductCard";
 import TryOnExperience from "../components/vton/TryOnExperience";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import SizeRecommendation from "../components/SizeRecommendation";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -17,6 +18,7 @@ export default function ProductPage() {
   const { addToCart } = useCart();
 
   const [selectedSize, setSelectedSize] = useState(null);
+  const [sizeRec, setSizeRec] = useState(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [addedToBag, setAddedToBag] = useState(false);
@@ -333,6 +335,33 @@ export default function ProductPage() {
               }}>
                 Select Size
               </p>
+              {sizeRec && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(74,222,128,0.1)',
+                    border: '0.5px solid rgba(74,222,128,0.3)',
+                    borderRadius: '20px',
+                    padding: '4px 12px',
+                    marginBottom: '12px'
+                  }}>
+                  <span style={{
+                    fontSize: '10px',
+                    color: '#4ade80',
+                    fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: '0.08em',
+                    fontWeight: 500
+                  }}>
+                    ✓ AI recommends size{' '}
+                    <strong>{sizeRec.size}</strong>
+                    {' '}({sizeRec.confidence}% match)
+                  </span>
+                </motion.div>
+              )}
               <span style={{
                 fontSize: '11px',
                 color: '#E8395A',
@@ -361,12 +390,18 @@ export default function ProductPage() {
                     borderRadius: '14px',
                     background: selectedSize === size
                       ? '#E8395A'
+                      : sizeRec?.size === size
+                      ? 'rgba(74,222,128,0.1)'
                       : 'rgba(255,255,255,0.04)',
                     border: selectedSize === size
                       ? '0.5px solid #E8395A'
+                      : sizeRec?.size === size
+                      ? '0.5px solid rgba(74,222,128,0.4)'
                       : '0.5px solid rgba(255,255,255,0.12)',
                     color: selectedSize === size
                       ? '#fafaf8'
+                      : sizeRec?.size === size
+                      ? '#4ade80'
                       : 'rgba(250,250,248,0.7)',
                     fontSize: '13px',
                     letterSpacing: '0.05em',
@@ -404,6 +439,12 @@ export default function ProductPage() {
             background: 'rgba(255,255,255,0.07)',
             margin: '20px 0'
           }} />
+
+          <SizeRecommendation
+            onRecommendation={(rec) => {
+              setSizeRec(rec);
+            }}
+          />
 
           {/* ── PRODUCT TABS ── */}
           <div style={{ marginBottom: '24px' }}>
