@@ -10,7 +10,7 @@ const LOADING_STAGES = [
     progress: 12
   },
   {
-    text: "Mapping body structure...",
+    text: "Tailoring to your fit...",
     progress: 28
   },
   {
@@ -420,12 +420,13 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       letterSpacing: '0.06em'
     },
     title: {
-      fontSize: '12px',
-      letterSpacing: '0.2em',
+      fontSize: '10px',
+      letterSpacing: '0.15em',
       color: 'rgba(250,250,248,0.6)',
       position: 'absolute',
       left: '50%',
-      transform: 'translateX(-50%)'
+      transform: 'translateX(-50%)',
+      whiteSpace: 'nowrap'
     },
     fitBadge: {
       background: 'rgba(74,222,128,0.12)',
@@ -496,7 +497,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           </motion.button>
           
           <span style={s.title}>
-            TRY THIS LOOK ON YOU
+            VIRTUAL TRY-ON
           </span>
 
           {fitScore && (
@@ -1196,11 +1197,12 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
               <h2 style={{
                 fontFamily: 
                   "'Cormorant Garamond', serif",
-                fontSize: '26px',
-                fontWeight: 300,
-                color: '#fafaf8',
+                fontSize: '28px',
+                fontWeight: 500,
+                color: '#ffffff',
                 marginBottom: '12px',
-                textAlign: 'center'
+                textAlign: 'center',
+                textShadow: '0px 2px 10px rgba(255,255,255,0.1)'
               }}>
                 Creating your AI look
               </h2>
@@ -1219,8 +1221,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.4 }}
                     style={{
-                      fontSize: '13px',
-                      color: 'rgba(250,250,248,0.45)',
+                      fontSize: '14px',
+                      color: '#fafaf8',
                       letterSpacing: '0.05em',
                       textAlign: 'center',
                       fontFamily: "'DM Sans', sans-serif"
@@ -1291,9 +1293,9 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
               {/* ── Bottom branding ────────── */}
               <p style={{
-                fontSize: '10px',
-                color: 'rgba(250,250,248,0.15)',
-                letterSpacing: '0.15em',
+                fontSize: '11px',
+                color: 'rgba(250,250,248,0.4)',
+                letterSpacing: '0.2em',
                 fontFamily: "'DM Sans', sans-serif"
               }}>
                 METASHOP AI
