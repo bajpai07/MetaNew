@@ -236,7 +236,7 @@ export default function Navbar() {
           backdropFilter: 'blur(20px)',
           borderTop: '0.5px solid var(--border)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(5, 1fr)',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           zIndex: 100
         }}
       >
@@ -266,14 +266,6 @@ export default function Navbar() {
           </button>
         </motion.div>
 
-        <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
-          <Link to="/try-on" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: '#E8395A' }}>
-            <motion.span animate={{ scale: location.pathname.includes('/try-on') ? 1.15 : 1 }} style={{ fontSize: '18px', color: '#E8395A' }} >
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 4.545V2m0 2.545l2.455-2.455M11 4.545l-2.455-2.455M11 15v2.545m0-2.545l2.455 2.455M11 15l-2.455 2.455M4.545 11H2m2.545 0L2 8.545M4.545 11l-2.455 2.455M18.455 11H21m-2.545 0l2.455-2.455M18.455 11l2.455 2.455"/></svg>
-            </motion.span>
-            <span style={{ fontSize: '9px', letterSpacing: '0.1em', fontFamily: 'var(--font-body)', fontWeight: location.pathname.includes('/try-on') ? 500 : 400 }}>TRY AI</span>
-          </Link>
-        </motion.div>
 
         <motion.div whileTap={{ scale: 0.96 }} className="flex h-full w-full">
           <Link to="/history" className="flex w-full flex-col items-center justify-center gap-[3px]" style={{ color: location.pathname === '/history' ? '#fafaf8' : 'rgba(250,250,248,0.3)' }}>
