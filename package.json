@@ -5,7 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@google/model-viewer": "^4.1.0",
+    "@google/model-viewer": "4.1.0",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/pose": "^0.5.1675469404",
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",

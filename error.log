@@ -1,0 +1,21 @@
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+npm error
+npm error While resolving: metashop-frontend@0.1.0
+npm error Found: three@0.172.0
+npm error node_modules/three
+npm error   three@"^0.172.0" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer three@"^0.182.0" from @google/model-viewer@4.2.0
+npm error node_modules/@google/model-viewer
+npm error   @google/model-viewer@"^4.1.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error C:\Users\bajpa\AppData\Local\npm-cache\_logs\2026-04-20T04_39_07_940Z-eresolve-report.txt
+npm error A complete log of this run can be found in: C:\Users\bajpa\AppData\Local\npm-cache\_logs\2026-04-20T04_39_07_940Z-debug-0.log
