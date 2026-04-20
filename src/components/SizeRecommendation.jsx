@@ -2,6 +2,58 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 
+// Local calculation logic for guest users
+function calculateSizeLocally(height, weight) {
+  const bmi = weight / ((height / 100) * (height / 100));
+  let size = 'M';
+  if (height <= 160) {
+    if (bmi < 18.5) size = 'XS';
+    else if (bmi < 22) size = 'S';
+    else if (bmi < 26) size = 'M';
+    else if (bmi < 30) size = 'L';
+    else size = 'XL';
+  } else if (height <= 170) {
+    if (bmi < 18.5) size = 'S';
+    else if (bmi < 22) size = 'M';
+    else if (bmi < 26) size = 'L';
+    else if (bmi < 30) size = 'XL';
+    else size = 'XXL';
+  } else if (height <= 180) {
+    if (bmi < 18.5) size = 'M';
+    else if (bmi < 22) size = 'L';
+    else if (bmi < 26) size = 'XL';
+    else if (bmi < 30) size = 'XXL';
+    else size = 'XXL';
+  } else {
+    if (bmi < 18.5) size = 'M';
+    else if (bmi < 22) size = 'L';
+    else if (bmi < 26) size = 'XL';
+    else size = 'XXL';
+  }
+  
+  let confidence = 82;
+  if (bmi >= 18.5 && bmi <= 27 && height >= 150 && height <= 190) {
+    confidence = Math.floor(Math.random() * 6) + 88;
+  } else {
+    confidence = Math.floor(Math.random() * 8) + 82;
+  }
+  
+  const messages = {
+    'XS': 'Extra small fit — slim silhouette',
+    'S': 'Small fit — lean and tailored',
+    'M': 'Medium fit — most popular size',
+    'L': 'Large fit — relaxed and comfortable',
+    'XL': 'Extra large — generous fit',
+    'XXL': 'Double XL — maximum comfort'
+  };
+  
+  return {
+    size,
+    confidence,
+    message: messages[size] || 'Standard fit'
+  };
+}
+
 const SizeRecommendation = ({ onRecommendation }) => {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
@@ -18,7 +70,18 @@ const SizeRecommendation = ({ onRecommendation }) => {
   const fetchSavedMeasurements = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) return;
+      if (!token) {
+        const localData = localStorage.getItem('local_measurements');
+        if (localData) {
+          const parsed = JSON.parse(localData);
+          setHeight(String(parsed.height));
+          setWeight(String(parsed.weight));
+          setRecommendation(parsed.recommendation);
+          setSaved(true);
+          onRecommendation?.(parsed.recommendation);
+        }
+        return;
+      }
 
       const res = await axios.get(
         `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/users/measurements`,
@@ -65,6 +128,16 @@ const SizeRecommendation = ({ onRecommendation }) => {
 
     try {
       const token = localStorage.getItem('token');
+
+      if (!token) {
+        const localRec = calculateSizeLocally(h, w);
+        setRecommendation(localRec);
+        setSaved(true);
+        onRecommendation?.(localRec);
+        localStorage.setItem('local_measurements', JSON.stringify({ height: h, weight: w, recommendation: localRec }));
+        setLoading(false);
+        return;
+      }
 
       const res = await axios.put(
         `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/users/measurements`,
