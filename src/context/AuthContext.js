@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -32,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/auth/login`, { email, password });
+      const { data } = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
       
       setToken(data.token);
       setUser(data.user); // Keep data.user for user state
@@ -40,13 +41,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(data.user)); // Keep data.user for local storage
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       
-      toast.success("Login successful!");
+      toast.success("Signed in");
       return true;
     } catch (error) {
       console.error("Login failed:", error);
       const apiMsg = error.response?.data?.message;
       const apiErr = error.response?.data?.error;
-      const display = apiErr ? `${apiMsg}: ${apiErr}` : (apiMsg || 'Login failed');
+      const display = apiErr ? `${apiMsg}: ${apiErr}` : (apiMsg || 'Those details didn’t match');
       toast.error(display, { id: 'login-error' });
       return false;
     }
@@ -54,12 +55,12 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/auth/signup`, { name, email, password });
-      toast.success("Registration successful! Please login.");
+      await axios.post(`${API_BASE}/api/auth/signup`, { name, email, password });
+      toast.success("Account created. Sign in to continue.");
       return true;
     } catch (error) {
       console.error("Signup failed:", error);
-      toast.error(error.response?.data?.message || "Signup failed");
+      toast.error(error.response?.data?.message || "We couldn’t create that account");
       return false;
     }
   };
@@ -70,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
-    toast.success('Logged out successfully');
+    toast.success('Signed out');
   };
 
   return (

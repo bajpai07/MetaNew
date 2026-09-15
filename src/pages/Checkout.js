@@ -5,7 +5,18 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import axios from "axios";
 import PaymentModal from "../components/PaymentModal";
+import { API_BASE } from '../config/api';
 
+/**
+ * THE INVERSION. The showroom is dark; the paperwork is on paper.
+ *
+ * Checkout, the confirmation, order history and administration are the only
+ * surfaces in the application set ink-on-bone. It is not a theme switch — it
+ * marks the moment you stop looking and start transacting, and it gives the
+ * utilitarian screens somewhere to belong instead of looking bolted on.
+ *
+ * Luxury checkout is fast and legible. Nothing here is decorated.
+ */
 export default function Checkout() {
   const { cartItems, fetchCart, userId } = useCart();
   const { user } = useAuth();
@@ -19,126 +30,213 @@ export default function Checkout() {
     country: "India"
   });
 
-  const total = cartItems?.reduce((acc, item) => acc + (Number(item.priceAtPurchase) * Number(item.qty)), 0) || 0;
+  const total =
+    cartItems?.reduce(
+      (acc, item) => acc + Number(item.priceAtPurchase) * Number(item.qty),
+      0
+    ) || 0;
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (!cartItems || cartItems.length === 0) {
-      toast.error("Your cart is empty");
+      toast.error("Your bag is empty");
       return;
     }
 
     if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.postalCode) {
-      toast.error("Please fill all shipping fields");
+      toast.error("Complete the delivery address first");
       return;
     }
-    
-    // Intercept checkout to open Virtual Gateway Modal
+
     setShowPayment(true);
   };
 
   const processSecurePayment = async () => {
     try {
       setShowPayment(false);
-      const loadingToast = toast.loading("Processing order securely...");
-      
-      // Send the strict, identical context userId
+      const loadingToast = toast.loading("Placing your order");
+
       const payload = {
         userId: userId,
         shippingAddress,
         paymentMethod: "Virtual Gateway"
       };
 
-      const config = user ? { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } } : {};
+      const config = user
+        ? { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        : {};
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders`, payload, config);
-      
-      // Backend automatically wiped the cart. Just refresh frontend state.
-      await fetchCart(); 
+      const res = await axios.post(
+        `${API_BASE}/api/orders`,
+        payload,
+        config
+      );
 
-      toast.success("Payment Verified & Order Placed Successfully!", { id: loadingToast });
+      await fetchCart();
+
+      toast.success("Your order is placed", { id: loadingToast });
       navigate(`/order-success/${res.data._id}`);
-      
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Order processing failed");
+      toast.error(err.response?.data?.message || "That order didn't go through");
     }
   };
 
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div style={{ textAlign: "center", padding: "100px 20px" }}>
-        <h2>Your bag is empty</h2>
-        <button onClick={() => navigate("/")} style={{ padding: "10px 20px", background: "#FF3F6C", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
-          Go to Shop
+      <div className="on-paper page gutter" style={{ paddingTop: "calc(var(--nav-h) + 96px)" }}>
+        <h1 className="display display-l" style={{ marginBottom: "14px" }}>
+          Your bag is empty
+        </h1>
+        <p className="meta measure" style={{ marginBottom: "36px" }}>
+          There is nothing here to pay for.
+        </p>
+        <button className="textlink" onClick={() => navigate("/")}>
+          Browse the collection
         </button>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", gap: "40px", padding: "100px 40px 40px", maxWidth: "1200px", margin: "0 auto", alignItems: "flex-start", flexWrap: "wrap", minHeight: "100vh", background: "var(--black)", color: "var(--white)" }}>
-      
-      {/* LEFT PANE: SHIPPING FORM */}
-      <div style={{ flex: "1 1 500px", background: "var(--surface)", padding: "40px", borderRadius: "16px", border: "0.5px solid var(--border)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "32px", paddingBottom: "16px", borderBottom: "0.5px solid var(--border)", fontSize: "28px", fontWeight: 400 }}>Shipping Details</h2>
-        
-        <form onSubmit={handlePlaceOrder} style={{ display: "flex", flexDirection: "column", gap: "28px" }}>
-          <div>
-            <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Street Address</label>
-            <input type="text" required placeholder="123 Main St" value={shippingAddress.address} onChange={(e) => setShippingAddress({...shippingAddress, address: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
-          </div>
-
-          <div style={{ display: "flex", gap: "24px" }}>
-             <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>City</label>
-                <input type="text" required placeholder="Mumbai" value={shippingAddress.city} onChange={(e) => setShippingAddress({...shippingAddress, city: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
-             </div>
-             <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "10px", fontSize: "11px", letterSpacing: "0.15em", color: "var(--text-secondary)", textTransform: "uppercase" }}>Pincode</label>
-                <input type="text" required placeholder="400001" value={shippingAddress.postalCode} onChange={(e) => setShippingAddress({...shippingAddress, postalCode: e.target.value})} style={{ width: "100%", padding: "18px", border: "0.5px solid var(--border)", borderRadius: "14px", background: "var(--surface-2)", color: "var(--white)", outline: "none", fontSize: "15px", fontFamily: "var(--font-body)" }} />
-             </div>
-          </div>
-
-          <button type="submit" style={{ marginTop: "24px", padding: "20px", background: "linear-gradient(135deg, #E8395A, #c42d4a)", color: "var(--white)", border: "none", borderRadius: "16px", fontSize: "13px", letterSpacing: "0.2em", fontWeight: "500", cursor: "pointer", width: "100%", boxShadow: "0 8px 24px rgba(232,57,90,0.3)", fontFamily: "var(--font-body)" }}>
-            PROCEED TO PAYMENT
-          </button>
-        </form>
+    <div className="on-paper page">
+      <div className="gutter" style={{ paddingTop: "34px", paddingBottom: "24px" }}>
+        <h1 className="display display-l">Checkout</h1>
       </div>
 
-      {/* RIGHT PANE: ORDER SUMMARY */}
-      <div style={{ flex: "1 1 400px", background: "var(--surface)", padding: "40px", borderRadius: "16px", border: "0.5px solid var(--border)" }}>
-        <h2 style={{ fontFamily: "var(--font-display)", marginBottom: "32px", paddingBottom: "16px", borderBottom: "0.5px solid var(--border)", fontSize: "28px", fontWeight: 400 }}>Order Summary</h2>
-        
-        <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "16px" }}>
-          {cartItems.map((item) => {
-             const product = item.product || {};
-             return (
-              <div key={item._id} style={{ display: "flex", alignItems: "center", marginBottom: "24px", paddingBottom: "24px", borderBottom: "0.5px solid var(--border)" }}>
-                {product.image && <img src={product.image} alt={product.name} style={{ width: "70px", height: "90px", objectFit: "cover", borderRadius: "8px", marginRight: "20px" }} />}
-                <div style={{ flex: 1 }}>
-                  <h5 style={{ margin: "0 0 6px 0", fontSize: "14px", fontWeight: 400 }}>{product.name || 'Product'}</h5>
-                  <p style={{ margin: 0, fontSize: "12px", color: "var(--text-secondary)" }}>Qty: {item.qty}</p>
-                </div>
-                <div style={{ fontWeight: "500", fontSize: "15px" }}>
-                  ₹{item.priceAtPurchase * item.qty}
-                </div>
-              </div>
-             );
-          })}
-        </div>
+      <div className="rule" />
 
-        <div style={{ marginTop: "8px", paddingTop: "24px", borderTop: "1px dashed var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0, fontSize: "13px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.15em" }}>Total Amount</h3>
-          <h2 style={{ fontFamily: "var(--font-display)", margin: 0, color: "var(--white)", fontSize: "36px", fontWeight: 400 }}>₹{total}</h2>
-        </div>
+      <div
+        className="gutter"
+        style={{
+          paddingTop: "36px",
+          paddingBottom: "80px",
+          display: "grid",
+          gap: "56px",
+          gridTemplateColumns: "1fr",
+          maxWidth: "1100px"
+        }}
+        id="checkout-grid"
+      >
+        {/* Delivery */}
+        <form onSubmit={handlePlaceOrder}>
+          <h2 className="label" style={{ color: "var(--paper-ash)", marginBottom: "26px" }}>
+            Delivery
+          </h2>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "26px", maxWidth: "480px" }}>
+            <div>
+              <label className="meta" htmlFor="ck-address" style={{ display: "block", marginBottom: "2px" }}>
+                Street address
+              </label>
+              <input
+                id="ck-address"
+                className="field"
+                type="text"
+                required
+                placeholder="Flat, building, street"
+                value={shippingAddress.address}
+                onChange={(e) => setShippingAddress({ ...shippingAddress, address: e.target.value })}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "24px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="meta" htmlFor="ck-city" style={{ display: "block", marginBottom: "2px" }}>
+                  City
+                </label>
+                <input
+                  id="ck-city"
+                  className="field"
+                  type="text"
+                  required
+                  placeholder="Mumbai"
+                  value={shippingAddress.city}
+                  onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="meta" htmlFor="ck-pin" style={{ display: "block", marginBottom: "2px" }}>
+                  Pincode
+                </label>
+                <input
+                  id="ck-pin"
+                  className="field"
+                  type="text"
+                  required
+                  placeholder="400001"
+                  value={shippingAddress.postalCode}
+                  onChange={(e) =>
+                    setShippingAddress({ ...shippingAddress, postalCode: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-bone" style={{ width: "100%", marginTop: "14px" }}>
+              Continue to payment
+            </button>
+          </div>
+        </form>
+
+        {/* Order */}
+        <section>
+          <h2 className="label" style={{ color: "var(--paper-ash)", marginBottom: "26px" }}>
+            Your order
+          </h2>
+
+          {cartItems.map((item) => {
+            const product = item.product || {};
+            return (
+              <div
+                key={item._id}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "18px",
+                  padding: "18px 0",
+                  borderBottom: "1px solid var(--paper-veil)"
+                }}
+              >
+                {product.image && (
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    style={{ width: "62px", height: "82px", objectFit: "cover", flexShrink: 0 }}
+                  />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: "var(--t-s)", marginBottom: "4px" }}>
+                    {product.name || "Product"}
+                  </p>
+                  <p className="meta">Quantity {item.qty}</p>
+                </div>
+                <p style={{ fontSize: "var(--t-s)" }}>
+                  ₹{(item.priceAtPurchase * item.qty).toLocaleString("en-IN")}
+                </p>
+              </div>
+            );
+          })}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              paddingTop: "22px"
+            }}
+          >
+            <span className="label" style={{ color: "var(--paper-ash)" }}>Total</span>
+            <span className="display display-m">₹{total.toLocaleString("en-IN")}</span>
+          </div>
+        </section>
       </div>
 
       {showPayment && (
-        <PaymentModal 
-          amount={total} 
-          onPay={processSecurePayment} 
-          onClose={() => setShowPayment(false)} 
+        <PaymentModal
+          amount={total}
+          onPay={processSecurePayment}
+          onClose={() => setShowPayment(false)}
         />
       )}
     </div>

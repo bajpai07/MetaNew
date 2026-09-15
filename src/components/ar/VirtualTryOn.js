@@ -108,7 +108,7 @@ export default function VirtualTryOn({ modelUrl = "/assets/models/dress.glb", ca
       const dataUrl = canvas2d.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = "My_MetaShop_Look.png";
+      a.download = "aiyaashi-look.png";
       a.click();
     } catch (err) {
       console.error("Capture Failed:", err);
@@ -143,10 +143,8 @@ export default function VirtualTryOn({ modelUrl = "/assets/models/dress.glb", ca
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 100, color: '#fff', backdropFilter: 'blur(10px)'
         }}>
-           <div style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.3)', borderTop: '4px solid #FF3F6C', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-           <style>{"@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }"}</style>
-           <h2 style={{ marginTop: '20px', letterSpacing: '2px', fontWeight: 'bold' }}>CALIBRATING AI...</h2>
-           <p style={{ color: '#aaa', marginTop: '10px' }}>Analyzing body keypoints and ambient lighting</p>
+           <h2 className="display display-m">Finding your proportions</h2>
+           <p className="label" style={{ color: 'var(--ash)', marginTop: '14px' }}>One moment</p>
         </div>
       )}
       {/* Video Background Layer */}
@@ -277,14 +275,15 @@ export default function VirtualTryOn({ modelUrl = "/assets/models/dress.glb", ca
             onClick={handleResetFit}
             style={{ padding: '10px 20px', background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(5px)', color: '#fff', border: '1px solid rgba(255,255,255,0.4)', borderRadius: '8px', cursor: 'pointer', pointerEvents: 'auto', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
           >
-            <span style={{ fontSize: '18px' }}>🔄</span> Reset Fit
+            Reset fit
           </button>
           
           <button 
             onClick={handleCapture}
-            style={{ padding: '12px 24px', background: '#FF3F6C', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', pointerEvents: 'auto', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(255,63,108,0.4)', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}
+            className="btn btn-primary"
+            style={{ pointerEvents: 'auto' }}
           >
-            <span style={{ fontSize: '20px' }}>📸</span> Capture
+            Capture
           </button>
         </div>
         {cameraError && (

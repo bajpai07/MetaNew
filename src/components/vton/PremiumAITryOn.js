@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { validatePose } from '../../utils/poseValidation';
+import { API_BASE } from '../../config/api';
 
 export default function PremiumAITryOn({ isOpen, onClose, product }) {
   const [userImage, setUserImage] = useState(null);
@@ -53,7 +54,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
       formData.append('humanImage', blob, 'human_user.jpg');
       formData.append('garmentImageUrl', product.image);
 
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/vton/generate`, 
+      const res = await axios.post(`${API_BASE}/api/vton/generate`, 
       formData, 
       { 
         timeout: 180000,
@@ -262,7 +263,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
                           }
                           const link = document.createElement('a');
                           link.href = imageUrl;
-                          link.download = `metashop-tryon-${Date.now()}.jpg`;
+                          link.download = `aiyaashi-look-${Date.now()}.jpg`;
                           link.target = '_blank';
                           document.body.appendChild(link);
                           link.click();

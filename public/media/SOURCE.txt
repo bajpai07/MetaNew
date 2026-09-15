@@ -1,0 +1,22 @@
+AIYAASHI hero.
+
+runway-01.mp4   A model walking the runway in a printed gown. 10s, 1366x720, 3.0MB.
+                https://www.pexels.com/video/a-woman-walking-down-the-runway-9512045/
+                Pexels Licence - free commercial use, no attribution required.
+
+runway-poster.jpg  Official still for the same clip, so first paint matches.
+
+Two earlier looks were removed on the client's note that they did not read as
+fashion: a model in a plain black dress who stays distant behind the foreground
+pampas for the whole take, and a walk through a rapeseed field that read as
+lifestyle rather than runway.
+
+HeroFilm is built to sequence any number of looks. Adding more is a matter of
+dropping files in here and extending the LOOKS array - no other change.
+
+runway-poster.jpg — regenerated 2026-09-14 as a still taken directly from
+runway-01.mp4 at t=5.0s. The previous poster was a tighter crop of the same
+scene, so the first painted frame sat closer than the film and the model's head
+landed behind the AIYAASHI masthead until the video took over — and stayed
+there permanently for anyone browsing with reduced motion. Same footage, same
+model, same grade; only the field of view now matches the clip.

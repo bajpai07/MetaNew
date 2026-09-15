@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Aiyaashi",
+  "name": "Aiyaashi",
+  "description": "Indulgence, on approval. See any piece worn on your own body before you decide.",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +21,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#14110F",
+  "background_color": "#14110F"
 }

@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_BASE } from '../config/api';
 
 const API = axios.create({
-  baseURL: `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api`, // ✅ IMPORTANT
+  baseURL: `${API_BASE}/api`, // ✅ IMPORTANT
 });
 
 API.interceptors.request.use((config) => {

@@ -1,30 +1,59 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
+import HeroFilm from "../components/HeroFilm";
+import SiteFooter from "../components/SiteFooter";
+import Wordmark from "../components/Wordmark";
 import { getProducts } from "../api/productService";
 import axios from "axios";
 import useDebounce from "../hooks/useDebounce";
-import { motion, AnimatePresence } from "framer-motion";
+import { API_BASE } from '../config/api';
+
+/**
+ * HOME — composed as chapters, not assembled from components.
+ *
+ * The scroll is the story: a campaign film, a held breath, three pieces set
+ * at unequal weight, a full-bleed garment, the Fitting Room offered as a
+ * service, a chapter where the colour comes entirely from cloth, then the
+ * collection and a quiet close.
+ *
+ * Two rules govern the page. No two chapters share a composition — scale,
+ * alignment, image weight and text placement all change from one to the next,
+ * because repetition is what makes a page read as a template. And every
+ * product name, price and description is real catalogue data; where a field
+ * does not exist the design does without it rather than inventing it.
+ *
+ * Three photographic registers, never mixed: campaign imagery is cloth and
+ * silhouette, product imagery is garments under the catalogue treatment, and
+ * the customer's own photograph gets the mat.
+ */
+
+// Campaign stills, chosen from a rendered contact sheet against one gate:
+// would this be believable in a fashion campaign? Everything that answered
+// "it would be believable in a catalogue" was cut — hanger shots, flat-lays,
+// blank-tee mockups and lifestyle photography all failed at that stage, which
+// is what the earlier set was almost entirely made of.
+const EDITORIAL_GARMENT =
+  "https://images.unsplash.com/photo-1685432531593-1afc8a152e5f?w=2000&q=85";
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?w=800&q=80";
+
+const FILTERS = ["All", "Women", "Men", "Kids"];
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const debouncedQuery = useDebounce(query, 300);
 
-  // Filters State
   const [category, setCategory] = useState(searchParams.get("category") || "All");
-  const [priceRange, setPriceRange] = useState([0, 10000]);
 
   useEffect(() => {
     const urlCat = searchParams.get("category");
-    if (urlCat && urlCat !== category) {
-      setCategory(urlCat);
-    } else if (!urlCat && category !== "All") {
-      setCategory("All");
-    }
+    if (urlCat && urlCat !== category) setCategory(urlCat);
+    else if (!urlCat && category !== "All") setCategory("All");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   useEffect(() => {
@@ -33,252 +62,367 @@ export default function Home() {
       try {
         let data;
         if (debouncedQuery.trim()) {
-          const res = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products/search?q=${encodeURIComponent(debouncedQuery)}`);
+          const res = await axios.get(
+            `${API_BASE}/api/products/search?q=${encodeURIComponent(debouncedQuery)}`
+          );
           data = res.data;
         } else {
-          data = await getProducts({
-            category: category === "All" ? "" : category,
-            minPrice: priceRange[0],
-            maxPrice: priceRange[1]
-          });
+          data = await getProducts({ category: category === "All" ? "" : category });
         }
 
-        const productArray = Array.isArray(data) ? data : (data.data || []);
-        const updated = productArray.map((p) => {
-          const baseP = Number(p.price || p.currentPrice || p.basePrice || 0);
-          return {
-            ...p,
-            price: baseP,
-            originalPrice: p.originalPrice || Math.round(baseP * 1.5),
-            image: p.image || p.imageUrl || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"
-          }
-        });
-        setProducts(updated);
+        const productArray = Array.isArray(data) ? data : data.data || [];
+        setProducts(
+          productArray.map((p) => {
+            const base = Number(p.price || p.currentPrice || p.basePrice || 0);
+            return {
+              ...p,
+              price: base,
+              originalPrice: p.originalPrice || Math.round(base * 1.5),
+              image: p.image || p.imageUrl || FALLBACK_IMAGE
+            };
+          })
+        );
       } catch (err) {
-        console.log("Failed to fetch products", err);
+        console.error("Failed to fetch products", err);
       } finally {
         setLoading(false);
       }
     };
     fetchProducts();
-  }, [debouncedQuery, category, priceRange]);
+  }, [debouncedQuery, category]);
+
+  const searching = Boolean(debouncedQuery.trim());
+  const browsing = searching || category !== "All";
+
+  // The first three pieces carry the featured chapter; the rest form the
+  // collection. When someone is searching or filtering they want a catalogue,
+  // not a campaign, so the editorial chapters step aside.
+  const featured = browsing ? [] : products.slice(0, 3);
+  const rest = featured.length ? products.slice(3) : products;
+
+  // How the catalogue is broken up. Someone who has filtered or searched wants
+  // a catalogue and nothing else, so they get one uninterrupted grid. Otherwise
+  // the interruptions are earned by length: a full-bleed garment once there are
+  // four pieces to carry it, and an ink band as well once there are nine — below
+  // that the page would be more interruption than collection.
+  // How the collection is composed.
+  //
+  // A filtered or searched view is a catalogue and gets one grid. The full
+  // collection is a campaign, and it is paced by scale rather than by repeating
+  // one row: a single piece at campaign size, then two large, then three, and
+  // between those a dark chapter, a pair set off the grid, and one piece given
+  // a page of its own.
+  //
+  // No grid block is ever longer than a single desktop row. Two rows of three
+  // in a row is where a collection starts to read as a result set — the eye
+  // learns the rhythm and stops looking at the clothes.
+  const blocks = [];
+  let at = 0;
+  const take = (n) => rest.slice(at, (at += n));
+
+  if (browsing || rest.length < 4) {
+    if (rest.length) blocks.push({ kind: "grid", items: rest });
+  } else {
+    blocks.push({ kind: "signature", product: take(1)[0] });
+    blocks.push({ kind: "pair", items: take(2) });
+
+    if (rest.length >= 10) {
+      blocks.push({ kind: "grid", items: take(3) });
+      blocks.push({ kind: "duo", items: take(2) });
+    }
+    if (rest.length >= 15) {
+      blocks.push({ kind: "grid", items: take(3) });
+    }
+    if (rest.length >= 10) {
+      blocks.push({ kind: "moment", product: take(1)[0] });
+    }
+    if (at < rest.length) {
+      blocks.push({ kind: "grid", items: rest.slice(at) });
+    }
+  }
+
+  const goTo = (id) => () =>
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div className="bg-[#0a0a0a] pb-6 font-body overflow-x-hidden text-white w-full min-h-screen">
-      {/* HERO SECTION */}
-      <div style={{
-        height: '100svh', width: '100%', position: 'relative', overflow: 'hidden', background: 'var(--black)'
-      }}>
-        {/* Background image */}
-        <motion.div
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: 'url(https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1080&q=80)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top'
-          }}
-        />
+    <div style={{ paddingBottom: "calc(var(--tab-h) + env(safe-area-inset-bottom))" }}>
+      <span
+        id="hero-sentinel"
+        aria-hidden="true"
+        style={{ position: "absolute", top: 0, width: "1px", height: "1px" }}
+      />
 
-        {/* Gradient overlay */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.3) 50%, rgba(10,10,10,0.1) 100%)'
-        }} />
+      {/* ───────────────────────── I. THE CAMPAIGN ───────────────────────── */}
+      <header className="hero">
+        <HeroFilm alt="A model walking the runway in a printed gown" />
+        <div className="hero-scrim hero-scrim-top" aria-hidden="true" />
+        <div className="hero-scrim hero-scrim-v" aria-hidden="true" />
 
-        {/* AI badge — top left */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          style={{
-            position: 'absolute', top: '72px', left: '20px',
-            display: 'flex', alignItems: 'center', gap: '7px',
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(232,57,90,0.8)',
-            borderRadius: '20px',
-            padding: '6px 14px'
-          }}>
-          <motion.div
-            animate={{ opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.6, repeat: Infinity }}
-            style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--rose)' }}
-          />
-          <span style={{ fontSize: '10px', letterSpacing: '0.15em', color: '#ff4d6d', fontWeight: 700 }}>
-            AI TRY-ON LIVE
-          </span>
-        </motion.div>
+        {/* No masthead down here any more. AIYAASHI now sits at the very top
+            of the screen, centred in the header, on this page and every other
+            — so the hero carries the film and the campaign line, nothing else,
+            and the name is never said twice on one screen. */}
+        <div className="hero-stage">
+          <div />
 
-        {/* Text content — bottom */}
-        <div style={{ position: 'absolute', bottom: '100px', left: '20px', right: '20px', textShadow: '0 4px 20px rgba(0,0,0,0.8)' }}>
-          <motion.p
-            style={{ fontSize: '10px', letterSpacing: '0.28em', color: '#fafaf8', marginBottom: '14px', fontWeight: 700, textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
-            NEW SEASON DROP
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }}
-            style={{
-              fontFamily: 'var(--font-display)', fontSize: 'clamp(38px, 10vw, 52px)', fontWeight: 500,
-              color: 'var(--white)', lineHeight: 1.08, letterSpacing: '-0.02em', marginBottom: '24px', textShadow: '0 4px 24px rgba(0,0,0,0.9)'
-            }}>
-            Wear it<br />before you<br /><em style={{ color: '#ff4d6d', fontStyle: 'italic', fontWeight: 600 }}>buy it.</em>
-          </motion.h1>
+          <div className="hero-foot">
+            <h1 className="hero-title">
+              Indulgence,
+              <br />
+              on approval.
+            </h1>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.6 }}
-            style={{ display: 'flex', gap: '12px', paddingLeft: '24px', paddingRight: '24px', paddingBottom: '36px' }}>
-            <motion.button
-              onClick={() => document.getElementById('ai')?.scrollIntoView({ behavior: 'smooth' })}
-              whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.02 }}
-              style={{
-                flex: 1, background: 'linear-gradient(135deg, #E8395A, #c42d4a)', color: 'var(--white)', border: 'none', borderRadius: '14px',
-                padding: '17px 28px', fontSize: '11px', letterSpacing: '0.2em', fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer',
-                boxShadow: '0 8px 30px rgba(232,57,90,0.4)', textShadow: 'none'
-              }}>
-              ✦ SEE THIS ON YOU
-            </motion.button>
-            <motion.button
-              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              whileTap={{ scale: 0.96 }}
-              style={{
-                padding: '17px 22px', background: 'rgba(250,250,248,0.08)', backdropFilter: 'blur(12px)',
-                color: 'var(--white)', border: '0.5px solid rgba(255,255,255,0.2)', borderRadius: '14px', fontSize: '11px',
-                letterSpacing: '0.2em', fontFamily: 'var(--font-body)', cursor: 'pointer'
-              }}>
-              DISCOVER
-            </motion.button>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* STRIP */}
-        <div style={{ overflow: 'hidden', background: 'var(--surface)', borderTop: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)', padding: '12px 0' }}>
-          <div className="marquee-track">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} style={{ display: 'flex' }}>
-                {['New Arrivals', 'AI Virtual Try-On', 'Free Delivery ₹499+', 'Easy 14 Day Returns', 'Pay on Delivery', 'First in India'].map((item, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', letterSpacing: '0.2em', color: 'var(--text-2)', padding: '0 20px', whiteSpace: 'nowrap', textTransform: 'uppercase', fontWeight: 600 }}>{item}</span>
-                  <span style={{ color: 'var(--rose)' }}>✦</span>
-                </div>
-              ))}
+            <div className="hero-actions">
+              <button className="textlink" onClick={goTo("collection")}>
+                Explore the Collection
+              </button>
+              <button className="head-link" onClick={goTo("fitting")} style={{ minHeight: "44px" }}>
+                Try It On
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <main className="max-w-screen-xl mx-auto w-full">
-        {/* FILTERS */}
-        <div style={{
-          display: 'flex', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-          padding: '0 20px', gap: '4px', borderBottom: '0.5px solid rgba(255,255,255,0.07)', position: 'sticky',
-          top: '56px', background: 'rgba(10,10,10,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', zIndex: 90, height: '52px'
-        }}>
-          {["All", "Men", "Women", "Kids"].map((cat) => (
-            <motion.button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              whileTap={{ scale: 0.96 }}
-              style={{
-                padding: '16px 22px', background: 'none', border: 'none',
-                borderBottom: category === cat ? '2.5px solid #E8395A' : '2.5px solid transparent',
-                color: category === cat ? '#fafaf8' : 'rgba(255,255,255,0.8)',
-                fontSize: '11px', letterSpacing: '0.16em', fontFamily: 'var(--font-body)',
-                fontWeight: category === cat ? 600 : 500, cursor: 'pointer', whiteSpace: 'nowrap',
-                flexShrink: 0, transition: 'color 0.2s, border-color 0.2s'
-              }}
-            >
-              {cat.toUpperCase()}
-            </motion.button>
-          ))}
-        </div>
-
-        {/* PRODUCT GRID */}
-        <section id="products" className="py-12 px-4 md:px-8 max-w-screen-xl mx-auto w-full bg-[#0a0a0a]">
-          <div style={{ 
-            padding: '28px 24px 20px',
-            borderBottom: '0.5px solid rgba(255,255,255,0.06)'
-          }}>
-            <p style={{
-              fontSize: '10px',
-              letterSpacing: '0.28em',
-              color: '#E8395A',
-              marginBottom: '10px',
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 500
-            }}>
-              ✦ HANDPICKED FOR YOU
-            </p>
-            <h2 style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(28px, 7vw, 36px)',
-              fontWeight: 300,
-              color: '#fafaf8',
-              lineHeight: 1.15,
-              letterSpacing: '-0.01em'
-            }}>
-              New Arrivals
-            </h2>
           </div>
-          {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border)' }}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} style={{ background: 'var(--black)', padding: '0 0 16px' }}>
-                  <div className="skeleton" style={{ aspectRatio: '3/4', width: '100%' }} />
-                  <div style={{ padding: '12px 4px 0' }}>
-                    <div className="skeleton" style={{ height: '10px', width: '60%', marginBottom: '8px' }} />
-                    <div className="skeleton" style={{ height: '13px', width: '85%', marginBottom: '8px' }} />
-                    <div className="skeleton" style={{ height: '14px', width: '40%' }} />
-                  </div>
-                </div>
-              ))}
-            </div>) : products.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', background: '#0a0a0a' }}>
-                {products.map((p, i) => (
-                  <React.Fragment key={p._id}>
-                    <div style={{ borderRight: i % 2 === 0 ? '0.5px solid rgba(255,255,255,0.06)' : 'none', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
-                      <ProductCard product={p} index={i} />
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
-            ) : null}
-          {/* NO RESULTS */}
-          {!loading && products.length === 0 && (
-            <div className="text-center py-20">
-              <h3 className="text-xl font-bold text-white/50">No products found</h3>
-            </div>
-          )}
-        </section>
+        </div>
+      </header>
 
-        {/* AI SECTION */}
-        <section id="ai" className="m-3 mt-8 bg-[#0a0a0a] rounded-[24px] text-white relative overflow-hidden shadow-2xl" style={{ padding: '40px 28px' }}>
-          <div className="relative z-10 flex flex-col items-start md:items-center md:text-center">
-            <div className="flex items-center gap-2" style={{ marginBottom: '14px', letterSpacing: '0.28em' }}>
-              <span className="w-4 h-[1px] bg-rose"></span>
-              <span className="text-[9px] text-rose uppercase font-bold">India First</span>
-            </div>
-            <h2 className="font-display italic font-semibold text-white" style={{ fontSize: 'clamp(26px, 6.5vw, 32px)', lineHeight: 1.25, marginBottom: '14px' }}>
-              The Fitting Room<br />of the Future
+      {/* ───────────────────────── II. THE BREATH ───────────────────────── */}
+      {!browsing && (
+        <section className="chapter-breath gutter">
+          <div style={{ width: "min(100%, 1440px)", marginInline: "auto" }}>
+            <h2 className="display display-l" style={{ maxWidth: "15ch", marginBottom: "24px" }}>
+              Cloth first, everything else after.
             </h2>
-            <p className="text-white/60 max-w-md font-body" style={{ fontSize: '14px', lineHeight: 1.75, marginBottom: '24px', letterSpacing: '0.02em' }}>
-              Upload your exact photo. See perfectly how any outfit looks on your body — before you spend a single rupee.
+            <p className="lede measure" style={{ maxWidth: "36ch" }}>
+              A short collection, chosen slowly — and every piece in it can be
+              seen on your own body before you commit.
             </p>
-            <button
-              onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-rose text-white w-full md:w-auto md:px-10 flex items-center justify-center font-bold uppercase rounded-xl transition-transform active:scale-95"
-              style={{ padding: '15px 28px', letterSpacing: '0.18em', fontSize: '11px' }}
-            >
-              Try It Now
+          </div>
+        </section>
+      )}
+
+      {/* ──────────────────── III. THREE PIECES, UNEQUAL ──────────────────── */}
+      {featured.length > 0 && (
+        <section className="gutter" style={{ paddingBottom: "clamp(80px, 12vh, 150px)" }}>
+          <div style={{ width: "min(100%, 1440px)", marginInline: "auto" }}>
+            <div className="feature-set">
+              {featured.map((p, i) => (
+                <ProductCard key={p._id} product={p} scale={i === 0 ? "feature" : "quiet"} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─────────────────── IV. FULL BLEED — THE GARMENT ─────────────────── */}
+      {!browsing && (
+        <section className="chapter-bleed">
+          <img src={EDITORIAL_GARMENT} alt="A model in black tailoring on a runway, shot in black and white" loading="lazy" decoding="async" />
+          <div className="chapter-bleed-copy gutter">
+            <h2 className="display display-l" style={{ marginBottom: "14px" }}>
+              The new silhouette
+            </h2>
+            <p className="meta" style={{ marginBottom: "26px", maxWidth: "26ch" }}>
+              Relaxed structure. Natural movement.
+            </p>
+            <button className="textlink" onClick={goTo("collection")}>
+              Explore
             </button>
           </div>
-          {/* Subtle Glows */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-rose/10 rounded-full blur-[80px] pointer-events-none"></div>
         </section>
-      </main>
+      )}
+
+      {/* ────────────────────── V. THE FITTING ROOM ────────────────────── */}
+      {/* This chapter used to hold an empty bone frame labelled "Your
+          photograph". The idea was that the only honest image here is the one
+          you have not uploaded yet — but on the page it read as a placeholder
+          nobody had finished, which is worse than saying nothing. The chapter
+          now carries type alone: the offer on the left, the terms and the way
+          in on the right. The mat itself is untouched and still does its real
+          job inside the fitting room. */}
+      {!browsing && (
+        <section id="fitting" className="chapter-fitting gutter">
+          <div className="chapter-fitting-inner">
+            <h2 className="display display-l chapter-fitting-title">
+              See how it feels before you wear it.
+            </h2>
+
+            <div className="chapter-fitting-side">
+              <p className="lede">
+                Upload one photograph and any piece in the collection is shown
+                on your own body, in your own proportions.
+              </p>
+              <p className="meta">
+                It is never shown to anyone else, and it is deleted within
+                twenty-four hours.
+              </p>
+              <button className="textlink" onClick={goTo("collection")}>
+                Choose a piece
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ───────────────────────── VII. THE CATALOGUE ───────────────────────── */}
+      {/* Set on bone. Everything above this point is a dark campaign; the
+          catalogue is where you actually look at clothes, and garments read
+          better against paper than against ink. It also stops the page being
+          black from top to bottom.
+
+          It is not one grid. A block of pieces, one garment at full bleed,
+          another block, and — when the collection is long enough to earn it —
+          an ink band before the last block. The interruptions are what stop a
+          catalogue reading as a result set; the thresholds are what stop them
+          reading as filler when there are only a few pieces to show. */}
+      <section id="collection" className="on-paper catalogue">
+        <header className="catalogue-intro cat-gutter">
+          <div className="catalogue-masthead">
+            <h2 className="display catalogue-title">
+              {searching ? `“${debouncedQuery.trim()}”` : category === "All" ? "The collection" : category}
+            </h2>
+            {!searching && (
+              <p className="catalogue-lede">
+                A short season, cut from cloth chosen before anything was designed.
+              </p>
+            )}
+          </div>
+
+          <div className="catalogue-controls">
+            {!searching && (
+              <p className="catalogue-count">
+                {rest.length} {rest.length === 1 ? "piece" : "pieces"}
+              </p>
+            )}
+            <nav className="catalogue-filters" aria-label="Filter by category">
+              {FILTERS.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`catalogue-filter${category === cat ? " is-on" : ""}`}
+                  aria-current={category === cat ? "true" : undefined}
+                >
+                  {cat}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </header>
+
+        {loading ? (
+          <div className="catalogue-grid cat-gutter">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="loading-block" style={{ aspectRatio: "4/5", width: "100%" }} />
+            ))}
+          </div>
+        ) : rest.length > 0 ? (
+          <>
+            {blocks.map((block, i) => {
+              // The signature look. One real piece from the collection, at a
+              // scale nothing else on the page is given, before the catalogue
+              // begins. It is the answer to "what is Aiyaashi" — so it is a
+              // garment, photographed, not a slogan over a stock image.
+              if (block.kind === "signature") {
+                return (
+                  <Link key={`s${i}`} to={`/products/${block.product._id}`} className="catalogue-signature">
+                    <img src={block.product.image} alt={block.product.name} decoding="async" />
+                    <div className="catalogue-signature-copy cat-gutter">
+                      <p className="signature-label">The signature look</p>
+                      <p className="display signature-name">{block.product.name}</p>
+                      <p className="signature-price">
+                        &#8377;{Number(block.product.price || 0).toLocaleString("en-IN")}
+                      </p>
+                      <span className="textlink">View the piece</span>
+                    </div>
+                  </Link>
+                );
+              }
+
+              // Two pieces off the grid: one at twice the width, one dropped
+              // below it. The measure underneath is the same three columns the
+              // rest of the page uses, so it reads as a decision rather than a
+              // wobble.
+              // Two pieces at twice the width of the catalogue, directly under
+              // the signature. Without it the page fell from one image at
+              // campaign size straight to a row of three, and the drop read as
+              // the editorial ending and the shop beginning.
+              if (block.kind === "pair") {
+                return (
+                  <div key={`p${i}`} className="catalogue-pair cat-gutter">
+                    {block.items.map((p) => (
+                      <ProductCard key={p._id} product={p} />
+                    ))}
+                  </div>
+                );
+              }
+
+              if (block.kind === "duo") {
+                return (
+                  <div key={`d${i}`} className="catalogue-duo cat-gutter">
+                    {block.items.map((p) => (
+                      <ProductCard key={p._id} product={p} />
+                    ))}
+                  </div>
+                );
+              }
+
+              if (block.kind === "grid") {
+                return (
+                  <div key={`g${i}`} className="catalogue-grid cat-gutter">
+                    {block.items.map((p) => (
+                      <ProductCard key={p._id} product={p} />
+                    ))}
+                  </div>
+                );
+              }
+
+              // One garment at full width, before the grid can start reading
+              // as a spreadsheet. A real piece from the catalogue, not a stock
+              // campaign shot.
+              if (block.kind === "moment") {
+                return (
+                  <Link key={`m${i}`} to={`/products/${block.product._id}`} className="catalogue-moment">
+                    <div className="catalogue-moment-figure">
+                      <img src={block.product.image} alt={block.product.name} loading="lazy" decoding="async" />
+                    </div>
+                    <div className="catalogue-moment-copy">
+                      <p className="catalogue-moment-eyebrow">From the collection</p>
+                      <div className="catalogue-moment-foot">
+                        <p className="display catalogue-moment-name">{block.product.name}</p>
+                        <p className="catalogue-moment-price">
+                          &#8377;{Number(block.product.price || 0).toLocaleString("en-IN")}
+                        </p>
+                        <span className="textlink">View the piece</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              }
+
+              return null;
+            })}
+          </>
+        ) : (
+          <div className="cat-gutter" style={{ padding: "80px 0 40px" }}>
+            <p className="display display-m" style={{ marginBottom: "12px" }}>
+              Nothing matches that search
+            </p>
+            <p className="meta measure">Try a different word, or browse the full collection.</p>
+          </div>
+        )}
+      </section>
+
+      {/* ───────────────────── VIII. THE CLOSING MOMENT ───────────────────── */}
+      {!browsing && (
+        <section className="chapter-close gutter">
+          <Wordmark variant="display" className="close-mark" />
+          <p className="display close-line">Worn before it&rsquo;s bought.</p>
+          <button className="textlink" onClick={goTo("fitting")}>
+            Try it on
+          </button>
+        </section>
+      )}
+
+      {/* ───────────────────────── IX. THE FOOTER ───────────────────────── */}
+      <SiteFooter />
     </div>
   );
 }

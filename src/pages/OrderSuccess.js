@@ -1,7 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE } from '../config/api';
 
+/**
+ * The receipt. Set on paper like the checkout that produced it, and read like
+ * a document rather than a celebration — no ✅, no exclamation mark, no
+ * centred confetti layout. A house confirms an order; it does not congratulate
+ * you for placing one.
+ */
 export default function OrderSuccess() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -9,60 +16,129 @@ export default function OrderSuccess() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Calling the API directly to bypass the token header requirement for guest flows
-    axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/orders/${id}`)
-      .then(res => {
-          setOrder(res.data);
-          setLoading(false);
+    axios
+      .get(`${API_BASE}/api/orders/${id}`)
+      .then((res) => {
+        setOrder(res.data);
+        setLoading(false);
       })
-      .catch(err => {
-          console.error(err);
-          setLoading(false);
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
       });
   }, [id]);
 
   if (loading) {
-     return <div style={{ textAlign: "center", padding: "100px" }}><h2>Loading your order details...</h2></div>;
+    return (
+      <div className="on-paper page gutter" style={{ paddingTop: "calc(var(--nav-h) + 96px)" }}>
+        <p className="label" style={{ color: "var(--paper-ash)" }}>Loading</p>
+      </div>
+    );
   }
 
   if (!order) {
-     return <div style={{ textAlign: "center", padding: "100px" }}><h2>Order not found</h2></div>;
+    return (
+      <div className="on-paper page gutter" style={{ paddingTop: "calc(var(--nav-h) + 96px)" }}>
+        <h1 className="display display-l" style={{ marginBottom: "14px" }}>
+          We can't find that order
+        </h1>
+        <p className="meta measure" style={{ marginBottom: "36px" }}>
+          The reference may be wrong, or the order may belong to another account.
+        </p>
+        <button className="textlink" onClick={() => navigate("/")}>
+          Browse the collection
+        </button>
+      </div>
+    );
   }
 
+  const rows = [
+    ["Order", order._id],
+    order.transactionId ? ["Transaction", order.transactionId] : null,
+    ["Placed", new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })],
+    ["Payment", order.paymentMethod || "Virtual gateway"],
+    order.shippingAddress
+      ? ["Delivering to", `${order.shippingAddress.city}, ${order.shippingAddress.postalCode}`]
+      : null
+  ].filter(Boolean);
+
   return (
-    <div style={{ maxWidth: "800px", margin: "40px auto", padding: "40px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", textAlign: "center" }}>
-      <div style={{ fontSize: "60px", color: "#20B2AA", marginBottom: "20px" }}>✅</div>
-      <h1 style={{ color: "#282c3f", marginBottom: "10px" }}>Order Placed Successfully!</h1>
-      <p style={{ color: "#666", fontSize: "16px", marginBottom: "30px" }}>Thank you for shopping with MetaShop. Your order is confirmed.</p>
-      
-      <div style={{ background: "#f9f9f9", padding: "20px", borderRadius: "8px", textAlign: "left", marginBottom: "30px" }}>
-        <p style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#666" }}>Order ID: <strong style={{ color: "#282c3f" }}>{order._id}</strong></p>
-        {order.transactionId && (
-          <p style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#666" }}>Transaction ID: <strong style={{ color: "#20B2AA" }}>{order.transactionId}</strong></p>
-        )}
-        <p style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#666" }}>Placed On: <strong style={{ color: "#282c3f" }}>{new Date(order.createdAt).toLocaleDateString()}</strong></p>
-        <p style={{ margin: "0 0 10px 0", fontSize: "14px", color: "#666" }}>Payment Method: <strong style={{ color: "#282c3f" }}>{order.paymentMethod || 'Virtual Gateway'}</strong></p>
-        <p style={{ margin: "0 0 0 0", fontSize: "14px", color: "#666" }}>Delivering to: <strong style={{ color: "#282c3f" }}>{order.shippingAddress?.city}, {order.shippingAddress?.postalCode}</strong></p>
+    <div className="on-paper page">
+      <div className="gutter" style={{ paddingTop: "34px", paddingBottom: "24px", maxWidth: "760px" }}>
+        <h1 className="display display-l" style={{ marginBottom: "14px" }}>
+          Your order is placed
+        </h1>
+        <p className="meta measure">
+          We've sent the details to your email. You'll hear from us again when
+          it ships.
+        </p>
       </div>
 
-      <div style={{ textAlign: "left" }}>
-        <h3 style={{ borderBottom: "1px solid #eee", paddingBottom: "10px", marginBottom: "15px" }}>Order Items</h3>
-        {order.orderItems.map(item => (
-          <div key={item._id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px", paddingBottom: "10px", borderBottom: "1px solid #f9f9f9" }}>
-             <span>{item.name} <span style={{ color: "#888" }}>× {item.qty}</span></span>
-             <span style={{ fontWeight: "bold" }}>₹{item.price * item.qty}</span>
+      <div className="rule" />
+
+      <div className="gutter" style={{ paddingTop: "30px", paddingBottom: "80px", maxWidth: "760px" }}>
+        <dl style={{ marginBottom: "44px" }}>
+          {rows.map(([label, value]) => (
+            <div
+              key={label}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "24px",
+                padding: "13px 0",
+                borderBottom: "1px solid var(--paper-veil)",
+                fontSize: "var(--t-s)"
+              }}
+            >
+              <dt style={{ color: "var(--paper-ash)" }}>{label}</dt>
+              <dd style={{ textAlign: "right", wordBreak: "break-all" }}>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <h2 className="label" style={{ color: "var(--paper-ash)", marginBottom: "18px" }}>
+          Pieces
+        </h2>
+
+        {order.orderItems.map((item) => (
+          <div
+            key={item._id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "24px",
+              padding: "13px 0",
+              borderBottom: "1px solid var(--paper-veil)",
+              fontSize: "var(--t-s)"
+            }}
+          >
+            <span>
+              {item.name}
+              <span style={{ color: "var(--paper-ash)" }}> × {item.qty}</span>
+            </span>
+            <span>₹{(item.price * item.qty).toLocaleString("en-IN")}</span>
           </div>
         ))}
-        
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", paddingTop: "20px", borderTop: "2px dashed #ccc" }}>
-           <h3 style={{ margin: 0 }}>Total Paid:</h3>
-           <h2 style={{ margin: 0, color: "#111" }}>₹{order.totalPrice}</h2>
-        </div>
-      </div>
 
-      <button onClick={() => navigate("/")} style={{ marginTop: "40px", padding: "15px 40px", background: "#FF3F6C", color: "white", border: "none", borderRadius: "4px", fontSize: "16px", fontWeight: "bold", cursor: "pointer" }}>
-        CONTINUE SHOPPING
-      </button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            paddingTop: "24px",
+            marginBottom: "48px"
+          }}
+        >
+          <span className="label" style={{ color: "var(--paper-ash)" }}>Paid</span>
+          <span className="display display-m">
+            ₹{Number(order.totalPrice).toLocaleString("en-IN")}
+          </span>
+        </div>
+
+        <button className="textlink" onClick={() => navigate("/")}>
+          Browse the collection
+        </button>
+      </div>
     </div>
   );
 }

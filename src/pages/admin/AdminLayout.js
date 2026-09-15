@@ -1,76 +1,87 @@
 import { Outlet, Navigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import Wordmark from "../../components/Wordmark";
 
+/**
+ * Administration stays utilitarian — dense, tabular, quick to scan — but it is
+ * paperwork, so it sits on the same bone ground as checkout and uses the same
+ * type and hairlines. Previously it was its own grey-and-pink world with emoji
+ * navigation; nothing about it now looks bolted on.
+ */
 export default function AdminLayout() {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <div style={{ padding: "50px", textAlign: "center" }}>Checking Permissions...</div>;
+  if (loading) {
+    return (
+      <div className="on-paper page gutter" style={{ paddingTop: "calc(var(--nav-h) + 96px)" }}>
+        <p className="label" style={{ color: "var(--paper-ash)" }}>Checking permissions</p>
+      </div>
+    );
+  }
 
   if (!user || user.role !== "admin") {
     return <Navigate to="/" replace />;
   }
 
-  const isActive = (path) => location.pathname === path;
+  const links = [
+    ["Overview", "/admin"],
+    ["Inventory", "/admin/inventory"],
+    ["Orders", "/admin/orders"]
+  ];
 
   return (
-    <div style={{ display: "flex", minHeight: "calc(100vh - 80px)", background: "#f5f5f6" }}>
-      {/* SIDEBAR */}
-      <aside style={{ width: "260px", background: "#fff", borderRight: "1px solid #eaeaec", padding: "30px 20px" }}>
-        <h2 style={{ fontSize: "16px", color: "#282c3f", marginBottom: "30px", textTransform: "uppercase", letterSpacing: "1px" }}>
-          Admin Panel
-        </h2>
-        
-        <nav style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <Link 
-            to="/admin" 
-            style={{ 
-              padding: "12px 15px", 
-              textDecoration: "none", 
-              color: isActive("/admin") ? "#FF3F6C" : "#535766", 
-              background: isActive("/admin") ? "#FFF0F4" : "transparent",
-              borderRadius: "4px",
-              fontWeight: isActive("/admin") ? "bold" : "600",
-              display: "flex", alignItems: "center", gap: "10px"
-            }}
-          >
-            📊 Overview
-          </Link>
-          
-          <Link 
-            to="/admin/inventory" 
-            style={{ 
-              padding: "12px 15px", 
-              textDecoration: "none", 
-              color: isActive("/admin/inventory") ? "#FF3F6C" : "#535766", 
-              background: isActive("/admin/inventory") ? "#FFF0F4" : "transparent",
-              borderRadius: "4px",
-              fontWeight: isActive("/admin/inventory") ? "bold" : "600",
-              display: "flex", alignItems: "center", gap: "10px"
-            }}
-          >
-            📦 Inventory
-          </Link>
+    <div className="on-paper page" style={{ display: "flex", flexDirection: "column" }}>
+      <div
+        className="gutter"
+        style={{
+          paddingTop: "30px",
+          paddingBottom: "18px",
+          display: "flex",
+          alignItems: "baseline",
+          gap: "20px",
+          flexWrap: "wrap"
+        }}
+      >
+        <Wordmark size={16} />
+        <span className="label" style={{ color: "var(--paper-ash)" }}>Administration</span>
+      </div>
 
-          <Link 
-            to="/admin/orders" 
-            style={{ 
-              padding: "12px 15px", 
-              textDecoration: "none", 
-              color: isActive("/admin/orders") ? "#FF3F6C" : "#535766", 
-              background: isActive("/admin/orders") ? "#FFF0F4" : "transparent",
-              borderRadius: "4px",
-              fontWeight: isActive("/admin/orders") ? "bold" : "600",
-              display: "flex", alignItems: "center", gap: "10px"
-            }}
-          >
-            🛒 Order Logs
-          </Link>
-        </nav>
-      </aside>
+      <nav
+        className="gutter"
+        style={{
+          display: "flex",
+          gap: "26px",
+          borderBottom: "1px solid var(--paper-veil)",
+          overflowX: "auto"
+        }}
+      >
+        {links.map(([label, path]) => {
+          const active = location.pathname === path;
+          return (
+            <Link
+              key={path}
+              to={path}
+              className="label"
+              style={{
+                whiteSpace: "nowrap",
+                minHeight: "48px",
+                display: "flex",
+                alignItems: "center",
+                color: active ? "var(--paper-ink)" : "var(--paper-ash)",
+                borderBottom: active
+                  ? "1px solid var(--paper-ink)"
+                  : "1px solid transparent",
+                marginBottom: "-1px"
+              }}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      {/* DASHBOARD CONTENT AREA */}
-      <main style={{ flex: 1, padding: "40px", overflowY: "auto" }}>
+      <main className="gutter" style={{ paddingTop: "36px", paddingBottom: "80px", flex: 1 }}>
         <Outlet />
       </main>
     </div>

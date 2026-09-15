@@ -19,7 +19,6 @@ class TextureManager {
       this.loader.load(
         textureUrl,
         (texture) => {
-          console.log(`✅ Texture loaded: ${textureUrl}`);
           this.cache.set(cacheKey, texture);
           resolve(texture);
         },

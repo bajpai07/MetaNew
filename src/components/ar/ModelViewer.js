@@ -15,7 +15,7 @@ export default function ModelViewer({ modelUrl }) {
   useEffect(() => {
     const viewer = viewerRef.current;
     if (viewer) {
-      const handleLoad = () => console.log("🚀 model-viewer: Model Loaded Successfully", finalModelUrl);
+      const handleLoad = () => {};
       const handleError = (e) => console.error("❌ model-viewer: Failed to load model", finalModelUrl, e);
       
       viewer.addEventListener('load', handleLoad);

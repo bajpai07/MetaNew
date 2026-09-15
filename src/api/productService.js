@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_BASE } from '../config/api';
 
-const API_URL = `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products`;
+const API_URL = `${API_BASE}/api/products`;
 
 export const getProducts = async (filters = {}) => {
     try {
@@ -16,7 +17,6 @@ export const getProducts = async (filters = {}) => {
         const url = queryString ? `${API_URL}?${queryString}` : API_URL;
 
         const response = await axios.get(url);
-        console.log(`🌐 [API SERVICE] GET /api/products - Status Code: ${response.status}`);
         return response.data;
     } catch (error) {
         console.error("Error fetching products:", error);

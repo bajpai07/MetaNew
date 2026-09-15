@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getProducts } from "../../api/productService";
 import toast from "react-hot-toast";
+import { Close } from "../../components/Marks";
+import { API_BASE } from '../../config/api';
 
 export default function AdminInventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: "",
     category: "Men",
@@ -31,13 +33,11 @@ export default function AdminInventory() {
     fetchCatalog();
   }, []);
 
-  if (loading) return <div>Loading Global Catalog...</div>;
-
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      
+
       const payload = {
         name: formData.name,
         category: formData.category,
@@ -45,59 +45,91 @@ export default function AdminInventory() {
         model3dUrl: formData.modelUrl,
         basePrice: Number(formData.price),
         stock: Number(formData.stock),
-        description: "Premium product added via Admin Terminal."
+        description: "Added from the administration panel."
       };
 
-      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:4000'}/api/products`, payload, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      toast.success("Product successfully pushed to Catalog!");
+      await axios.post(
+        `${API_BASE}/api/products`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Added to the catalogue");
       setIsModalOpen(false);
-      
-      // refresh catalog
+
       const data = await getProducts();
       setProducts(data);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add product");
+      toast.error(err.response?.data?.message || "Couldn't add that piece");
     }
   };
 
+  if (loading) {
+    return <p className="label" style={{ color: "var(--paper-ash)" }}>Loading catalogue</p>;
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", borderBottom: "1px solid #eaeaec", paddingBottom: "15px" }}>
-        <h1 style={{ fontSize: "24px", color: "#282c3f", margin: 0 }}>Product Inventory</h1>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          style={{ background: "#FF3F6C", color: "white", border: "none", padding: "10px 20px", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}
-        >
-          + Add New Product
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: "20px",
+          marginBottom: "32px",
+          flexWrap: "wrap"
+        }}
+      >
+        <h1 className="display display-l">Inventory</h1>
+        <button onClick={() => setIsModalOpen(true)} className="textlink">
+          Add a piece
         </button>
       </div>
 
-      <div style={{ background: "#fff", borderRadius: "8px", boxShadow: "0 2px 10px rgba(0,0,0,0.03)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead style={{ background: "#f9f9f9", borderBottom: "1px solid #eaeaec" }}>
-            <tr>
-              <th style={{ padding: "15px", textAlign: "left", fontSize: "12px", color: "#7e818c", textTransform: "uppercase" }}>Visual</th>
-              <th style={{ padding: "15px", textAlign: "left", fontSize: "12px", color: "#7e818c", textTransform: "uppercase" }}>Title</th>
-              <th style={{ padding: "15px", textAlign: "left", fontSize: "12px", color: "#7e818c", textTransform: "uppercase" }}>Category</th>
-              <th style={{ padding: "15px", textAlign: "left", fontSize: "12px", color: "#7e818c", textTransform: "uppercase" }}>Price</th>
-              <th style={{ padding: "15px", textAlign: "right", fontSize: "12px", color: "#7e818c", textTransform: "uppercase" }}>Actions</th>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "560px" }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--paper-veil)" }}>
+              {["", "Piece", "Category", "Price", ""].map((h, i) => (
+                <th
+                  key={i}
+                  className="label"
+                  style={{
+                    textAlign: i === 4 ? "right" : "left",
+                    color: "var(--paper-ash)",
+                    padding: "0 12px 14px 0",
+                    fontWeight: 500
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {products.map(p => (
-              <tr key={p._id} style={{ borderBottom: "1px solid #f2f2f2" }}>
-                <td style={{ padding: "15px" }}>
-                  <img src={p.image} alt={p.name} style={{ width: "40px", height: "50px", objectFit: "cover", borderRadius: "4px" }} />
+            {products.map((p) => (
+              <tr key={p._id} style={{ borderBottom: "1px solid var(--paper-veil)" }}>
+                <td style={{ padding: "14px 12px 14px 0", width: "52px" }}>
+                  <img
+                    src={p.image}
+                    alt=""
+                    style={{ width: "38px", height: "50px", objectFit: "cover" }}
+                  />
                 </td>
-                <td style={{ padding: "15px", fontWeight: "600", color: "#282c3f" }}>{p.name}</td>
-                <td style={{ padding: "15px", color: "#535766" }}>{p.category}</td>
-                <td style={{ padding: "15px", fontWeight: "bold", color: "#FF3F6C" }}>₹{p.price}</td>
-                <td style={{ padding: "15px", textAlign: "right" }}>
-                  <button style={{ background: "transparent", border: "1px solid #eaeaec", padding: "6px 12px", borderRadius: "4px", cursor: "pointer", marginRight: "10px", fontSize: "12px" }}>Edit</button>
-                  <button style={{ background: "#fff0f4", color: "#FF3F6C", border: "none", padding: "6px 12px", borderRadius: "4px", cursor: "pointer", fontSize: "12px", fontWeight: "bold" }}>Delete</button>
+                <td style={{ padding: "14px 12px 14px 0", fontSize: "var(--t-s)" }}>{p.name}</td>
+                <td style={{ padding: "14px 12px 14px 0", fontSize: "var(--t-s)", color: "var(--paper-ash)" }}>
+                  {p.category}
+                </td>
+                <td style={{ padding: "14px 12px 14px 0", fontSize: "var(--t-s)" }}>
+                  ₹{Number(p.price || 0).toLocaleString("en-IN")}
+                </td>
+                <td style={{ padding: "14px 0", textAlign: "right", whiteSpace: "nowrap" }}>
+                  <button className="label" style={{ color: "var(--paper-ash)", marginRight: "18px", minHeight: "44px" }}>
+                    Edit
+                  </button>
+                  <button className="label" style={{ color: "var(--paper-ash)", minHeight: "44px" }}>
+                    Remove
+                  </button>
                 </td>
               </tr>
             ))}
@@ -106,33 +138,125 @@ export default function AdminInventory() {
       </div>
 
       {isModalOpen && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
-          <div style={{ background: "#fff", padding: "30px", borderRadius: "8px", width: "400px", maxWidth: "90%" }}>
-            <h2 style={{ fontSize: "18px", marginBottom: "20px", borderBottom: "1px solid #eaeaec", paddingBottom: "10px" }}>Add Product to Catalog</h2>
-            
-            <form onSubmit={handleAddSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              <input required type="text" placeholder="Product Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} />
-              
-              <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }}>
-                <option value="Men">Men</option>
-                <option value="Women">Women</option>
-                <option value="Kids">Kids</option>
-                <option value="Beauty">Beauty</option>
-              </select>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(14,12,11,0.78)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            zIndex: 1000
+          }}
+        >
+          <div
+            className="on-paper"
+            style={{ width: "100%", maxWidth: "440px", padding: "34px 32px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}
+          >
+            <button
+              onClick={() => setIsModalOpen(false)}
+              aria-label="Close"
+              style={{ position: "absolute", top: "20px", right: "20px", padding: "10px", margin: "-10px" }}
+            >
+              <Close size={15} />
+            </button>
 
-              <div style={{ display: "flex", gap: "10px" }}>
-                <input required type="number" placeholder="Price (₹)" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px", flex: 1 }} />
-                <input required type="number" placeholder="Stock" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px", flex: 1 }} />
+            <h2 className="display display-m" style={{ marginBottom: "28px" }}>
+              Add a piece
+            </h2>
+
+            <form onSubmit={handleAddSubmit} style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+              <div>
+                <label className="meta" htmlFor="inv-name" style={{ display: "block" }}>Name</label>
+                <input
+                  id="inv-name"
+                  className="field"
+                  required
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
               </div>
 
-              <input required type="text" placeholder="Image URL" value={formData.image} onChange={e => setFormData({...formData, image: e.target.value})} style={{ padding: "10px", border: "1px solid #ccc", borderRadius: "4px" }} />
-              
-              <input type="text" placeholder="AR Model URL (.glb) - Optional" value={formData.modelUrl} onChange={e => setFormData({...formData, modelUrl: e.target.value})} style={{ padding: "10px", border: "1px solid #20B2AA", borderRadius: "4px", outline: "none" }} />
-              <small style={{ color: "#20B2AA", marginTop: "-10px", fontSize: "11px" }}>✨ Links directly into the Virtual Try-On Engine.</small>
+              <div>
+                <label className="meta" htmlFor="inv-cat" style={{ display: "block" }}>Category</label>
+                <select
+                  id="inv-cat"
+                  className="field"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                >
+                  <option value="Men">Men</option>
+                  <option value="Women">Women</option>
+                  <option value="Kids">Kids</option>
+                  <option value="Beauty">Beauty</option>
+                </select>
+              </div>
 
-              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <button type="submit" style={{ flex: 1, background: "#FF3F6C", color: "white", padding: "10px", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}>Add Product</button>
-                <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, background: "#eaeaec", color: "#282c3f", padding: "10px", border: "none", borderRadius: "4px", fontWeight: "bold", cursor: "pointer" }}>Cancel</button>
+              <div style={{ display: "flex", gap: "20px" }}>
+                <div style={{ flex: 1 }}>
+                  <label className="meta" htmlFor="inv-price" style={{ display: "block" }}>Price in ₹</label>
+                  <input
+                    id="inv-price"
+                    className="field"
+                    required
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="meta" htmlFor="inv-stock" style={{ display: "block" }}>Stock</label>
+                  <input
+                    id="inv-stock"
+                    className="field"
+                    required
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="meta" htmlFor="inv-image" style={{ display: "block" }}>Image URL</label>
+                <input
+                  id="inv-image"
+                  className="field"
+                  required
+                  type="text"
+                  value={formData.image}
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="meta" htmlFor="inv-model" style={{ display: "block" }}>
+                  3D model URL — optional, feeds the try-on engine
+                </label>
+                <input
+                  id="inv-model"
+                  className="field"
+                  type="text"
+                  placeholder=".glb"
+                  value={formData.modelUrl}
+                  onChange={(e) => setFormData({ ...formData, modelUrl: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "1px", marginTop: "10px" }}>
+                <button type="submit" className="btn btn-bone" style={{ flex: 1 }}>
+                  Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="btn btn-quiet"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>

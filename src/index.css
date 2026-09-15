@@ -1,1100 +1,1715 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*, *::before, *::after {
+/* ============================================================
+   AIYAASHI — design tokens
+   See DESIGN.md. Do not hand-tune colour or type per component.
+   ============================================================ */
+
+:root {
+  /* ---- Colour: ink and paper, one accent ---- */
+  --ink: #14110F;
+  --ink-raised: #1C1815;
+  --ink-sunken: #0E0C0B;
+  --bone: #EDE7DE;
+  --bone-dim: rgba(237, 231, 222, 0.80);
+  --ash: #A2988C;
+  --oxblood: #5E1A22;
+  --oxblood-deep: #4A1219;
+  --veil: rgba(237, 231, 222, 0.10);
+  --veil-strong: rgba(237, 231, 222, 0.22);
+
+  /* Inverted surfaces — the paperwork (checkout, orders, admin) */
+  --paper: #EDE7DE;
+  --paper-raised: #E3DCD1;
+  --paper-ink: #14110F;
+  --paper-ash: #5C534A;
+  --paper-veil: rgba(20, 17, 15, 0.12);
+
+  /* ---- Type ---- */
+  --font-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  --font-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Helvetica, Arial, sans-serif;
+
+  --t-display: clamp(44px, 13.5vw, 128px);
+  --t-xl: clamp(30px, 7vw, 52px);
+  --t-l: clamp(22px, 5vw, 30px);
+  --t-m: 18px;
+  --t-body: 16px;
+  --t-s: 14px;
+  --t-xs: 12px;
+
+  /* Tracking came down across the board. 0.18em on every label turned
+     ordinary UI text into spaced-out editorial decoration and cost real
+     legibility; wide tracking is now reserved for the logotype alone. */
+  --track-wide: 0.11em;
+  --track-mark: 0.34em;
+
+  /* ---- Space ---- */
+  --gutter: 20px;
+  --nav-h: 76px;
+  --tab-h: 62px;
+
+  /* ---- Motion ---- */
+  --d-micro: 240ms;
+  --d-state: 600ms;
+  --d-reveal: 1100ms;
+  --ease-drape: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 768px) {
+  :root { --gutter: 40px; --nav-h: 92px; }
+}
+@media (min-width: 1200px) {
+  :root { --gutter: 64px; }
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-:root {
-  --black: #0a0a0a;
-  --white: #fafaf8;
-  --rose: #E8395A;
-  --rose-dark: #c42d4a;
-  --rose-light: rgba(232,57,90,0.12);
-  --surface: #111111;
-  --surface-2: #181818;
-  --surface-3: #222222;
-  --border: rgba(255,255,255,0.07);
-  --border-active: rgba(255,255,255,0.18);
-  --text-1: #fafaf8;
-  --text-2: rgba(250,250,248,0.55);
-  --text-3: rgba(250,250,248,0.28);
-  --font-display: 'Cormorant Garamond', serif;
-  --font-body: 'DM Sans', sans-serif;
-  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
 html {
-  background: var(--black);
-  color: var(--white);
-  font-family: var(--font-body);
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
+  background: var(--ink);
+  -webkit-text-size-adjust: 100%;
 }
-
-* { scrollbar-width: none; }
-*::-webkit-scrollbar { display: none; }
-html { scrollbar-width: none; }
 
 body {
-  background: var(--black);
-  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: 1.65;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  letter-spacing: 0.01em;
-  line-height: 1.6;
 }
 
-input, select, textarea, button {
-  -webkit-appearance: none;
-  appearance: none;
-}
+#root { overflow-x: hidden; }
 
-::selection {
-  background: var(--color-text-primary);
-  color: var(--color-bg);
-}
+img { max-width: 100%; display: block; }
 
-/* Myntra Marquee */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+a { color: inherit; text-decoration: none; }
 
-.marquee-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 20s linear infinite;
-}
-
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
-/* Myntra Skeleton */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--surface) 25%,
-    var(--surface-2) 50%,
-    var(--surface) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
-}
-
-*:focus-visible {
-  outline: 2px solid var(--color-text-primary);
-  outline-offset: 2px;
-}
-
-/* Typography Base */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-}
-
-button, a {
-  min-height: 44px;
-  min-width: 44px;
-}
-
-a {
-  text-decoration: none;
+button,
+input,
+select,
+textarea {
+  font: inherit;
   color: inherit;
 }
 
-/* Navbar */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 32px;
-  z-index: 1000;
+button { background: none; border: none; cursor: pointer; }
+
+input,
+select,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
 }
 
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 48px;
+::selection {
+  background: var(--bone);
+  color: var(--ink);
 }
 
-.brand {
-  font-weight: 600;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-primary);
-}
+/* Scrollbars stay out of the way but remain usable on desktop */
+::-webkit-scrollbar { width: 0; height: 0; }
+* { scrollbar-width: none; }
 
-.nav-categories {
-  display: flex;
-  gap: 32px;
-  height: 64px;
+/* ---- Focus: always visible, never removed ---- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 1px solid var(--bone);
+  outline-offset: 3px;
 }
+.on-paper :focus-visible { outline-color: var(--paper-ink); }
 
-.nav-item-wrapper {
-  display: flex;
-  align-items: center;
-  height: 64px;
-}
+/* ============================================================
+   Type primitives
+   ============================================================ */
 
-.nav-item-wrapper>a {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.display {
+  font-family: var(--font-display);
   font-weight: 500;
-  color: var(--color-text-primary);
-  transition: opacity 0.2s ease;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
+  line-height: 0.94;
+  letter-spacing: -0.015em;
 }
 
-.nav-item-wrapper:hover>a {
-  opacity: 0.5;
-}
+/* Didone hairlines vanish on dark below 20px — never set display type smaller */
+.display-xl { font-size: var(--t-display); }
+.display-l  { font-size: var(--t-xl); line-height: 1.02; }
+.display-m  { font-size: var(--t-l); line-height: 1.12; }
 
-.mega-menu {
-  position: absolute;
-  top: 64px;
-  left: 0;
-  width: 100%;
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-  padding: 40px 60px 60px;
-  display: none;
-  justify-content: center;
-  gap: 80px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
-  z-index: 999;
-  animation: slideDown 0.2s ease-out forwards;
-  opacity: 0;
-  cursor: default;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-3px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.nav-item-wrapper:hover .mega-menu {
-  display: flex;
-}
-
-.mega-menu-column {
-  display: flex;
-  flex-direction: column;
-  min-width: 140px;
-}
-
-.mega-menu-column h4 {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: var(--color-text-primary);
-}
-
-.mega-menu-column a {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  margin-bottom: 14px;
-  text-transform: capitalize;
-  letter-spacing: 0.02em;
-  font-weight: 400;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.mega-menu-column a:hover {
-  color: var(--color-text-primary);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-}
-
-.search-bar input {
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-  height: 38px;
-  font-size: 13px;
-  padding: 0 16px;
-  width: 250px;
-  font-family: 'Outfit', sans-serif;
-  background: transparent;
-  color: var(--color-text-primary);
-  transition: border-color 0.2s ease;
-}
-
-.search-bar input:focus {
-  outline: none;
-  border-color: var(--color-text-primary);
-}
-
-.navlinks {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.nav-action {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 400;
-  color: var(--color-text-primary);
-  transition: opacity 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-action:hover {
-  opacity: 0.5;
-}
-
-.nav-action span.icon {
-  font-size: 20px;
-}
-
-.cart-action {
-  position: relative;
-}
-
-.cart-badge {
-  position: absolute;
-  top: 0px;
-  right: -8px;
-  width: 6px;
-  height: 6px;
-  background: var(--color-text-primary);
-  border-radius: 50%;
-  color: transparent;
-  overflow: hidden;
-}
-
-/* Home / Hero */
-.home-container {
-  padding-top: 64px;
-}
-
-/* Zara Hero Banner */
-.zara-hero-banner {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  margin-top: -64px;
-  /* Assume navbar is 64px, we want full bleed */
-  background: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&q=80') center/cover no-repeat;
-  color: white;
-  overflow: hidden;
-  margin-bottom: 64px;
-}
-
-.zara-hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.1) 60%);
-  z-index: 1;
-}
-
-.zara-hero-content {
-  position: static;
-  z-index: 2;
-}
-
-.zara-hero-title {
-  position: absolute;
-  bottom: 88px;
-  /* Using ~88px to maintain the requested 16px gap above the button, which is at bottom: 32px + ~40px height */
-  left: 48px;
-  font-size: clamp(40px, 7vw, 110px);
-  font-weight: 200;
-  letter-spacing: 0.2em;
-  color: white;
-  margin: 0;
-  line-height: 1;
-}
-
-.zara-discover-btn {
-  position: absolute;
-  bottom: 32px;
-  left: 48px;
-  border: 1px solid white;
-  background: transparent;
-  color: white;
-  padding: 12px 40px;
-  border-radius: 0;
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  z-index: 2;
-}
-
-.zara-discover-btn:hover {
-  background: white;
-  color: black;
-}
-
-.circular-categories-section {
-  padding: 0 48px;
-  margin-bottom: 64px;
-}
-
-.circular-categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 24px;
-  justify-content: center;
-}
-
-.circle-category-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.circle-category-item:hover {
-  transform: translateY(-4px);
-}
-
-.circle-img-wrapper {
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #f0f0f0;
-  margin-bottom: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.circle-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.circle-category-item:hover .circle-img-wrapper img {
-  transform: scale(1.05);
-}
-
-.circle-cat-name {
-  font-size: 14px;
-  color: #1A1A18;
+.mark {
+  font-family: var(--font-display);
   font-weight: 500;
-  text-align: center;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 32px 16px;
-}
-
-/* Category Navigation (Horizontal Swipe) */
-.category-tab-container {
-  display: flex;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  gap: 32px;
-  justify-content: center;
-}
-
-.category-tab-container::-webkit-scrollbar {
-  display: none;
-}
-
-.category-tab-container span {
-  flex-shrink: 0;
-}
-
-.category-tab-container span:last-child {
-  padding-right: 20px;
-}
-
-/* Product Card */
-.product-card {
-  position: relative;
-  cursor: pointer;
-  background: transparent;
-}
-
-.product-image-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 3/4;
-  overflow: hidden;
-  border-radius: 0;
-  background: var(--color-bg-secondary);
-}
-
-.product-image {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.product-card:hover .product-image {
-  transform: scale(1.03);
-}
-
-.ar-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--color-text-primary);
-  color: var(--color-bg);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  padding: 3px 8px;
-  border-radius: 0;
   text-transform: uppercase;
-}
-
-.product-info {
-  margin-top: 12px;
-}
-
-.product-brand {
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 4px;
-}
-
-.product-title {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--color-text-primary);
-  letter-spacing: 0.02em;
-  margin-bottom: 4px;
+  letter-spacing: var(--track-mark);
+  margin-right: calc(var(--track-mark) * -1);
+  display: inline-block;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.product-price-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+/* The wordmark at chrome scale.
+   Wide tracking is earned at display size and nowhere else. At 15px the
+   0.34em setting above let the repeated narrow strokes of A, I, A, A drift
+   apart until the word stopped reading as a word and had to be deciphered
+   letter by letter — a legibility bug, however elegant it looks large.
+   So the compact treatment tightens the tracking to a third, adds weight so
+   the thicks stay solid, and pins Bodoni's optical-size axis to its low end,
+   which is exactly what that axis is for: it thickens the Didone hairlines
+   that otherwise vanish at small sizes. `.mark` alone is still used wherever
+   the name has room to breathe. */
+.mark-compact {
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  margin-right: -0.10em;
+  font-variation-settings: 'opsz' 8;
 }
 
-.current-price {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--color-text-primary);
-}
-
-.original-price {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  text-decoration: line-through;
-}
-
-.discount {
-  background: var(--color-text-primary);
-  color: var(--color-bg);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  padding: 3px 8px;
-  border-radius: 0;
+.label {
+  font-size: var(--t-xs);
+  letter-spacing: var(--track-wide);
   text-transform: uppercase;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
-.product-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.lede { font-size: var(--t-m); line-height: 1.62; color: var(--bone-dim); font-weight: 400; }
+.meta { font-size: var(--t-s); line-height: 1.6; color: var(--ash); letter-spacing: 0; }
+
+.rule {
+  height: 1px;
+  background: var(--veil);
+  border: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
-  transform: translateY(10px);
 }
+.on-paper .rule { background: var(--paper-veil); }
 
-.product-card:hover .product-actions {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
+.gutter { padding-left: var(--gutter); padding-right: var(--gutter); }
 
-.add-cart-btn {
-  width: 100%;
-  padding: 12px 0;
-  background: var(--color-bg);
-  color: var(--color-text-primary);
-  border: none;
-  font-size: 12px;
+/* Measure — keeps prose from running the full width of a desktop screen */
+.measure { max-width: 34em; }
+
+/* ============================================================
+   Controls
+   ============================================================ */
+
+.btn {
+  font-family: var(--font-body);
+  font-size: var(--t-s);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  font-weight: 600;
+  min-height: 52px;
+  padding: 17px 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0;
-  text-align: center;
+  transition: background var(--d-micro) var(--ease-drape),
+              color var(--d-micro) var(--ease-drape),
+              border-color var(--d-micro) var(--ease-drape),
+              opacity var(--d-micro) var(--ease-drape);
 }
 
-.add-cart-btn:hover {
-  background: var(--color-text-primary);
-  color: var(--color-bg);
+.btn-primary { background: var(--oxblood); color: var(--bone); }
+.btn-primary:hover { background: var(--oxblood-deep); }
+
+.btn-bone { background: var(--bone); color: var(--ink); }
+.btn-bone:hover { background: #fff; }
+
+.btn-quiet {
+  background: transparent;
+  color: var(--bone);
+  border: 1px solid var(--veil-strong);
+}
+.btn-quiet:hover { border-color: var(--bone); }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* A link that reads as a link without a chevron bolted to it */
+.textlink {
+  display: inline-block;
+  font-size: var(--t-s);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--bone);
+  transition: opacity var(--d-micro) var(--ease-drape);
+}
+.textlink:hover { opacity: 0.6; }
+
+.field {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--veil-strong);
+  padding: 14px 0;
+  font-size: var(--t-body);
+  font-weight: 500;
+  color: var(--bone);
+  transition: border-color var(--d-micro) var(--ease-drape);
+}
+.field::placeholder { color: var(--ash); }
+.field:focus { border-bottom-color: var(--bone); }
+.on-paper .field { border-bottom-color: var(--paper-veil); color: var(--paper-ink); }
+.on-paper .field::placeholder { color: var(--paper-ash); }
+.on-paper .field:focus { border-bottom-color: var(--paper-ink); }
+
+/* ============================================================
+   THE MAT — see DESIGN.md §5
+   Every photograph a customer supplies is mounted this way, in
+   every state, so that source quality stops being visible.
+   ============================================================ */
+
+/* The plate is a portrait print, and a print has a size.
+   It was only ever capped at 100% of its column, so on a 1535px desktop the
+   3:4 aperture came out 1367 wide and over 1800 tall — you could see a
+   forehead, and had to scroll to find the rest of your own photograph. The
+   width is now capped by the height of the screen as well, so the whole plate
+   lands inside one view at any size. On a phone 100% still wins, which is why
+   this needs no breakpoint: the desktop simply stops behaving unlike it. */
+.mat {
+  background: var(--bone);
+  padding: 16px 16px 26px;
+  width: min(100%, 560px, max(380px, calc(48svh + 40px)));
+  margin-inline: auto;
 }
 
-/* Product Detail Page */
-.pdp-container {
-  padding: 104px 32px 64px;
-  max-width: 1200px;
-  margin: 0 auto;
+/* The fitting room is one centred column, at the plate's own width.
+   On a phone that is what it always was. On a desktop the copy sat hard left
+   while the plate sat in the middle of the screen, which read as two unrelated
+   things; sharing one measure makes the page behave the same at every size. */
+.fitting-col {
+  width: min(100%, 560px, max(380px, calc(48svh + 40px)));
+  margin-inline: auto;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+}
+@media (min-width: 600px) {
+  .fitting-col { padding-left: 0; padding-right: 0; }
 }
 
-.pdp-layout {
-  display: flex;
-  gap: 64px;
+.aperture {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--ink-sunken);
 }
 
-.pdp-gallery {
-  width: 55%;
-}
-
-.pdp-main-image {
+.aperture > img,
+.aperture > video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 0;
+  object-position: top center;
 }
 
-.pdp-details {
-  width: 45%;
-  padding-top: 32px;
+/* The customer's own photograph is shown whole rather than filled to the
+   aperture. `cover` anchored to the top is right for a finished look, but on
+   the upload preview it cut the legs off the full-length photograph the copy
+   had just asked for — you could not check the thing you were being asked to
+   check. The margins fall on the sunken ground inside the bone mat, which
+   reads as a mounted print. */
+.aperture-contain > img,
+.aperture-contain > video {
+  object-fit: contain;
+  object-position: center;
 }
 
-.pdp-brand {
-  font-size: 11px;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
+/* 1 — the grade: pulls every source into one warm, desaturated key.
+   Order matters — desaturate first, then warm what is left, so a harsh
+   fluorescent or a cyan-cast wall lands in the same family as a studio
+   softbox instead of shouting over it. An earlier, gentler version of this
+   (saturate .82 / sepia .06) was not nearly strong enough: a cyan wall at 82%
+   saturation is still a cyan wall. */
+.graded {
+  filter: saturate(0.58) contrast(1.07) brightness(0.95) sepia(0.26);
 }
 
-.pdp-title {
-  font-size: 28px;
-  font-weight: 300;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-  color: var(--color-text-primary);
-  margin-bottom: 24px;
+/* 2 — the vignette: corners toward ink, eye toward the garment. Deep enough
+   to actually swallow a cluttered bedroom corner, which is the usual
+   background in a photograph taken on a phone at arm's length. */
+.aperture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(108% 82% at 50% 40%,
+      rgba(20, 17, 15, 0) 34%,
+      rgba(20, 17, 15, 0.30) 72%,
+      rgba(20, 17, 15, 0.68) 100%);
 }
 
-.pdp-price-block {
+/* 3 — the caption, on the deeper bottom margin */
+.mat-caption {
+  margin-top: 12px;
   display: flex;
   align-items: baseline;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.pdp-price {
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--color-text-primary);
-}
-
-.pdp-mrp {
-  font-size: 16px;
-  color: var(--color-text-muted);
-  text-decoration: line-through;
-}
-
-.pdp-discount {
-  font-size: 13px;
-  color: var(--color-success);
-  font-weight: 500;
-}
-
-.section-divider {
-  border-top: 1px solid var(--color-border);
-  margin: 24px 0;
-}
-
-.pdp-stock {
-  font-size: 13px;
-  color: var(--color-success);
-  font-weight: 400;
-  margin-bottom: 24px;
-}
-
-.pdp-delivery-text {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-}
-
-.pdp-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 32px 0;
-}
-
-.pdp-add-btn {
-  width: 100%;
-  background: #FF3F6C;
-  color: white;
-  border: none;
-  border-radius: 0;
-  padding: 16px;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-
-.pdp-add-btn:hover {
-  opacity: 0.9;
-}
-
-.pdp-wishlist-btn {
-  width: 100%;
-  background: transparent;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-  padding: 16px;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.pdp-wishlist-btn:hover {
-  border-color: var(--color-text-primary);
-}
-
-.pdp-ar-section {
-  background: var(--color-bg-secondary);
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  margin-bottom: 24px;
-}
-
-.pdp-ar-btn {
-  background: var(--color-text-primary);
-  color: var(--color-bg);
-  border: none;
-  border-radius: 0;
-  padding: 12px;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  width: 100%;
-  transition: opacity 0.2s ease;
-  margin-bottom: 8px;
-}
-
-.pdp-ar-btn:hover {
-  opacity: 0.8;
-}
-
-.pdp-ai-btn {
-  background: transparent;
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-  padding: 12px;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  width: 100%;
-  transition: border-color 0.2s ease;
-}
-
-.pdp-ai-btn:hover {
-  border-color: var(--color-text-primary);
-}
-
-/* Cart Page */
-.cart-page {
-  padding: 104px 32px 64px;
-  max-width: 800px;
-  margin: 0 auto;
-  background: white;
-}
-
-.cart-item-row {
-  display: flex;
-  padding: 24px 0;
-  border-bottom: 1px solid var(--color-border);
-  gap: 24px;
-}
-
-.cart-item-img {
-  width: 80px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 0;
-}
-
-.cart-item-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.cart-item-name {
-  font-size: 14px;
-  font-weight: 400;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
-}
-
-.cart-item-price {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: 16px;
-}
-
-.qty-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.qty-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-border);
-  background: transparent;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--color-text-primary);
-  border-radius: 0;
-}
-
-.cart-total-section {
-  padding-top: 24px;
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin-bottom: 32px;
-}
-
-.checkout-btn {
-  width: 100%;
-  background: #FF3F6C;
-  color: white;
-  border: none;
-  border-radius: 0;
-  height: 52px;
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  gap: 16px;
+  color: var(--paper-ink);
+  font-size: var(--t-xs);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  cursor: pointer;
+  font-weight: 600;
+}
+.mat-caption span:last-child { color: var(--paper-ash); }
+
+/* The reveal — the one orchestrated moment on the site */
+@keyframes plate-develop {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+.developing {
+  animation: plate-develop var(--d-reveal) var(--ease-drape) both;
 }
 
-@media (max-width: 900px) {
-  .pdp-layout {
-    flex-direction: column;
+/* Processing: the customer's own photo, held in the mat, with a slow
+   light band passing over it. No spinner, no percentage. */
+@keyframes plate-pass {
+  0%   { transform: translateY(-120%); }
+  100% { transform: translateY(320%); }
+}
+.pass-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 42%;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(237, 231, 222, 0) 0%,
+    rgba(237, 231, 222, 0.10) 50%,
+    rgba(237, 231, 222, 0) 100%
+  );
+  animation: plate-pass 3200ms var(--ease-drape) infinite;
+}
+
+/* ============================================================
+   Quiet loading. No shimmer gradients.
+   ============================================================ */
+@keyframes breathe {
+  0%, 100% { opacity: 0.30; }
+  50%      { opacity: 0.14; }
+}
+.loading-block {
+  background: var(--ink-raised);
+  animation: breathe 2600ms ease-in-out infinite;
+}
+.on-paper .loading-block { background: var(--paper-raised); }
+
+/* ============================================================
+   Inverted surface — the paperwork
+   ============================================================ */
+.on-paper {
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+.on-paper .meta { color: var(--paper-ash); }
+.on-paper .lede { color: var(--paper-ash); }
+.on-paper .btn-bone { background: var(--paper-ink); color: var(--paper); }
+.on-paper .btn-quiet { color: var(--paper-ink); border-color: var(--paper-veil); }
+.on-paper .btn-quiet:hover { border-color: var(--paper-ink); }
+.on-paper .textlink { border-bottom-color: var(--paper-ink); }
+
+/* ============================================================
+   Reduced motion — every duration collapses, the wipe becomes a cut
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-
-  .pdp-gallery {
-    width: 100%;
-  }
-
-  .pdp-details {
-    width: 100%;
-  }
-
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .pass-band { display: none; }
+  .developing { animation: none; }
 }
 
-/* ===========================
-   AUTH (Preserved)
-   =========================== */
-.auth-page {
-  min-height: calc(100vh - var(--nav-height));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-  padding: 36px;
-  border: 1px solid var(--color-border);
-  border-radius: 0;
-}
-
-.auth-input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  margin-bottom: 12px;
-  border-radius: 0;
-}
-
-.auth-btn {
-  width: 100%;
-  padding: 12px;
-  background: #FF3F6C;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 0;
-}
-
-/* ===========================
-   VIRTUAL TRY-ON (AR) - PRESERVED
-   =========================== */
+/* ============================================================
+   AR surface — behavioural layout preserved verbatim.
+   ARViewer mounts a fullscreen camera view; these rules are
+   structural, not decorative.
+   ============================================================ */
 .ar-viewer-page {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
-  background: #000;
+  background: var(--ink-sunken);
   z-index: 9999;
 }
 
-.virtual-try-on-container {
+/* ============================================================
+   Page shell
+   ============================================================ */
+
+/* Clears the fixed navbar, and the mobile tab bar at the foot. */
+.page {
+  min-height: 100vh;
+  padding-top: var(--nav-h);
+  padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .page { padding-bottom: 0; }
+}
+
+/* A docked action bar. Sits above the mobile tab bar rather than under it —
+   the two used to overlap at the same z-index. */
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+  background: var(--ink);
+  border-top: 1px solid var(--veil);
+  padding: 16px var(--gutter);
+  z-index: 99;
+}
+@media (min-width: 768px) {
+  .dock { bottom: 0; padding-bottom: 16px; }
+}
+.on-paper .dock { background: var(--paper); border-top-color: var(--paper-veil); }
+
+/* The product dock.
+   It used to be two solid slabs edge to edge — an oxblood half and a bone half
+   — which is the one element on the page that looked like a checkout widget
+   rather than a fashion house. Both fills are gone. The two actions are set as
+   type on the bar's own ground, divided by a hairline: the bag carries a rule
+   under it because it is the commercial action, the fitting room does not.
+   Nothing about what the buttons do has changed. */
+.dock-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: min(100%, 1440px);
+  margin-inline: auto;
+}
+
+.dock-act {
+  flex: 1;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: var(--t-s);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: transparent;
+  color: var(--ash);
+  transition: color var(--d-micro) var(--ease-drape);
+}
+.dock-act:hover { color: var(--bone); }
+.dock-act + .dock-act { border-left: 1px solid var(--veil); }
+
+.dock-act-lead { color: var(--bone); }
+.dock-act-lead > span { border-bottom: 1px solid var(--bone); padding-bottom: 6px; }
+
+.on-paper .dock-act { color: var(--paper-ash); }
+.on-paper .dock-act:hover,
+.on-paper .dock-act-lead { color: var(--paper-ink); }
+.on-paper .dock-act + .dock-act { border-left-color: var(--paper-veil); }
+.on-paper .dock-act-lead > span { border-bottom-color: var(--paper-ink); }
+
+/* Leaves room for a dock so the last row of content is never trapped under it */
+.has-dock { padding-bottom: calc(var(--tab-h) + 150px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) {
+  .has-dock { padding-bottom: 150px; }
+}
+
+/* Collection grid — two up on a phone, widening with the viewport. It carries
+   the page gutter so the first column lines up with the headline above it.
+   The display declaration lives here rather than inline: when it was set on
+   the element, a later rewrite dropped it and the whole collection silently
+   stacked into a single 7,900px column. */
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 20px;
+  row-gap: 44px;
+}
+@media (min-width: 768px)  { .collection-grid { grid-template-columns: repeat(3, 1fr); column-gap: 28px; row-gap: 56px; } }
+@media (min-width: 1200px) { .collection-grid { grid-template-columns: repeat(4, 1fr); column-gap: 32px; } }
+
+/* Checkout goes two-column once there is room for it */
+@media (min-width: 900px) {
+  #checkout-grid { grid-template-columns: 1.1fr 0.9fr; gap: 80px; }
+}
+
+/* Saved looks — a wall of mats. One up on a phone so each plate is read
+   properly rather than skimmed; more as the wall gets wider. */
+.looks-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  padding-bottom: 80px;
+}
+@media (min-width: 560px)  { .looks-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .looks-grid { grid-template-columns: repeat(3, 1fr); gap: 40px; } }
+
+/* Responsive visibility that survives inline styles.
+   Tailwind's `md:hidden` loses to an inline `display`, which silently left the
+   hamburger and the mobile tab bar on screen at desktop widths. These win. */
+@media (min-width: 768px) {
+  .mobile-only { display: none !important; }
+}
+@media (max-width: 767.98px) {
+  .desktop-only { display: none !important; }
+}
+
+/* ============================================================
+   CATALOGUE IMAGERY — see DESIGN.md §5b
+   The mat (above) is for photographs the customer supplies: it
+   presents them, and says "this one is yours". Merchandise needs the
+   opposite signal — controlled, even, unremarkable — so it gets its own
+   treatment and never the mat.
+
+   The problem is the same though: the catalogue arrives as assorted
+   stock. A blown-white cutout, a grey seamless, a cool outdoor step and
+   a warm indoor arcade sit in one grid and read as a scrapbook.
+
+   The fix is tonal compression, not darkening. contrast() below 1 pulls
+   blown highlights down and lifts crushed blacks, so no frame in the
+   grid is ever pure white or pure black; the flat warm veil over the top
+   then locks every background to one temperature. The result is a
+   catalogue shot under one studio light rather than four.
+   ============================================================ */
+
+.goods {
   position: relative;
   width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #000;
+  aspect-ratio: 4 / 5;
   overflow: hidden;
+  background: var(--ink-raised);
 }
 
-.close-ar-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s;
-}
-
-.close-ar-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.webcam-feed {
-  position: relative;
+.goods > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
-  z-index: 1;
+  object-position: center 28%;
 }
 
-.ar-overlay {
+/* The grade. Earlier versions of this pushed saturation to .6 and sepia to
+   .2 to force four stock sources into one key. It worked, and it made the
+   whole catalogue brown — garments lost their colour and skin went grey.
+   Consistency is now carried by the fixed ratio, the crop and a very light
+   warm veil; the grade itself only lifts. Nothing here desaturates. */
+.goods > img {
+  filter: saturate(1.06) contrast(1.06) brightness(1.03);
+}
+
+/* A whisper of warm tone — enough to keep a cool studio and a warm interior
+   in the same family, far too little to read as a wash. */
+.goods::after {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(150, 120, 96, 0.05);
+}
+
+/* The product page runs the same treatment, capped in height.
+   At 3:4 the image pushed the name, the price and the cloth line all under
+   the dock, so opening a product showed a photograph and nothing else. The
+   cap is what guarantees the fold clears: it reserves room for four lines of
+   information no matter how tall the phone is, rather than hoping a fixed
+   ratio happens to leave enough. */
+.goods-hero {
+  aspect-ratio: 4 / 5;
+  max-height: 54svh;
+}
+@media (min-width: 768px) {
+  .goods-hero { aspect-ratio: 3 / 4; max-height: 78svh; }
+}
+
+/* ============================================================
+   Product page layout
+   ============================================================ */
+
+.pdp-layout { margin-top: var(--nav-h); }
+
+/* On a wide screen a full-bleed product image is 1280px of garment and
+   nothing else: the name and the price drop under the dock exactly as they
+   did on the phone, and the piece gets cropped at the head and the hem. Two
+   columns from 900px up — image left, information right, the information
+   sticky so it stays with you down the page. */
+@media (min-width: 900px) {
+  .pdp-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+    column-gap: 56px;
+    align-items: start;
+    padding-right: var(--gutter);
+  }
+  .pdp-layout .goods-hero {
+    max-height: calc(100svh - var(--nav-h) - 32px);
+  }
+  .pdp-info {
+    position: sticky;
+    top: calc(var(--nav-h) + 20px);
+    padding-left: 0;
+  }
+}
+
+/* ============================================================
+   HOME HERO — full-bleed photography
+   One photograph, edge to edge, exposed as shot. It replaces an
+   earlier type-led layout whose image was a dim strip fading into a
+   mostly-empty dark field: that read as unfinished rather than as mood.
+   ============================================================ */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 46px;
+  /* Full viewport, less the mobile tab bar that would otherwise sit over
+     the copy. Desktop has no tab bar, so it takes the whole screen. */
+  min-height: calc(100svh - var(--tab-h));
+}
+
+@media (min-width: 768px) {
+  .hero { min-height: 100svh; padding-bottom: 64px; }
+}
+
+/* The looks cross-fade into one another — slow enough to read as a change of
+   pass in a show, never as a cut. */
+.hero-look {
+  transition: opacity 1200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The film layers. Every video element and the reduced-motion poster share
+   these rules so the frame is identical whichever is showing. */
+.hero-film {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: 2;
+  object-fit: cover;
+  object-position: var(--look-mobile, 50% 44%);
+  /* The film is graded up, not down: the campaign should look alive. */
+  /* Deliberately ungraded: this footage already carries its own light. */
 }
 
-.ar-loading-text {
+@media (min-width: 768px) {
+  .hero-film { object-position: var(--look-desktop, 50% 34%); }
+}
+
+/* Available to assistive technology, invisible on screen. */
+.sr-only {
   position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 700;
-  backdrop-filter: blur(5px);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-@media (max-width: 768px) {
-
-  /* Navbar fix */
-  .navbar,
-  nav {
-    padding: 0 16px;
-  }
-
-  /* Hero fix - full width */
-  .hero,
-  [class*="hero"] {
-    width: 100% !important;
-    min-height: 70vh;
-  }
-
-  /* Product Grid (Vertical 2-Column Grid) */
-  .grid,
-  .product-grid,
-  [class*="product-grid"],
-  .products-grid,
-  [class*="products"] {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    padding: 10px !important;
-    overflow-x: visible !important;
-    scroll-snap-type: none !important;
-  }
-
-  .product-card {
-    width: 100% !important;
-    flex: auto !important;
-    scroll-snap-align: none !important;
-  }
-
-  /* Reset category tabs alignment on mobile */
-  .category-tab-container {
-    justify-content: flex-start !important;
-    padding-left: 20px;
-  }
-
-  /* Product card text size */
-  .product-card h3,
-  .product-card p {
-    font-size: 12px !important;
-  }
-
-  /* Hide ORDERS and LOGOUT on mobile navbar */
-  .nav-orders,
-  .nav-logout,
-  [class*="orders"],
-  [class*="logout"] {
-    display: none !important;
-  }
-
-  /* Category filter pills - scrollable */
-  .category-filter,
-  [class*="filter"] {
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
+/* The hero stage. The film is the screen; this is the only thing on top of
+   it. The wordmark sits high and the campaign line sits low, so the two never
+   compete and the eye lands on the name first. */
+/* The stage stacks to the foot of the frame rather than spanning it.
+   The film is a tight beauty close-up with no headroom above the brow, so a
+   top-centre wordmark landed straight across her eyes. Panning cannot fix
+   that — the source is height-constrained, so there is no vertical slack to
+   move. Setting the name low keeps the whole face clear above it and still
+   reads as one confident block: name, campaign line, action. */
+/* The masthead sits at the top of the frame, centred, and the campaign copy
+   sits at the foot of it — `space-between` holds the two as far apart as the
+   hero is tall, which is the separation the hierarchy needs.
+   The top padding is deliberately tight to the navigation. The film is framed
+   from its top edge (see .hero-film), so the clean wall above the model runs
+   behind the name; the higher the name sits in that wall, the more room is
+   left between it and her. */
+.hero-stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* The masthead is centred; the campaign line is not. Each child chooses. */
+  align-items: stretch;
+  text-align: center;
+  gap: clamp(10px, 1.6vh, 18px);
+  padding-top: calc(var(--nav-h) + clamp(10px, 1.6vh, 28px));
+  padding-inline: var(--gutter);
+  width: 100%;
 }
 
-@media (max-width: 480px) {
+/* THE HERO IDENTITY.
+   Not a logo on a page — the name at campaign scale. The chrome wordmark is
+   16px, tight and weighted for legibility; this is the opposite job, so it
+   gets its own setting: very large, warm white, and tracked only enough to
+   let the doubled AA breathe. The 0.34em of the display treatment is far too
+   wide at this size — it would run past 2,000px on a desktop screen. */
+.hero-mark {
+  display: block;
+  align-self: center;
+  /* One line, always. The size is capped by viewport width rather than by a
+     fixed maximum, and nowrap plus the trimmed trailing letterspace guarantee
+     AIYAASHI never breaks to "AIYA / ASHI" or runs past the edge. */
+  /* Sized against the thing that actually decides the collision: how far down
+     the frame the model's head lands.
+     `cover` scales the film by whichever axis is short, so the height it paints
+     is max(100svh, 100vw / 1.897) — the clip is 1366x720. Her head sits about a
+     quarter of the way down that, so max(26svh, 13.7vw) is where it appears,
+     whatever the window. The name is then allowed whatever is left above it,
+     less the header and a margin.
+     A flat 15svh cap did not catch this: on a 1366x768 laptop — the commonest
+     size there is — it still asked for 90px of type and left 23px of daylight
+     above her hair. At 1024x600 it left five. */
+  font-size: max(
+    30px,
+    min(clamp(38px, 6.6vw, 104px), calc((max(26svh, 13.7vw) - 132px) / 0.94))
+  );
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-right: -0.05em;
+  line-height: 0.94 !important;
+  white-space: nowrap;
+  max-width: 100%;
+  color: #F7F3EC;
 
-  /* Extra small phones */
-  .hero-title,
-  [class*="hero"] h1,
-  [class*="hero"] h2 {
-    font-size: clamp(28px, 8vw, 48px) !important;
+  /* THE FIX for faint strokes.
+     Bodoni Moda carries an optical-size axis, and `font-optical-sizing: auto`
+     — the browser default — picks the size to match the font-size. At 158px
+     that lands near opsz 96: the display cut, whose hairlines are drawn as
+     thin as the design allows. Those hairlines are exactly the strokes that
+     were vanishing against a bright frame — the thin diagonal of the A and Y,
+     the spine of the S, the hairline serifs on I and H — so some letters read
+     solid and others read faint.
+
+     Pinning opsz to the text end of the axis rebuilds those strokes at a
+     weight that survives any background. No shadow, no outline, no gradient,
+     no opacity: one solid fill, every character equal. */
+  font-optical-sizing: none;
+  font-variation-settings: 'opsz' 20;
+}
+
+/* The campaign line sits at the foot of the frame on the left, where the
+   runway floor and the dried grasses give it ground to stand on. Centred, it
+   fell across the model's skirt and had to stay small to survive there; on the
+   left it can be read at campaign size without touching her. */
+.hero-foot {
+  align-self: flex-start;
+  text-align: left;
+  padding-bottom: clamp(26px, 4.4vh, 56px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(14px, 2vh, 22px);
+  max-width: 34ch;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(21px, 2.15vw, 33px);
+  line-height: 1.14;
+  letter-spacing: -0.012em;
+  color: #F7F3EC;
+  text-wrap: balance;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px clamp(20px, 2.4vw, 34px);
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Two scrims, not one flat wash over the picture.
+   The vertical one protects the foot of the frame; the horizontal one
+   protects the left column. Together they cover exactly the corner the
+   copy occupies and leave the top-right — the face, the coat, the light
+   on the wall — at full exposure. A single global dim would have muted
+   the photograph, which is what the old hero did wrong. */
+/* The campaign line stands on the left now, and the runway's own light strips
+   run straight through that corner. This fades out by the middle of the frame,
+   so the model and the lit wall behind her keep their full exposure. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(20, 17, 15, 0.50) 0%,
+    rgba(20, 17, 15, 0.28) 20%,
+    rgba(20, 17, 15, 0) 44%
+  );
+}
+
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hero-scrim-v {
+  background: linear-gradient(
+    to top,
+    rgba(20, 17, 15, 0.62) 0%,
+    rgba(20, 17, 15, 0.40) 20%,
+    rgba(20, 17, 15, 0.16) 44%,
+    rgba(20, 17, 15, 0) 68%
+  );
+}
+
+.hero-scrim-h {
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 17, 15, 0.52) 0%,
+    rgba(20, 17, 15, 0.34) 20%,
+    rgba(20, 17, 15, 0.16) 38%,
+    rgba(20, 17, 15, 0) 56%
+  );
+}
+
+.hero {
+  /* The stage is a flex child, so the hero itself must be a column. */
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-scrim-top {
+  background: linear-gradient(
+    to bottom,
+    rgba(20, 17, 15, 0.52) 0%,
+    rgba(20, 17, 15, 0.34) 20%,
+    rgba(20, 17, 15, 0.16) 38%,
+    rgba(20, 17, 15, 0) 56%
+  );
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+/* Three tracks, not a flex row: the name has to be optically centred on the
+   screen, and with a flex row it drifts with whatever the two sides happen to
+   weigh. The outer tracks are equal, so the middle one is always the centre. */
+.site-head {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  padding-left: var(--gutter);
+  padding-right: var(--gutter);
+  z-index: 100;
+  color: var(--bone);
+  background-color: #14110F;
+  border-bottom: 1px solid rgba(237, 231, 222, 0.10);
+  transition: background-color var(--d-state) var(--ease-drape),
+              border-color var(--d-state) var(--ease-drape);
+}
+
+/* Over the hero: no fill, no rule, so the campaign image reaches the top of
+   the screen. A short gradient keeps the type readable against whatever the
+   film is doing underneath without tinting the whole frame. */
+.site-head-over {
+  background-color: transparent;
+  border-bottom-color: transparent;
+}
+.site-head-over::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -40px 0;
+  pointer-events: none;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgba(20, 17, 15, 0.55), rgba(20, 17, 15, 0));
+}
+
+.site-head-left  { display: flex; align-items: center; gap: clamp(14px, 2vw, 26px); min-width: 0; }
+.site-head-right { display: flex; align-items: center; gap: 22px; justify-content: flex-end; }
+
+/* The masthead at header scale. Between the two settings the logotype already
+   had: too large for the compact 16px chrome cut, too small for the display
+   cut's 0.34em, which at this size closes the A-I-A-A strokes into a band.
+   Its own tracking, its own weight, and the optical-size axis pinned low so
+   the hairlines stay solid. */
+.head-mark {
+  font-size: clamp(21px, 2.1vw, 31px);
+  font-weight: 500;
+  letter-spacing: 0.17em;
+  margin-right: -0.17em;
+  font-optical-sizing: none;
+  font-variation-settings: 'opsz' 16;
+}
+
+.head-brand { display: inline-flex; align-items: center; justify-self: center; }
+
+.head-link {
+  font-size: var(--t-xs);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.88;
+  white-space: nowrap;
+  transition: opacity var(--d-micro) var(--ease-drape);
+}
+.head-link:hover { opacity: 1; }
+
+/* The header has its own breakpoint, higher than the page's. The centred
+   section list plus account and bag needs about 1024px before it stops
+   crowding the wordmark — at 768 the full desktop header overlapped the
+   logotype and pushed "Bag" off the right edge. Below that the header is
+   the compact one: rules, wordmark, search, bag. */
+/* These carry !important because the elements they sit on set `display`
+   inline, and an inline style otherwise wins — which is exactly how the
+   hamburger ended up visible on a 1440px desktop. */
+.head-wide { display: none !important; }
+.head-narrow { display: inline-flex !important; }
+
+@media (min-width: 1024px) {
+  .head-wide { display: flex !important; }
+  .head-narrow { display: none !important; }
+}
+
+/* The search field opens as a full-width row under the bar at every size,
+   rather than living permanently in the header as a box. One less container,
+   and it stops competing with the wordmark. */
+.head-searchrow {
+  position: relative;
+  z-index: 50;
+  margin-top: var(--nav-h);
+  padding-block: 14px;
+  background: var(--ink);
+  border-bottom: 1px solid var(--veil);
+}
+
+/* ============================================================
+   EDITORIAL CHAPTERS
+   Each chapter sets its own scale, alignment and image weight. Nothing
+   on this page repeats the section before it.
+   ============================================================ */
+
+/* A chapter of type alone. The breath after the hero. */
+.chapter-breath {
+  padding-block: clamp(86px, 15vh, 180px);
+}
+
+/* Featured: one large piece, two smaller beside it. Deliberately not a
+   three-up grid — the first piece carries roughly twice the weight. */
+.feature-set {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px 28px;
+}
+@media (min-width: 860px) {
+  .feature-set {
+    grid-template-columns: 1.35fr 1fr;
+    align-items: start;
+    gap: 30px;
+  }
+  /* The featured piece spans both rows and stretches to match the pair
+     beside it, so the composition reads as one deliberate block rather than
+     a tall column next to a short one. */
+  .feature-set > :first-child {
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .feature-set > :first-child .goods {
+    flex: 1;
+    aspect-ratio: auto;
+    min-height: 460px;
   }
 }
 
-@media (max-width: 480px) {
+/* Full-bleed editorial break. Runs edge to edge, text sits at one edge. */
+.chapter-bleed {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* A lifted floor tone so that a full-bleed chapter whose image has not
+     decoded yet reads as a surface rather than as a hole in the page. */
+  background-color: var(--ink-raised);
+  display: flex;
+  align-items: flex-end;
+  min-height: 70svh;
+}
+@media (min-width: 768px) { .chapter-bleed { min-height: 88svh; } }
 
-  /* Fix product grid overflow was previously forcing 2 columns */
-
-  /* Fix mega menu on mobile */
-  [class*="mega-menu"],
-  [class*="dropdown"],
-  [class*="submenu"] {
-    display: none !important;
-  }
-
-  /* Fix any horizontal overflow */
-  body,
-  #root,
-  .App {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-  }
-
-  /* Hero text size on small phones */
-  [class*="hero"] {
-    overflow: hidden !important;
-  }
-
+.chapter-bleed > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-@import url('./ultra.css');
+.chapter-bleed-copy {
+  position: relative;
+  z-index: 1;
+  padding-bottom: clamp(36px, 6vh, 72px);
+  max-width: min(100%, 560px);
+}
+
+/* A scrim no larger than the copy needs: bottom-left only, and gone by
+   half height so the photograph stays alive. */
+.chapter-bleed::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(20,17,15,.80) 0%, rgba(20,17,15,.40) 26%, rgba(20,17,15,0) 58%),
+    linear-gradient(to right, rgba(20,17,15,.52) 0%, rgba(20,17,15,0) 52%);
+}
+
+/* The fitting room, set in type. Two columns of words rather than a frame
+   beside a paragraph: the offer at display size on the left, the terms and the
+   way in held to its baseline on the right. */
+.chapter-fitting {
+  padding-block: clamp(84px, 13vh, 176px);
+}
+
+.chapter-fitting-inner {
+  width: min(100%, 1440px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(26px, 4vh, 44px);
+}
+@media (min-width: 900px) {
+  .chapter-fitting-inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+    gap: clamp(40px, 5vw, 96px);
+    align-items: end;
+  }
+}
+
+.chapter-fitting-title { max-width: 15ch; }
+
+.chapter-fitting-side {
+  max-width: 40ch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(14px, 2vh, 20px);
+}
+
+/* Split chapter: image one side, type the other. Stacks on a phone with the
+   image first — the composition changes, the feeling does not. */
+.chapter-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+  padding-block: clamp(70px, 12vh, 140px);
+}
+@media (min-width: 900px) {
+  .chapter-split {
+    grid-template-columns: 0.82fr 1fr;
+    gap: clamp(40px, 5vw, 72px);
+  }
+  .chapter-split-flip > :first-child { order: 2; }
+}
+
+/* An empty aperture rendered in near-black read as a missing image rather
+   than as an invitation. Bone-toned, it reads as what it is: an empty mount
+   waiting for a print. */
+.aperture-empty {
+  background: var(--paper-raised);
+  box-shadow: inset 0 0 0 1px rgba(20, 17, 15, 0.10);
+}
+.aperture-empty::after { display: none; }
+
+/* This chapter exists to bring real colour into the page, so the cloth is
+   left rich. An earlier version pulled it toward oxblood and dimmed it to 86%
+   — which defeated the entire point of the chapter. */
+.chapter-colour > img {
+  filter: saturate(1.05) contrast(1.04) brightness(1.02);
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.site-foot {
+  border-top: 1px solid var(--veil);
+  padding-block: clamp(56px, 9vh, 96px);
+}
+
+.foot-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 700px) {
+  .foot-cols { grid-template-columns: 1.4fr repeat(2, minmax(0, 1fr)); gap: 48px; }
+}
+
+.foot-list { display: flex; flex-direction: column; gap: 12px; }
+.foot-list a, .foot-list button {
+  font-size: var(--t-s);
+  font-weight: 500;
+  color: var(--bone-dim);
+  text-align: left;
+  transition: color var(--d-micro) var(--ease-drape);
+}
+.foot-list a:hover, .foot-list button:hover { color: var(--bone); }
+
+/* A featured piece stands taller than its neighbours on a phone; on wide
+   screens the .feature-set rules above stretch it to fill its row instead. */
+.goods-feature { aspect-ratio: 3 / 4; }
+
+/* ============================================================
+   THE CLOSING MOMENT
+   The page opens on the name at campaign scale and closes on it again,
+   quietly — type alone on ink, no image, no card. It is the only section
+   on the page that repeats the hero's centring, and it does so on purpose:
+   the two are bookends.
+   ============================================================ */
+
+.chapter-close {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(18px, 2.6vh, 30px);
+  padding-block: clamp(96px, 18vh, 210px);
+}
+
+.close-mark {
+  font-size: clamp(15px, 1.5vw, 20px);
+  color: var(--ash);
+}
+
+.close-line {
+  font-size: clamp(30px, 5.4vw, 78px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  max-width: 16ch;
+}
+
+/* ============================================================
+   PRODUCT CAPTION
+   Name and price take their colour from the surrounding ground, so one
+   card works on ink and on bone. Type does the hierarchy — no container,
+   no border, no badge.
+   ============================================================ */
+
+.goods-name {
+  font-size: var(--t-body);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.005em;
+  color: var(--bone);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.goods-price {
+  font-size: var(--t-s);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+}
+
+.goods-was {
+  margin-left: 10px;
+  color: var(--ash);
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.goods-feature .goods-name,
+.feature-set > :first-child .goods-name { font-size: var(--t-m); }
+
+.on-paper .goods-name,
+.on-paper .goods-price { color: var(--paper-ink); }
+.on-paper .goods-was { color: var(--paper-ash); }
+
+/* ============================================================
+   THE CATALOGUE
+   The one light chapter on the page. Bigger pictures, fewer of them,
+   and type that can actually be read at arm's length.
+
+   Everything in here — the opening, the grids, the campaign copy — is set
+   against one measure, `--cat-gutter`, which is tighter than the page gutter.
+   The page gutter is written for reading; a catalogue is for looking, and the
+   40px it gives back at each edge goes straight into the photographs.
+   ============================================================ */
+
+.catalogue {
+  --cat-gutter: clamp(16px, 2vw, 30px);
+  padding-top: clamp(88px, 14vh, 184px);
+  padding-bottom: clamp(72px, 11vh, 140px);
+}
+
+.cat-gutter {
+  padding-left: var(--cat-gutter);
+  padding-right: var(--cat-gutter);
+}
+
+/* The opening. Not a page heading with a subtitle under it — a masthead:
+   the name of the collection set as large as it can be carried, and the one
+   line about it hung off the far side at reading size, sitting on the same
+   baseline. Utility (the count, the filters) comes after a hairline, so it
+   never reads at the same level as the title. */
+.catalogue-intro {
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  padding-bottom: clamp(34px, 4.6vh, 60px);
+}
+
+.catalogue-masthead {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(18px, 2.6vh, 30px);
+}
+@media (min-width: 1000px) {
+  .catalogue-masthead {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 24%);
+    align-items: baseline;
+    gap: clamp(32px, 4vw, 72px);
+  }
+}
+
+/* Stepped down from 7.6vw/122px. At that size the title was so much larger
+   than everything under it that the opening read as two unrelated pieces of
+   design rather than one block — authority, but no relationship. */
+.catalogue-title {
+  font-size: clamp(38px, 5.6vw, 88px);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.024em;
+  text-wrap: balance;
+}
+
+/* Readable, and quieter than the title by size — not by going grey. */
+.catalogue-lede {
+  max-width: 34ch;
+  font-size: clamp(15px, 1.05vw, 17px);
+  line-height: 1.55;
+  color: var(--paper-ink);
+}
+
+.catalogue-controls {
+  margin-top: clamp(28px, 4vh, 48px);
+  padding-top: 18px;
+  border-top: 1px solid var(--paper-rule, rgba(20, 17, 15, 0.14));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 40px;
+  flex-wrap: wrap;
+}
+
+.catalogue-count {
+  font-size: var(--t-s);
+  color: var(--paper-ash);
+  letter-spacing: 0.02em;
+}
+
+.catalogue-filters {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  margin-left: auto;
+}
+
+.catalogue-filter {
+  font-size: var(--t-s);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper-ash);
+  white-space: nowrap;
+  min-height: 44px;
+  border-bottom: 1px solid transparent;
+  transition: color var(--d-micro) var(--ease-drape),
+              border-color var(--d-micro) var(--ease-drape);
+}
+.catalogue-filter:hover { color: var(--paper-ink); }
+.catalogue-filter.is-on {
+  color: var(--paper-ink);
+  border-bottom-color: var(--paper-ink);
+}
+
+/* Two up until there is real room, three from desktop on. Three rather than
+   four so each garment gets area — a catalogue is for looking at clothes, not
+   for fitting the most tiles on a screen.
+   The third column waits for 900px, not 720: on a 768 tablet it cut every
+   garment down to about 210px wide, which is smaller than the same piece gets
+   on a phone and reads as a search-results page. */
+.catalogue-grid {
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 14px;
+  row-gap: clamp(44px, 5.4vw, 76px);
+}
+@media (min-width: 600px) {
+  .catalogue-grid { column-gap: 20px; }
+}
+@media (min-width: 900px) {
+  .catalogue-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Blocks are sized as one desktop row of three, which on a two-column phone
+   leaves the third piece alone beside an empty cell. Rather than an orphan, it
+   takes the full width — the row reads as two, then one, which is a rhythm
+   instead of a gap. */
+@media (max-width: 899px) {
+  .catalogue-grid > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Taller frames, and less of the photograph thrown away.
+   Fashion is shot upright, usually near 2:3. Forcing that into 4:5 meant
+   cropping a fifth of the height, and at 28% from the top it was taking the
+   models' heads off — a beheaded coat is the single most catalogue-looking
+   thing a page can do. 3:4 is closer to how the pictures were taken, so there
+   is less to throw away, and what is thrown away now comes off the floor. */
+.catalogue .goods { aspect-ratio: 3 / 4; }
+.catalogue .goods > img { object-position: center 18%; }
+
+/* The caption. Name confident, price clear, the old price quiet beside it —
+   three weights, not one. Set here rather than on .goods so the featured
+   chapter upstairs keeps its own smaller setting. */
+.catalogue .goods-name {
+  font-size: clamp(16px, 1.15vw, 18px);
+  font-weight: 500;
+  line-height: 1.35;
+}
+.catalogue .goods-price {
+  margin-top: 5px;
+  font-size: clamp(15px, 1.05vw, 16px);
+  font-weight: 450;
+}
+.catalogue .goods-was {
+  font-size: var(--t-s);
+  font-weight: 400;
+}
+
+/* Hover: the photograph settles half a percent closer and nothing else moves.
+   No overlay, no button, no lift. */
+.catalogue .goods > img {
+  transition: transform 900ms var(--ease-drape);
+}
+.catalogue a:hover .goods > img {
+  transform: scale(1.025);
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalogue a:hover .goods > img { transform: none; }
+}
+
+/* THE SIGNATURE LOOK.
+   The largest thing on the page, and deliberately so: the hierarchy runs
+   signature, then campaign, then product, then type. It is a real piece with a
+   real price, set full bleed with the name on the foot of the photograph, so
+   the collection opens on a garment rather than on a row of garments. */
+.catalogue-signature {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 74svh;
+  overflow: hidden;
+  background: var(--paper-raised);
+  margin-bottom: clamp(56px, 8vh, 116px);
+}
+/* Shorter than it was. At 92svh the band was so much wider than it was tall
+   that a portrait photograph had to lose two thirds of its height to fill it. */
+@media (min-width: 768px) { .catalogue-signature { min-height: 82svh; } }
+
+.catalogue-signature > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* A standing figure, read from near the top.
+     A portrait photograph in a full-bleed band is cropped hard on the vertical,
+     and whichever band this picks is all anyone sees. Centred, it landed on the
+     torso and took the model's head off at 1024 — the worst thing an anchor
+     image can do. A quarter down holds the head and shoulders of a standing
+     full-length shot, which is what a signature look is. */
+  object-position: center 22%;
+  filter: saturate(1.05) contrast(1.04) brightness(1.02);
+  transition: transform 1400ms var(--ease-drape);
+}
+.catalogue-signature:hover > img { transform: scale(1.015); }
+@media (prefers-reduced-motion: reduce) {
+  .catalogue-signature:hover > img { transform: none; }
+}
+
+/* Bottom-left only, and gone by two thirds, so the garment keeps its light. */
+.catalogue-signature::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(20,17,15,.76) 0%, rgba(20,17,15,.34) 26%, rgba(20,17,15,0) 62%),
+    linear-gradient(to right, rgba(20,17,15,.42) 0%, rgba(20,17,15,0) 48%);
+}
+
+.catalogue-signature-copy {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  padding-bottom: clamp(36px, 5.4vh, 72px);
+  color: #F7F3EC;
+}
+
+.signature-label {
+  font-size: var(--t-s);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(247, 243, 236, 0.74);
+  margin-bottom: clamp(16px, 2.2vh, 26px);
+}
+
+.signature-name {
+  font-size: clamp(36px, 5vw, 84px);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  color: #F7F3EC;
+  max-width: 16ch;
+}
+
+.signature-price {
+  margin-top: clamp(12px, 1.6vh, 18px);
+  margin-bottom: clamp(24px, 3.2vh, 36px);
+  font-size: clamp(16px, 1.15vw, 19px);
+  font-weight: 450;
+  color: rgba(247, 243, 236, 0.92);
+}
+
+.catalogue-signature .textlink { border-bottom-color: #F7F3EC; color: #F7F3EC; }
+.on-paper .catalogue-signature .textlink { border-bottom-color: #F7F3EC; }
+
+/* The signature on a desktop is a spread, not a letterbox.
+   Fashion is shot upright; a full-bleed band on a wide screen asks a 3:4
+   photograph to fill a 3:2 hole, so two thirds of its height is thrown away and
+   no single crop position survives every window — centred it took the model's
+   head off at 1024, and a quarter down still cut her at the eyes at 1440. Given
+   its own upright frame beside the type, the model is whole at every width and
+   the band keeps its scale. Below 900 the band is already upright, so it stays
+   full bleed and the type sits on the photograph. */
+@media (min-width: 900px) {
+  .catalogue-signature {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 46%);
+    align-items: end;
+    column-gap: clamp(32px, 4vw, 72px);
+    min-height: 0;
+    background: var(--ink);
+    padding-block: clamp(40px, 6vh, 88px);
+  }
+  .catalogue-signature > img {
+    position: static;
+    grid-column: 2;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-position: center 22%;
+  }
+  .catalogue-signature::after { display: none; }
+  .catalogue-signature-copy {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto;
+    margin-inline: 0;
+    padding-bottom: clamp(16px, 3vh, 44px);
+    padding-left: var(--cat-gutter);
+  }
+  .catalogue-signature-copy.cat-gutter { padding-right: 0; }
+}
+
+/* TWO LARGE.
+   The step between the signature and the catalogue. On a desktop that is two
+   pieces at roughly twice the grid's width; on a phone it is one at a time at
+   full width, because two-up on a phone is just the grid again and the step
+   would disappear exactly where it is needed most. */
+.catalogue-pair {
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: clamp(44px, 6vw, 80px);
+  column-gap: clamp(20px, 2.4vw, 34px);
+  margin-bottom: clamp(56px, 8vh, 104px);
+}
+@media (min-width: 720px) {
+  .catalogue-pair { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* THE OFF-GRID PAIR.
+   One piece at twice the width and one dropped below it. It sits on the same
+   three columns as every grid on the page — the asymmetry is in what occupies
+   them, not in the measure, which is what keeps it from reading as an error. */
+.catalogue-duo {
+  width: min(100%, 1760px);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: clamp(40px, 5.4vw, 76px);
+  column-gap: 20px;
+  margin-block: clamp(48px, 7vh, 96px);
+}
+/* The offset is a desktop move only. Narrower, it left the second piece at
+   64% with a field of empty bone beside it — on a wide screen that reads as
+   composition, on a phone it reads as a missing product. */
+@media (max-width: 899px) {
+  .catalogue-duo {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 14px;
+  }
+}
+@media (min-width: 600px) and (max-width: 899px) {
+  .catalogue-duo { column-gap: 20px; }
+}
+@media (min-width: 900px) {
+  .catalogue-duo {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+  .catalogue-duo > :first-child { grid-column: span 2; }
+  .catalogue-duo > :last-child { margin-top: clamp(64px, 11vh, 170px); }
+}
+
+/* The interruption between two grid blocks.
+   This was a full-bleed band with the photograph behind the type. It does not
+   survive real catalogue photography: garments are shot upright at 4:5, and
+   cropping one into a letterbox produced a two-metre close-up of a trouser leg
+   with the name floating over it. The garment now keeps its own proportion at
+   editorial scale and the type sits beside it, which works whatever the
+   photograph happens to be. */
+.catalogue-moment {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  background: var(--paper-raised);
+  margin-block: clamp(48px, 7vh, 96px);
+}
+@media (min-width: 900px) {
+  /* The photograph led at 1.08fr, which made the band 935px tall and left the
+     type column mostly empty under it. Narrower keeps the garment larger than
+     anything in the grid and takes 120px of bone out of the composition. */
+  .catalogue-moment { grid-template-columns: 0.84fr 1fr; }
+}
+
+.catalogue-moment-figure {
+  position: relative;
+  width: 100%;
+  /* No height cap. Capping it changed the box's ratio away from 4:5, and the
+     image — cover-cropped — then showed a different part of the garment than
+     the same photograph shows in the grid. The frame the photography was
+     chosen for is 4:5, so the moment keeps 4:5. */
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+.catalogue-moment-figure > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 18%;
+  filter: saturate(1.06) contrast(1.05) brightness(1.02);
+  transition: transform 1100ms var(--ease-drape);
+}
+.catalogue-moment:hover .catalogue-moment-figure > img { transform: scale(1.02); }
+@media (prefers-reduced-motion: reduce) {
+  .catalogue-moment:hover .catalogue-moment-figure > img { transform: none; }
+}
+
+/* The type frames its column rather than sitting in the middle of it: the
+   label at the head, the name on the foot of the photograph. With everything
+   dropped to the baseline the space above read as a field of missing bone;
+   held at both ends it reads as a column. */
+.catalogue-moment-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Without this the column stretches its children, and the link's underline
+     ran the full width of the page. */
+  align-items: flex-start;
+  padding: clamp(36px, 5vw, 76px) var(--cat-gutter);
+}
+
+.catalogue-moment-eyebrow {
+  font-size: var(--t-s);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-ash);
+}
+@media (max-width: 899px) {
+  .catalogue-moment-eyebrow { margin-bottom: clamp(18px, 2.4vh, 30px); }
+}
+
+.catalogue-moment-name {
+  font-size: clamp(30px, 3.6vw, 60px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.018em;
+  color: var(--paper-ink);
+}
+
+.catalogue-moment-price {
+  margin-top: clamp(12px, 1.6vh, 18px);
+  margin-bottom: clamp(26px, 3.4vh, 40px);
+  font-size: clamp(16px, 1.15vw, 19px);
+  font-weight: 450;
+  color: var(--paper-ink);
+}
+
+/* The campaign interruption. This was a band of type on ink; it is now the
+   colour chapter itself, moved down out of the run-up and set between two
+   blocks of clothes, which is where a campaign page actually puts one. The
+   section is light, the campaign is dark, and the rhythm comes from that.
+
+   It carries .on-paper's inheritance with it, so every colour the chapter
+   relies on from the dark half of the page has to be named again here. */
+.catalogue-campaign {
+  margin-block: clamp(56px, 8vh, 112px);
+}
+
+.catalogue-campaign .chapter-bleed-copy,
+.catalogue-campaign .display { color: var(--bone); }
+.on-paper .catalogue-campaign .meta { color: var(--ash); }
+.catalogue-campaign .textlink { border-bottom-color: var(--bone); color: var(--bone); }
 

@@ -18,52 +18,64 @@ const sendOrderConfirmationEmail = async (email, order) => {
 
     const itemsHtml = order.orderItems.map(item => `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.qty}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #ddd;">₹${item.price}</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 14px;">${item.name}</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 14px; color: #6B6259;">${item.qty}</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 14px; text-align: right;">₹${item.price}</td>
       </tr>
     `).join('');
 
+    // Ink on bone, Didone wordmark, hairline rules — the same system as the
+    // order confirmation screen the customer has just come from.
     const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaec; border-radius: 8px; overflow: hidden;">
-        <div style="background-color: #FF3F6C; color: white; padding: 20px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px;">MetaShop Order Confirmation</h1>
+      <div style="font-family: Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #EDE7DE; color: #14110F; padding: 40px 32px;">
+        <div style="font-family: Didot, 'Times New Roman', serif; font-size: 15px; letter-spacing: 0.34em; text-transform: uppercase; margin-bottom: 56px;">
+          Aiyaashi
         </div>
-        <div style="padding: 30px;">
-          <h2 style="color: #282c3f; margin-top: 0;">Thank you for your purchase!</h2>
-          <p style="color: #7e818c; font-size: 16px; line-height: 1.5;">Your payment has been successfully processed and your order is now confirmed.</p>
-          
-          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin: 25px 0;">
-            <p style="margin: 5px 0;"><strong>Order ID:</strong> ${order._id}</p>
-            <p style="margin: 5px 0;"><strong>Transaction ID:</strong> <span style="color: #20B2AA;">${order.transactionId}</span></p>
-            <p style="margin: 5px 0;"><strong>Total Amount:</strong> ₹${order.totalPrice}</p>
-          </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-            <thead>
-              <tr style="background-color: #f4f4f5; text-align: left;">
-                <th style="padding: 10px;">Item</th>
-                <th style="padding: 10px;">Qty</th>
-                <th style="padding: 10px;">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHtml}
-            </tbody>
-          </table>
+        <h1 style="font-family: Didot, 'Times New Roman', serif; font-size: 34px; font-weight: 500; line-height: 1.1; margin: 0 0 14px 0;">
+          Your order is placed
+        </h1>
+        <p style="font-size: 14px; line-height: 1.6; color: #6B6259; margin: 0 0 40px 0; max-width: 34em;">
+          We have it, and we will write again the moment it ships.
+        </p>
 
-          <div style="margin-top: 40px; text-align: center; color: #7e818c; font-size: 14px;">
-            <p>We'll send you another email when your order ships.</p>
-            <p>MetaShop Team</p>
-          </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+          <tr>
+            <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 13px; color: #6B6259;">Order</td>
+            <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 13px; text-align: right;">${order._id}</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 13px; color: #6B6259;">Transaction</td>
+            <td style="padding: 12px 0; border-bottom: 1px solid rgba(20,17,15,0.12); font-size: 13px; text-align: right;">${order.transactionId}</td>
+          </tr>
+        </table>
+
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6259; margin-bottom: 12px;">
+          Pieces
         </div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 24px;">
+          <tr>
+            <td style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6259;">Paid</td>
+            <td style="font-family: Didot, 'Times New Roman', serif; font-size: 26px; text-align: right;">₹${order.totalPrice}</td>
+          </tr>
+        </table>
+
+        <p style="font-size: 12px; line-height: 1.6; color: #6B6259; margin: 56px 0 0 0;">
+          Aiyaashi
+        </p>
       </div>
     `;
 
     const info = await transporter.sendMail({
-      from: '"MetaShop Support" <support@metashop.com>', // sender address
+      from: '"Aiyaashi" <support@aiyaashi.com>', // sender address
       to: email, // list of receivers
-      subject: `Order Confirmed - ${order.transactionId}`, // Subject line
+      subject: `Your Aiyaashi order — ${order.transactionId}`, // Subject line
       html: htmlContent, // html body
     });
 

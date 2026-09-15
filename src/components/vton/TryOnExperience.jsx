@@ -1,30 +1,39 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import OutfitRecommendations from '../OutfitRecommendations';
-import MetricsPanel from '../MetricsPanel';
+import Plate from '../Plate';
+import { Back } from '../Marks';
+import { API_BASE } from '../../config/api';
+
+/**
+ * THE FITTING ROOM.
+ *
+ * This is the product. Everything else on the site is quiet so that this
+ * screen can be the loud one — and the loud thing here is not a spinner or a
+ * progress bar, it is the mat (see components/Plate.jsx and DESIGN.md §5).
+ *
+ * The customer's photograph is mounted in the same bone mat in every state —
+ * empty, chosen, developing, revealed — so the surface never jumps, and so a
+ * phone snapshot taken in a badly lit room sits in the same visual language as
+ * the catalogue beside it.
+ *
+ * Removed from the old build, deliberately:
+ *   · the full-screen loading overlay, its dual rotating rings, its progress
+ *     bar and its five stage dots — replaced by the plate developing in place
+ *   · the tab toggle and second copy of the image below the compare slider,
+ *     which showed the same two photographs twice
+ *   · the AI metrics panel, which was mounted inside the fixed action bar
+ *
+ * All network behaviour — validation, job creation, polling, download, share,
+ * reset, product switching — is unchanged.
+ */
 
 const LOADING_STAGES = [
-  {
-    text: "Optimizing your photo...",
-    progress: 12
-  },
-  {
-    text: "Tailoring to your fit...",
-    progress: 28
-  },
-  {
-    text: "Applying outfit fit...",
-    progress: 48
-  },
-  {
-    text: "Enhancing fabric details...",
-    progress: 65
-  },
-  {
-    text: "Perfecting your look...",
-    progress: 82
-  }
+  'Reading your photograph',
+  'Finding your proportions',
+  'Draping the garment',
+  'Settling the fabric',
+  'Finishing the plate'
 ];
 
 const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
@@ -35,46 +44,34 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
   const [fitScore, setFitScore] = useState(null);
-  const [activeTab, setActiveTab] = useState('yours'); // 'yours' | 'ai'
   const [sliderPos, setSliderPos] = useState(50);
   const [generationTime, setGenerationTime] = useState(null);
   const [stageIndex, setStageIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
   const stageTimerRef = useRef(null);
-  const [retryCount, setRetryCount] = useState(0);
   const [isRetryable, setIsRetryable] = useState(false);
   const [warnings, setWarnings] = useState([]);
-  const [avgGenerationTime, setAvgGenerationTime] = useState(null);
-  
+
+  const fileInputRef = useRef(null);
+  const sliderRef = useRef(null);
+
   const handleTryThis = (newProduct) => {
     setResultUrl(null);
     setPreviewUrl(null);
     setUploadedPhoto(null);
     setFitScore(null);
     setError(null);
-    setActiveTab('yours');
     setSliderPos(50);
     setCurrentProduct(newProduct);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  
-  const fileInputRef = useRef(null);
-  const sliderRef = useRef(null);
 
-  // ── Loading stages animation ──────────
+  // ── Loading stages ────────────────────
   const startStages = useCallback(() => {
     setStageIndex(0);
-    setProgress(0);
-    
     let index = 0;
     stageTimerRef.current = setInterval(() => {
       index++;
-      if (index < LOADING_STAGES.length) {
-        setStageIndex(index);
-        setProgress(
-          LOADING_STAGES[index].progress
-        );
-      }
+      if (index < LOADING_STAGES.length) setStageIndex(index);
     }, 3000);
   }, []);
 
@@ -83,42 +80,31 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       clearInterval(stageTimerRef.current);
       stageTimerRef.current = null;
     }
-    // Animate to 100% on completion
-    setProgress(100);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (stageTimerRef.current) {
-        clearInterval(stageTimerRef.current);
-      }
+      if (stageTimerRef.current) clearInterval(stageTimerRef.current);
     };
   }, []);
 
-  // ── File upload handler ───────────────
+  // ── File upload ───────────────────────
   const handleFileChange = useCallback((e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
-    // Validate file
-    const allowedTypes = [
-      'image/jpeg', 
-      'image/jpg',
-      'image/png',
-      'image/webp'
-    ];
-    
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
     if (!allowedTypes.includes(file.type)) {
-      setError("Please upload a JPG, PNG or WebP image");
+      setError('That file type won’t work. Use a JPG, PNG or WebP.');
       return;
     }
-    
+
     if (file.size > 10 * 1024 * 1024) {
-      setError("Image must be less than 10MB");
+      setError('That photograph is over 10MB. Try a smaller one.');
       return;
     }
-    
+
     setError(null);
     setResultUrl(null);
     setFitScore(null);
@@ -127,19 +113,14 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
 
-  // ── File upload handler ───────────────
-
-  // ── Generate handler ──────────────────
-  const [jobId, setJobId] = useState(null);
-  const [jobStatus, setJobStatus] = useState(null);
+  // ── Generation ────────────────────────
+  const [, setJobId] = useState(null);
+  const [, setJobStatus] = useState(null);
   const pollingRef = useRef(null);
 
-  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-      }
+      if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, []);
 
@@ -151,38 +132,28 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   }, []);
 
   const startPolling = useCallback((jobId) => {
-    console.log("Starting polling for:", jobId);
-    
     let attempts = 0;
-    const MAX_ATTEMPTS = 60; // 60 * 3s = 3 min max
-    
+    const MAX_ATTEMPTS = 60; // 60 × 3s = 3 min
+
     pollingRef.current = setInterval(async () => {
       attempts++;
-      
+
       if (attempts > MAX_ATTEMPTS) {
         stopPolling();
         stopStages();
         setIsGenerating(false);
-        setError(
-          "Taking too long. Please try again."
-        );
+        setIsRetryable(true);
+        setError('This is taking longer than it should. Try again.');
         return;
       }
 
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/vton/status/${jobId}`
+          `${API_BASE}/api/vton/status/${jobId}`
         );
 
         const data = response.data;
         setJobStatus(data.status);
-
-        console.log(
-          "Job status:", 
-          data.status, 
-          "attempt:", 
-          attempts
-        );
 
         if (data.status === 'completed') {
           stopPolling();
@@ -191,40 +162,31 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           setFitScore(data.fitScore);
           setGenerationTime(data.generationTime);
           setWarnings(data.warnings || []);
-          if (data.metrics?.avgGenerationTime) {
-            setAvgGenerationTime(data.metrics.avgGenerationTime);
-          }
-          setActiveTab('ai');
           setIsGenerating(false);
-          
         } else if (data.status === 'failed') {
           stopPolling();
           stopStages();
-          setError(
-            data.error || 
-            "Something went wrong. Please try again."
-          );
+          setIsRetryable(true);
+          setError(data.error || 'That one didn’t come out. Try again.');
           setIsGenerating(false);
         }
-        // If pending/processing — keep polling
-
+        // pending / processing — keep polling
       } catch (err) {
-        console.error("Polling error:", err.message);
-        // Don't stop polling on network error
-        // Just retry next interval
+        // Network blip: don't stop polling, retry on the next interval
+        console.error('Polling error:', err.message);
       }
-    }, 3000); // Poll every 3 seconds
-
-  }, [stopPolling, stopStages, setWarnings, setAvgGenerationTime]);
+    }, 3000);
+  }, [stopPolling, stopStages]);
 
   const handleGenerate = useCallback(async () => {
     if (!uploadedPhoto) {
-      setError("Please upload your photo first");
+      setError('Choose a photograph first.');
       return;
     }
 
     setIsGenerating(true);
     setError(null);
+    setIsRetryable(false);
     setResultUrl(null);
     setJobId(null);
     setJobStatus(null);
@@ -235,70 +197,53 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       formData.append('humanImage', uploadedPhoto);
       formData.append(
         'garmentImageUrl',
-        currentProduct?.image || 
-        currentProduct?.imageUrl ||
-        currentProduct?.images?.[0]
+        currentProduct?.image || currentProduct?.imageUrl || currentProduct?.images?.[0]
       );
       formData.append('productId', currentProduct?._id || '');
       formData.append('productName', currentProduct?.name || '');
       formData.append('productPrice', currentProduct?.price || '');
 
-      // This returns INSTANTLY with jobId
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:10000'}/api/vton/generate`,
+        `${API_BASE}/api/vton/generate`,
         formData,
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            Authorization: `Bearer ${localStorage.getItem('token')}`
           },
-          timeout: 30000 // just 30s for initial request
+          timeout: 30000
         }
       );
 
-      if (response.data.success && 
-          response.data.jobId) {
+      if (response.data.success && response.data.jobId) {
         const newJobId = response.data.jobId;
         setJobId(newJobId);
         setJobStatus('pending');
-        
-        console.log("Job created:", newJobId);
-        
-        // Start polling for result
         startPolling(newJobId);
-        
       } else {
-        throw new Error(
-          response.data.error || 
-          "Failed to start generation"
-        );
+        throw new Error(response.data.error || 'Failed to start generation');
       }
-
     } catch (err) {
-      console.error("Generate error:", err);
+      console.error('Generate error:', err);
       stopStages();
       setIsGenerating(false);
-      
-      let errorMsg = 
-        "Something went wrong. Please try again.";
-      
+      setIsRetryable(true);
+
+      let errorMsg = 'That didn’t go through. Try again.';
+
       if (err.response?.status === 400) {
-        errorMsg = err.response.data?.error 
-          || "Couldn't process this photo. Try a clearer image.";
+        errorMsg =
+          err.response.data?.error ||
+          'We couldn’t read that photograph. Try a clearer one.';
       } else if (!navigator.onLine) {
-        errorMsg = "No internet connection.";
+        errorMsg = 'You’re offline.';
       }
-      
+
       setError(errorMsg);
     }
-  }, [
-    uploadedPhoto, 
-    currentProduct, 
-    startStages,
-    startPolling
-  ]);
+  }, [uploadedPhoto, currentProduct, startStages, startPolling, stopStages]);
 
-  // ── Download handler ──────────────────
+  // ── Download ──────────────────────────
   const handleDownload = useCallback(async () => {
     if (!resultUrl) return;
     try {
@@ -308,7 +253,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       }
       const link = document.createElement('a');
       link.href = resultUrl;
-      link.download = `metashop-tryon-${Date.now()}.jpg`;
+      link.download = `aiyaashi-look-${Date.now()}.jpg`;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -318,33 +263,28 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     }
   }, [resultUrl]);
 
-  // ── Share handler ─────────────────────
+  // ── Share ─────────────────────────────
   const handleShare = useCallback(async () => {
     if (!resultUrl) return;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Check out this outfit on me!',
-          text: `I tried on ${product?.name || "this piece"} virtually on Metashop 🛍️`,
+          title: 'My look from Aiyaashi',
+          text: `${product?.name || 'This piece'}, seen on me before I decide. Aiyaashi.`,
           url: window.location.href
         });
       } catch (err) {
         if (err.name !== 'AbortError') {
-          navigator.clipboard?.writeText(
-            window.location.href
-          );
+          navigator.clipboard?.writeText(window.location.href);
         }
       }
     } else {
-      navigator.clipboard?.writeText(
-        window.location.href
-      );
-      alert('Link copied to clipboard!');
+      navigator.clipboard?.writeText(window.location.href);
     }
   }, [resultUrl, product]);
 
-  // ── Reset handler ─────────────────────
+  // ── Reset ─────────────────────────────
   const handleTryAnother = useCallback(() => {
     setUploadedPhoto(null);
     setPreviewUrl(null);
@@ -353,21 +293,19 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setError(null);
     setWarnings([]);
     setIsRetryable(false);
-    setActiveTab('yours');
     setSliderPos(50);
     setGenerationTime(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  // ── Before/After slider ───────────────
+  // ── Compare slider ────────────────────
   const isDraggingRef = useRef(false);
   const dragStartPosRef = useRef({ x: 0, y: 0 });
 
   const handleSliderMove = useCallback((clientX) => {
     if (!sliderRef.current) return;
     requestAnimationFrame(() => {
+      if (!sliderRef.current) return;
       const rect = sliderRef.current.getBoundingClientRect();
       const pos = Math.min(
         Math.max(((clientX - rect.left) / rect.width) * 100, 0),
@@ -377,1118 +315,313 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     });
   }, []);
 
-  // If not open, render nothing to match original modal paradigm
   if (!isOpen && typeof isOpen !== 'undefined') return null;
 
-  // ── Styles ────────────────────────────
-  const s = {
-    wrap: {
-      position: isOpen ? 'fixed' : 'relative',
-      inset: isOpen ? 0 : 'auto',
-      zIndex: isOpen ? 9999 : 'auto',
-      minHeight: '100vh',
-      background: '#0a0a0a',
-      color: '#fafaf8',
-      fontFamily: "'DM Sans', sans-serif",
-      paddingBottom: '120px',
-      overflow: 'auto',
-      pointerEvents: 'auto'
-    },
-    header: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '18px 24px',
-      borderBottom: '0.5px solid rgba(255,255,255,0.08)',
-      position: 'sticky',
-      top: 0,
-      background: 'rgba(10,10,10,0.95)',
-      backdropFilter: 'blur(12px)',
-      zIndex: 100
-    },
-    backBtn: {
-      background: 'none',
-      border: 'none',
-      color: '#fafaf8',
-      cursor: 'pointer',
-      fontSize: '13px',
-      padding: '10px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontFamily: "'DM Sans', sans-serif",
-      letterSpacing: '0.06em'
-    },
-    title: {
-      fontSize: '10px',
-      letterSpacing: '0.15em',
-      color: 'rgba(250,250,248,0.6)',
-      position: 'absolute',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      whiteSpace: 'nowrap'
-    },
-    fitBadge: {
-      background: 'rgba(74,222,128,0.12)',
-      border: '0.5px solid rgba(74,222,128,0.4)',
-      borderRadius: '20px',
-      padding: '4px 12px',
-      fontSize: '11px',
-      color: '#4ade80',
-      fontWeight: 500,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px'
-    },
-    uploadZone: {
-      margin: '0 24px',
-      aspectRatio: '3/4',
-      background: '#111111',
-      border: '1.5px dashed rgba(255,255,255,0.15)',
-      borderRadius: '24px',
-      overflow: 'hidden',
-      cursor: 'pointer',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
-      transition: 'border-color 0.2s'
-    },
-    tabRow: {
-      display: 'flex',
-      background: 'rgba(255,255,255,0.05)',
-      borderRadius: '12px',
-      padding: '3px',
-      margin: '0 20px 16px',
-      gap: '2px'
-    },
-    tab: (active) => ({
-      flex: 1,
-      padding: '10px',
-      borderRadius: '10px',
-      border: 'none',
-      background: active ? '#fafaf8' : 'transparent',
-      color: active ? '#0a0a0a' : 'rgba(250,250,248,0.5)',
-      fontSize: '12px',
-      fontWeight: active ? 600 : 400,
-      letterSpacing: '0.08em',
-      cursor: 'pointer',
-      fontFamily: "'DM Sans', sans-serif",
-      transition: 'all 0.2s'
-    })
-  };
+  const stageText = LOADING_STAGES[stageIndex];
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
-        style={s.wrap}>
+    <div
+      style={{
+        position: isOpen ? 'fixed' : 'relative',
+        inset: isOpen ? 0 : 'auto',
+        zIndex: isOpen ? 9999 : 'auto',
+        minHeight: '100vh',
+        background: 'var(--ink)',
+        color: 'var(--bone)',
+        overflowY: 'auto',
+        paddingBottom: 'calc(150px + env(safe-area-inset-bottom))'
+      }}
+    >
+      {/* ── Header ── */}
+      <header
+        className="gutter"
+        style={{
+          height: '60px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid var(--veil)',
+          position: 'sticky',
+          top: 0,
+          background: 'var(--ink)',
+          zIndex: 10
+        }}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Leave the fitting room"
+          style={{ display: 'flex', alignItems: 'center', width: '44px', height: '44px', marginLeft: '-13px' }}
+        >
+          <Back />
+        </button>
+        <span className="label" style={{ color: 'var(--ash)' }}>The fitting room</span>
+        <span style={{ width: '44px' }} />
+      </header>
 
-        {/* ── Header ───────────────────── */}
-        <div style={s.header}>
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            style={s.backBtn}
-            onClick={onClose}>
-            ← Back
-          </motion.button>
+      {/* ── The plate ── */}
+      {!resultUrl ? (
+        <>
+          <div className="fitting-col" style={{ paddingTop: '24px', paddingBottom: '20px' }}>
+            <h2 className="display display-l" style={{ marginBottom: '14px' }}>
+              See it on you
+            </h2>
+            <p className="meta measure">
+              One photograph, facing forward, full length if you can. It is
+              deleted within twenty-four hours.
+            </p>
+          </div>
 
-          {fitScore && (
-            <div style={s.fitBadge}>
-              <span>●</span>
-              {fitScore}% MATCH
-            </div>
-          )}
-          
-          {!fitScore && <div style={{ width: '80px' }} />}
-        </div>
-
-        {/* ── Main content ─────────────── */}
-        {!resultUrl ? (
-          <>
-            {/* Upload section */}
-            <div style={{ padding: '22px 24px 0' }}>
-              <h2 style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: 'clamp(22px, 5.5vw, 28px)',
-                lineHeight: 1.25,
-                fontWeight: 400,
-                marginBottom: '8px',
-                color: '#fafaf8',
-                letterSpacing: '-0.01em'
-              }}>
-                ✦ See yourself in this outfit
-              </h2>
-              <p style={{
-                fontSize: '13px',
-                lineHeight: 1.6,
-                letterSpacing: '0.02em',
-                color: 'rgba(250,250,248,0.45)',
-                marginBottom: '22px'
-              }}>
-                Use a clear front-facing full body photo
-              </p>
-            </div>
-
-            {/* Upload zone */}
-            <motion.div
-              whileTap={{ scale: 0.99 }}
-              style={{
-                ...s.uploadZone,
-                borderColor: previewUrl 
-                  ? 'rgba(232,57,90,0.4)'
-                  : 'rgba(255,255,255,0.15)'
-              }}
-              onClick={() => fileInputRef.current?.click()}>
-              
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Your photo"
+          <div className="fitting-col">
+            {previewUrl ? (
+              <Plate
+                src={previewUrl}
+                alt="Your photograph"
+                fit="contain"
+                processing={isGenerating}
+                caption={isGenerating ? 'Developing' : 'Your photograph'}
+                note={isGenerating ? stageText : 'Change'}
+                onClick={isGenerating ? undefined : () => fileInputRef.current?.click()}
+                style={{ cursor: isGenerating ? 'default' : 'pointer' }}
+              />
+            ) : (
+              <figure className="mat">
+                <button
+                  className="aperture"
+                  onClick={() => fileInputRef.current?.click()}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'top center'
-                  }}
-                />
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '20px'
-                }}>
-                  <div style={{
-                    width: '60px',
-                    height: '60px',
-                    marginBottom: '14px',
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '0.5px solid rgba(255,255,255,0.12)',
-                    borderRadius: '18px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '24px'
-                  }}>
-                    +
-                  </div>
-                  <p style={{
-                    fontSize: '15px',
-                    marginBottom: '8px',
-                    color: 'rgba(250,250,248,0.5)',
-                    textAlign: 'center'
-                  }}>
-                    Upload your photo
-                  </p>
-                  <p style={{
-                    fontSize: '12px',
-                    letterSpacing: '0.02em',
-                    color: 'rgba(250,250,248,0.25)',
-                    textAlign: 'center',
-                    lineHeight: 1.5
-                  }}>
-                    JPG, PNG or WebP • Max 10MB
-                  </p>
-                </div>
-              )}
-
-              {/* Change photo overlay */}
-              {previewUrl && (
-                <div style={{
-                  position: 'absolute',
-                  bottom: '12px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'rgba(10,10,10,0.75)',
-                  backdropFilter: 'blur(8px)',
-                  border: '0.5px solid rgba(255,255,255,0.15)',
-                  borderRadius: '20px',
-                  padding: '8px 20px',
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  color: '#fafaf8',
-                  whiteSpace: 'nowrap'
-                }}>
-                  ↑ Change photo
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </motion.div>
-
-            {/* Privacy note */}
-            <p style={{
-              textAlign: 'center',
-              fontSize: '12px',
-              fontWeight: 500,
-              letterSpacing: '0.08em',
-              color: 'rgba(250,250,248,0.75)',
-              margin: '18px 24px 0',
-              padding: '12px 16px',
-              background: 'rgba(255,255,255,0.04)',
-              border: '0.5px solid rgba(255,255,255,0.08)',
-              borderRadius: '12px'
-            }}>
-              🔒 Private & auto-deleted within 24 hours
-            </p>
-
-            {/* Tips */}
-            <div style={{
-              margin: '18px 24px 0',
-              background: 'rgba(255,255,255,0.03)',
-              border: '0.5px solid rgba(255,255,255,0.06)',
-              borderRadius: '14px',
-              padding: '16px 18px'
-            }}>
-              <p style={{
-                fontSize: '10px',
-                letterSpacing: '0.2em',
-                color: 'rgba(250,250,248,0.35)',
-                marginBottom: '10px'
-              }}>
-                BEST RESULTS
-              </p>
-              {[
-                '✓ Full body visible',
-                '✓ Front-facing pose',
-                '✓ Good lighting',
-                '✓ Plain background'
-              ].map(tip => (
-                <p key={tip} style={{
-                  fontSize: '13px',
-                  lineHeight: 1.6,
-                  letterSpacing: '0.01em',
-                  color: 'rgba(250,250,248,0.5)',
-                  marginBottom: '6px'
-                }}>
-                  {tip}
-                </p>
-              ))}
-            </div>
-
-            {/* Error */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  style={{
-                    margin: '16px 20px 0',
-                    background: 'rgba(232,57,90,0.08)',
-                    border: '0.5px solid rgba(232,57,90,0.25)',
-                    borderRadius: '16px',
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                  
-                  <p style={{
-                    fontSize: '13px',
-                    color: 'rgba(250,250,248,0.8)',
-                    textAlign: 'center',
-                    lineHeight: 1.6
-                  }}>
-                    {error}
-                  </p>
-
-                  {/* Retry button */}
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      setError(null);
-                      handleGenerate();
-                    }}
-                    style={{
-                      background: 
-                        'linear-gradient(135deg, #E8395A, #c42d4a)',
-                      color: '#fafaf8',
-                      border: 'none',
-                      borderRadius: '12px',
-                      padding: '12px 24px',
-                      fontSize: '12px',
-                      letterSpacing: '0.15em',
-                      fontWeight: 500,
-                      fontFamily: "'DM Sans', sans-serif",
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}>
-                    ↺ TRY AGAIN
-                  </motion.button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.5,
-              ease: [0.25, 0.46, 0.45, 0.94]
-            }}>
-            {/* ── Result section ─────────── */}
-            
-            {/* Before/After Slider */}
-            <div style={{ 
-              margin: '16px 20px 0',
-              borderRadius: '20px',
-              overflow: 'hidden',
-              position: 'relative',
-              aspectRatio: '3/4',
-              userSelect: 'none'
-            }}
-              ref={sliderRef}>
-              
-              {/* AI result — full width */}
-              <img
-                src={resultUrl}
-                alt="AI Try-On"
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'top'
-                }}
-              />
-              
-              {/* Original photo — clipped */}
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                clipPath: `inset(0 ${100 - sliderPos}% 0 0)`
-              }}>
-                <img
-                  src={previewUrl}
-                  alt="Your photo"
-                  style={{
                     width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    objectPosition: 'top'
+                    border: 0,
+                    background: 'var(--ink-sunken)'
                   }}
-                />
-              </div>
-              
-              {/* Slider handle */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  bottom: 0,
-                  left: `${sliderPos}%`,
-                  transform: 'translateX(-50%)',
-                  width: '40px',
-                  cursor: 'ew-resize',
-                  touchAction: 'pan-y',
-                  display: 'flex',
-                  justifyContent: 'center'
-                }}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  isDraggingRef.current = true;
-                  const move = (ev) => {
-                    if (isDraggingRef.current) {
-                      handleSliderMove(ev.clientX);
-                    }
-                  };
-                  const up = () => {
-                    isDraggingRef.current = false;
-                    window.removeEventListener('mousemove', move);
-                    window.removeEventListener('mouseup', up);
-                  };
-                  window.addEventListener('mousemove', move);
-                  window.addEventListener('mouseup', up);
-                }}
-                onTouchStart={(e) => {
-                  isDraggingRef.current = true;
-                  dragStartPosRef.current = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY
-                  };
-                  const move = (ev) => {
-                    if (!isDraggingRef.current) return;
-                    
-                    const deltaX = Math.abs(ev.touches[0].clientX - dragStartPosRef.current.x);
-                    const deltaY = Math.abs(ev.touches[0].clientY - dragStartPosRef.current.y);
-                    
-                    if (deltaX > deltaY) {
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      handleSliderMove(ev.touches[0].clientX);
-                    }
-                  };
-                  const end = () => {
-                    isDraggingRef.current = false;
-                    window.removeEventListener('touchmove', move);
-                    window.removeEventListener('touchend', end);
-                    window.removeEventListener('touchcancel', end);
-                  };
-                  window.addEventListener('touchmove', move, { passive: false });
-                  window.addEventListener('touchend', end);
-                  window.addEventListener('touchcancel', end);
-                }}>
-                <div style={{ width: '2px', height: '100%', background: 'rgba(255,255,255,0.9)' }} />
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  background: '#fafaf8',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px',
-                  color: '#0a0a0a',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
-                  fontWeight: 700,
-                  cursor: 'ew-resize'
-                }}>
-                  ⇔
-                </div>
-              </div>
-              
-              {/* Labels */}
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                left: '12px',
-                background: 'rgba(10,10,10,0.6)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '8px',
-                padding: '4px 10px',
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.7)'
-              }}>
-                YOU
-              </div>
-              <div style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                background: 'rgba(232,57,90,0.7)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '8px',
-                padding: '4px 10px',
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: '#fafaf8'
-              }}>
-                AI LOOK
-              </div>
-              
-              {/* Drag hint */}
-              <div style={{
-                position: 'absolute',
-                bottom: '12px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                background: 'rgba(10,10,10,0.65)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '20px',
-                padding: '5px 14px',
-                fontSize: '10px',
-                letterSpacing: '0.1em',
-                color: 'rgba(255,255,255,0.6)',
-                whiteSpace: 'nowrap'
-              }}>
-                ← drag to compare →
-              </div>
-            </div>
-
-            {/* Tab toggle */}
-            <div style={s.tabRow}>
-              {['yours', 'ai'].map(tab => (
-                <motion.button
-                  key={tab}
-                  whileTap={{ scale: 0.97 }}
-                  style={s.tab(activeTab === tab)}
-                  onClick={() => setActiveTab(tab)}>
-                  {tab === 'yours' 
-                    ? 'YOUR PHOTO' 
-                    : 'AI LOOK'}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Single image view */}
-            <div style={{
-              margin: '0 20px',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              aspectRatio: '3/4'
-            }}>
-              <img
-                src={activeTab === 'yours' 
-                  ? previewUrl 
-                  : resultUrl}
-                alt={activeTab === 'yours' 
-                  ? 'Your photo' 
-                  : 'AI Try-On'}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'top'
-                }}
-              />
-            </div>
-
-            {/* Stats row */}
-            {(fitScore || generationTime) && (
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                margin: '20px 24px 0'
-              }}>
-                {fitScore && (
-                  <div style={{
-                    flex: 1,
-                    background: 'rgba(74,222,128,0.06)',
-                    border: '0.5px solid rgba(74,222,128,0.2)',
-                    borderRadius: '14px',
-                    padding: '16px',
-                    textAlign: 'center'
-                  }}>
-                    <p style={{
-                      fontSize: '24px',
-                      letterSpacing: '-0.02em',
-                      fontWeight: 600,
-                      color: '#4ade80',
-                      marginBottom: '2px'
-                    }}>
-                      {fitScore}%
-                    </p>
-                    <p style={{
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      color: 'rgba(250,250,248,0.4)'
-                    }}>
-                      AI FIT SCORE
-                    </p>
-                  </div>
-                )}
-                {generationTime && (
-                  <div style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '0.5px solid rgba(255,255,255,0.07)',
-                    borderRadius: '14px',
-                    padding: '16px',
-                    textAlign: 'center'
-                  }}>
-                    <p style={{
-                      fontSize: '24px',
-                      letterSpacing: '-0.02em',
-                      fontWeight: 600,
-                      color: '#fafaf8',
-                      marginBottom: '2px'
-                    }}>
-                      {(generationTime/1000).toFixed(1)}s
-                    </p>
-                    <p style={{
-                      fontSize: '10px',
-                      letterSpacing: '0.1em',
-                      color: 'rgba(250,250,248,0.4)'
-                    }}>
-                      GENERATED IN
-                    </p>
-                  </div>
-                )}
-              </div>
+                >
+                  <span className="label" style={{ color: 'var(--bone)' }}>
+                    Choose a photograph
+                  </span>
+                </button>
+                <figcaption className="mat-caption">
+                  <span>Your photograph</span>
+                  <span>JPG · PNG · WebP</span>
+                </figcaption>
+              </figure>
             )}
 
-            {/* Average time metric */}
-            {avgGenerationTime && (
-              <p style={{
-                textAlign: 'center',
-                fontSize: '10px',
-                color: 'rgba(250,250,248,0.3)',
-                letterSpacing: '0.05em',
-                marginTop: '10px'
-              }}>
-                ⚡ Avg generation time: {(avgGenerationTime/1000).toFixed(1)}s
-              </p>
-            )}
-            {/* Warnings block */}
-            {warnings && warnings.length > 0 && (
-              <div style={{
-                margin: '20px 24px 0',
-                background: 'rgba(234, 179, 8, 0.1)',
-                border: '0.5px solid rgba(234, 179, 8, 0.3)',
-                borderRadius: '12px',
-                padding: '14px 16px'
-              }}>
-                <p style={{
-                  fontSize: '11px',
-                  letterSpacing: '0.1em',
-                  color: 'rgba(234, 179, 8, 0.8)',
-                  marginBottom: '8px',
-                  fontWeight: 600
-                }}>
-                  FOR BETTER RESULTS
-                </p>
-                {warnings.map((warning, i) => (
-                  <p key={i} style={{
-                    fontSize: '12px',
-                    color: 'rgba(250,250,248,0.7)',
-                    marginBottom: '4px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '6px',
-                    lineHeight: 1.4
-                  }}>
-                    <span style={{ color: 'rgba(234, 179, 8, 0.6)' }}>•</span>
-                    {warning}
-                  </p>
-                ))}
-              </div>
-            )}
-
-            {/* Product name */}
-            <div style={{
-              margin: '20px 24px 0',
-              padding: '18px 20px',
-              background: 'rgba(255,255,255,0.03)',
-              border: '0.5px solid rgba(255,255,255,0.07)',
-              borderRadius: '12px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}>
-              <div>
-                <p style={{
-                  fontSize: '10px',
-                  letterSpacing: '0.18em',
-                  color: 'rgba(250,250,248,0.35)',
-                  marginBottom: '6px'
-                }}>
-                  OUTFIT TRIED
-                </p>
-                <p style={{
-                  fontSize: '15px',
-                  letterSpacing: '0.01em',
-                  color: '#fafaf8',
-                  fontWeight: 400
-                }}>
-                  {currentProduct?.name || "Garment preview"}
-                </p>
-              </div>
-              <p style={{
-                fontSize: '17px',
-                letterSpacing: '-0.01em',
-                fontWeight: 600,
-                color: '#fafaf8'
-              }}>
-                {currentProduct?.price ? `₹${currentProduct.price.toLocaleString('en-IN')}` : ''}
-              </p>
-            </div>
-
-            <OutfitRecommendations
-              productId={currentProduct?._id}
-              onTryThis={handleTryThis}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
             />
-          </motion.div>
-        )}
+          </div>
 
-        {/* ── Loading overlay ───────────── */}
-        <AnimatePresence>
-          {isGenerating && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(10,10,10,0.94)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 200,
-                padding: '40px 32px'
-              }}>
+          {!previewUrl && (
+            <div className="fitting-col" style={{ paddingTop: '32px' }}>
+              <div className="rule" style={{ marginBottom: '22px' }} />
+              <p className="meta measure">
+                It works best with a plain wall behind you, even light, and your
+                whole body in frame.
+              </p>
+            </div>
+          )}
 
-              {/* ── Animated ring ──────────── */}
-              <div style={{
-                position: 'relative',
-                width: '80px',
-                height: '80px',
-                marginBottom: '40px'
-              }}>
-                {/* Outer slow ring */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: 'linear'
-                  }}
+          {error && (
+            <div className="fitting-col" style={{ paddingTop: '28px' }}>
+              <div className="rule" style={{ marginBottom: '20px' }} />
+              <p style={{ marginBottom: '18px' }}>{error}</p>
+              <button className="textlink" onClick={() => { setError(null); handleGenerate(); }}>
+                Try again
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {/* ── The reveal ──
+              The result is wiped down the aperture over 1.1s rather than faded
+              in. It is the one moment on this site asking to be watched. */}
+          <div className="fitting-col" style={{ paddingTop: '24px' }}>
+            <figure className="mat">
+              <div className="aperture" ref={sliderRef} style={{ userSelect: 'none' }}>
+                <img
+                  src={resultUrl}
+                  alt={`${currentProduct?.name || 'This piece'}, worn by you`}
+                  className="graded developing"
+                />
+
+                {/* The original, clipped by the handle */}
+                <div
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(232,57,90,0.2)',
-                    borderTop: '1px solid #E8395A'
+                    clipPath: `inset(0 ${100 - sliderPos}% 0 0)`
                   }}
-                />
-                {/* Inner fast ring */}
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'linear'
-                  }}
+                >
+                  <img
+                    src={previewUrl}
+                    alt="Your photograph"
+                    className="graded"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
+                  />
+                </div>
+
+                {/* Handle */}
+                <div
+                  role="separator"
+                  aria-label="Drag to compare"
                   style={{
                     position: 'absolute',
-                    inset: '12px',
-                    borderRadius: '50%',
-                    border: 
-                      '1px solid rgba(255,255,255,0.06)',
-                    borderBottom: 
-                      '1px solid rgba(255,255,255,0.3)'
+                    top: 0,
+                    bottom: 0,
+                    left: `${sliderPos}%`,
+                    transform: 'translateX(-50%)',
+                    width: '44px',
+                    cursor: 'ew-resize',
+                    touchAction: 'pan-y',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    zIndex: 2
                   }}
-                />
-                {/* Center dot */}
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    opacity: [0.6, 1, 0.6]
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    isDraggingRef.current = true;
+                    const move = (ev) => {
+                      if (isDraggingRef.current) handleSliderMove(ev.clientX);
+                    };
+                    const up = () => {
+                      isDraggingRef.current = false;
+                      window.removeEventListener('mousemove', move);
+                      window.removeEventListener('mouseup', up);
+                    };
+                    window.addEventListener('mousemove', move);
+                    window.addEventListener('mouseup', up);
                   }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: 'easeInOut'
+                  onTouchStart={(e) => {
+                    isDraggingRef.current = true;
+                    dragStartPosRef.current = {
+                      x: e.touches[0].clientX,
+                      y: e.touches[0].clientY
+                    };
+                    const move = (ev) => {
+                      if (!isDraggingRef.current) return;
+                      const deltaX = Math.abs(ev.touches[0].clientX - dragStartPosRef.current.x);
+                      const deltaY = Math.abs(ev.touches[0].clientY - dragStartPosRef.current.y);
+                      if (deltaX > deltaY) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        handleSliderMove(ev.touches[0].clientX);
+                      }
+                    };
+                    const end = () => {
+                      isDraggingRef.current = false;
+                      window.removeEventListener('touchmove', move);
+                      window.removeEventListener('touchend', end);
+                      window.removeEventListener('touchcancel', end);
+                    };
+                    window.addEventListener('touchmove', move, { passive: false });
+                    window.addEventListener('touchend', end);
+                    window.addEventListener('touchcancel', end);
                   }}
-                  style={{
-                    position: 'absolute',
-                    inset: '34px',
-                    borderRadius: '50%',
-                    background: '#E8395A'
-                  }}
-                />
-              </div>
-
-              {/* ── Main heading ───────────── */}
-              <h2 style={{
-                fontFamily: 
-                  "'Cormorant Garamond', serif",
-                fontSize: '28px',
-                fontWeight: 500,
-                color: '#ffffff',
-                marginBottom: '12px',
-                textAlign: 'center',
-                textShadow: '0px 2px 10px rgba(255,255,255,0.1)'
-              }}>
-                Creating your AI look
-              </h2>
-
-              {/* ── Dynamic stage text ─────── */}
-              <div style={{
-                height: '24px',
-                overflow: 'hidden',
-                marginBottom: '32px'
-              }}>
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key={stageIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.4 }}
+                >
+                  <div style={{ width: '1px', height: '100%', background: 'var(--bone)' }} />
+                  <div
                     style={{
-                      fontSize: '14px',
-                      color: '#fafaf8',
-                      letterSpacing: '0.05em',
-                      textAlign: 'center',
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>
-                    {LOADING_STAGES[stageIndex]?.text}
-                  </motion.p>
-                </AnimatePresence>
-              </div>
-
-              {/* ── Progress bar ───────────── */}
-              <div style={{
-                width: '200px',
-                marginBottom: '24px'
-              }}>
-                {/* Track */}
-                <div style={{
-                  height: '2px',
-                  background: 'rgba(255,255,255,0.08)',
-                  borderRadius: '2px',
-                  overflow: 'hidden'
-                }}>
-                  {/* Fill */}
-                  <motion.div
-                    animate={{ width: `${progress}%` }}
-                    transition={{
-                      duration: 0.8,
-                      ease: 'easeOut'
-                    }}
-                    style={{
-                      height: '100%',
-                      background: 
-                        'linear-gradient(90deg, #E8395A, #ff6b8a)',
-                      borderRadius: '2px'
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: '26px',
+                      height: '26px',
+                      background: 'var(--bone)'
                     }}
                   />
                 </div>
-                
-                {/* percentage removed for cleaner UX */}
               </div>
 
-              {/* ── Stage dots ─────────────── */}
-              <div style={{
-                display: 'flex',
-                gap: '8px',
-                alignItems: 'center',
-                marginBottom: '32px'
-              }}>
-                {LOADING_STAGES.map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={{
-                      width: i === stageIndex 
-                        ? '20px' : '6px',
-                      background: i <= stageIndex
-                        ? '#E8395A'
-                        : 'rgba(255,255,255,0.12)',
-                      opacity: i === stageIndex 
-                        ? 1 : 0.5
-                    }}
-                    transition={{ duration: 0.3 }}
-                    style={{
-                      height: '6px',
-                      borderRadius: '3px'
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* ── Bottom branding ────────── */}
-              <p style={{
-                fontSize: '11px',
-                color: 'rgba(250,250,248,0.4)',
-                letterSpacing: '0.2em',
-                fontFamily: "'DM Sans', sans-serif"
-              }}>
-                METASHOP AI
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Fixed Bottom CTA ─────────── */}
-        <div style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '16px 24px',
-          paddingBottom: 
-            'calc(16px + env(safe-area-inset-bottom))',
-          background: 'rgba(10,10,10,0.95)',
-          backdropFilter: 'blur(20px)',
-          borderTop: '0.5px solid rgba(255,255,255,0.07)',
-          zIndex: 100
-        }}>
-
-          {!resultUrl ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {error && isRetryable ? (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => { setRetryCount(p => p + 1); handleGenerate(); }}
-                  disabled={isGenerating}
-                  style={{
-                    width: '100%',
-                    background: 'linear-gradient(135deg, #E8395A, #c42d4a)',
-                    color: '#fafaf8',
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    fontSize: '12px',
-                    letterSpacing: '0.24em',
-                    fontWeight: 500,
-                    fontFamily: "'DM Sans', sans-serif",
-                    cursor: isGenerating ? 'not-allowed' : 'pointer',
-                    opacity: isGenerating ? 0.6 : 1,
-                    transition: 'all 0.3s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px'
-                  }}>
-                  ✦ TRY AGAIN
-                </motion.button>
-              ) : (
-                <motion.button
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !uploadedPhoto}
-                  style={{
-                    width: '100%',
-                    background: uploadedPhoto
-                      ? 'linear-gradient(135deg, #E8395A, #c42d4a)'
-                      : 'rgba(255,255,255,0.08)',
-                    color: uploadedPhoto
-                      ? '#fafaf8'
-                      : 'rgba(250,250,248,0.3)',
-                    border: 'none',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    fontSize: '12px',
-                    letterSpacing: '0.24em',
-                    fontWeight: 500,
-                    fontFamily: "'DM Sans', sans-serif",
-                    cursor: (isGenerating || !uploadedPhoto) ? 'not-allowed' : 'pointer',
-                    opacity: isGenerating ? 0.6 : 1,
-                    transition: 'all 0.3s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px'
-                  }}>
-                  ✦ GENERATE MY LOOK ✨
-                </motion.button>
-              )}
-              
-              {!error && uploadedPhoto && (
-                <p style={{
-                  fontSize: '10px',
-                  color: 'rgba(250,250,248,0.4)',
-                  textAlign: 'center',
-                  letterSpacing: '0.05em'
-                }}>
-                  Best results with clear front-facing photos
-                </p>
-              )}
-              {error && isRetryable && (
-                <p style={{
-                  fontSize: '10px',
-                  color: 'rgba(250,250,248,0.4)',
-                  textAlign: 'center',
-                  letterSpacing: '0.05em'
-                }}>
-                  If it fails, you can retry instantly
-                </p>
-              )}
-            </div>
-          ) : (
-            /* Result action buttons */
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}>
-              
-              {/* Download + Share row */}
-              <div style={{ 
-                display: 'flex', 
-                gap: '12px' 
-              }}>
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={handleDownload}
-                  style={{
-                    flex: 1,
-                    background: '#fafaf8',
-                    color: '#0a0a0a',
-                    border: 'none',
-                    borderRadius: '14px',
-                    padding: '16px',
-                    fontSize: '11px',
-                    letterSpacing: '0.18em',
-                    fontWeight: 600,
-                    fontFamily: "'DM Sans', sans-serif",
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}>
-                  ↓ SAVE LOOK
-                </motion.button>
-
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={handleShare}
-                  style={{
-                    flex: 1,
-                    background: 'rgba(255,255,255,0.06)',
-                    color: '#fafaf8',
-                    border: '0.5px solid rgba(255,255,255,0.15)',
-                    borderRadius: '14px',
-                    padding: '16px',
-                    fontSize: '11px',
-                    letterSpacing: '0.18em',
-                    fontFamily: "'DM Sans', sans-serif",
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}>
-                  ↗ SHARE
-                </motion.button>
-              </div>
-
-              {/* Try another */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleTryAnother}
-                style={{
-                  width: '100%',
-                  background: 
-                    'linear-gradient(135deg, #E8395A, #c42d4a)',
-                  color: '#fafaf8',
-                  border: 'none',
-                  borderRadius: '14px',
-                  padding: '16px',
-                  fontSize: '11px',
-                  letterSpacing: '0.18em',
-                  fontWeight: 500,
-                  fontFamily: "'DM Sans', sans-serif",
-                  cursor: 'pointer'
-                }}>
-                ✦ TRY ANOTHER LOOK
-              </motion.button>
-            </div>
-          )}
-
-          <div className="mt-8">
-            <MetricsPanel />
+              <figcaption className="mat-caption">
+                <span>{currentProduct?.name || 'Your look'}</span>
+                <span>Drag to compare</span>
+              </figcaption>
+            </figure>
           </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
+
+          {/* ── The reading ── */}
+          <div className="fitting-col" style={{ paddingTop: '30px' }}>
+            <div className="rule" />
+            {[
+              fitScore ? ['Fit', `${fitScore}%`] : null,
+              currentProduct?.price
+                ? ['Price', `₹${Number(currentProduct.price).toLocaleString('en-IN')}`]
+                : null,
+              generationTime ? ['Made in', `${(generationTime / 1000).toFixed(1)}s`] : null
+            ]
+              .filter(Boolean)
+              .map(([label, value]) => (
+                <div
+                  key={label}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '14px 0',
+                    borderBottom: '1px solid var(--veil)',
+                    fontSize: 'var(--t-s)'
+                  }}
+                >
+                  <span style={{ color: 'var(--ash)' }}>{label}</span>
+                  <span>{value}</span>
+                </div>
+              ))}
+          </div>
+
+          {warnings && warnings.length > 0 && (
+            <div className="fitting-col" style={{ paddingTop: '26px' }}>
+              <p className="label" style={{ color: 'var(--ash)', marginBottom: '12px' }}>
+                Next time
+              </p>
+              {warnings.map((warning, i) => (
+                <p key={i} className="meta measure" style={{ marginBottom: '5px' }}>
+                  {warning}
+                </p>
+              ))}
+            </div>
+          )}
+
+          <OutfitRecommendations productId={currentProduct?._id} onTryThis={handleTryThis} />
+        </>
+      )}
+
+      {/* ── Dock ── */}
+      <div className="dock" style={{ position: 'fixed', bottom: 0 }}>
+        {!resultUrl ? (
+          <button
+            className={`btn ${uploadedPhoto ? 'btn-primary' : 'btn-quiet'}`}
+            style={{ width: '100%' }}
+            onClick={error && isRetryable ? () => { setError(null); handleGenerate(); } : handleGenerate}
+            disabled={isGenerating || !uploadedPhoto}
+          >
+            {isGenerating
+              ? 'Developing'
+              : error && isRetryable
+              ? 'Try again'
+              : 'See it on you'}
+          </button>
+        ) : (
+          <div style={{ display: 'flex', gap: '1px' }}>
+            <button className="btn btn-quiet" style={{ flex: 1 }} onClick={handleShare}>
+              Share
+            </button>
+            <button className="btn btn-quiet" style={{ flex: 1 }} onClick={handleDownload}>
+              Save
+            </button>
+            <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleTryAnother}>
+              Try another
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

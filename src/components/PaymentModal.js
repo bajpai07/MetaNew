@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { Close } from './Marks';
 
+/**
+ * Payment sits on paper, like the checkout behind it. The "🔒 256-bit AES
+ * Bank-grade Security" line is gone — it was the only sentence on the screen
+ * shouting, and a padlock emoji is not what makes a house trustworthy.
+ * The sandbox note stays, because that one is true and useful.
+ */
 export default function PaymentModal({ amount, onPay, onClose }) {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
@@ -15,9 +22,7 @@ export default function PaymentModal({ amount, onPay, onClose }) {
 
   const handleExpiryChange = (e) => {
     let val = e.target.value.replace(/\D/g, '');
-    if (val.length >= 2) {
-      val = val.substring(0, 2) + '/' + val.substring(2, 4);
-    }
+    if (val.length >= 2) val = val.substring(0, 2) + '/' + val.substring(2, 4);
     if (val.length <= 5) setExpiry(val);
   };
 
@@ -29,12 +34,11 @@ export default function PaymentModal({ amount, onPay, onClose }) {
   const handlePayment = (e) => {
     e.preventDefault();
     if (cardNumber.length < 19 || expiry.length < 5 || cvv.length < 3) {
-      toast.error("Please enter valid card details to simulate payment");
+      toast.error('Enter full card details to simulate payment');
       return;
     }
 
     setIsProcessing(true);
-    // 2-Second Simulated Network Delay
     setTimeout(() => {
       setIsProcessing(false);
       onPay();
@@ -42,38 +46,85 @@ export default function PaymentModal({ amount, onPay, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
-      <div style={{ background: 'var(--surface)', padding: '40px', borderRadius: '16px', width: '100%', maxWidth: '400px', position: 'relative', border: '0.5px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-        <button onClick={onClose} disabled={isProcessing} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-secondary)' }}>✕</button>
-        
-        <h2 style={{ fontFamily: 'var(--font-display)', margin: '0 0 5px 0', color: 'var(--white)', fontSize: '24px', fontWeight: 400 }}>Complete Payment</h2>
-        <p style={{ margin: '0 0 25px 0', color: 'var(--text-secondary)', fontSize: '13px' }}>MetaShop Virtual Gateway (Sandbox)</p>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(14,12,11,0.78)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px',
+        zIndex: 1000
+      }}
+    >
+      <div
+        className="on-paper"
+        style={{ width: '100%', maxWidth: '420px', padding: '36px 32px 32px', position: 'relative' }}
+      >
+        <button
+          onClick={onClose}
+          disabled={isProcessing}
+          aria-label="Close payment"
+          style={{ position: 'absolute', top: '20px', right: '20px', padding: '10px', margin: '-10px' }}
+        >
+          <Close size={15} />
+        </button>
 
-        <form onSubmit={handlePayment}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '11px', letterSpacing: '0.1em', fontWeight: '500', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Card Number</label>
-            <input type="text" placeholder="XXXX XXXX XXXX XXXX" required value={cardNumber} onChange={handleCardNumberChange} disabled={isProcessing} style={{ width: '100%', padding: '14px', border: '0.5px solid var(--border)', borderRadius: '8px', fontSize: '15px', letterSpacing: '2px', background: 'var(--surface-2)', color: 'var(--white)', outline: 'none' }} />
+        <h2 className="display display-m" style={{ marginBottom: '6px' }}>Payment</h2>
+        <p className="meta" style={{ marginBottom: '32px' }}>Aiyaashi virtual gateway · sandbox</p>
+
+        <form onSubmit={handlePayment} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div>
+            <label className="meta" htmlFor="pay-card" style={{ display: 'block' }}>Card number</label>
+            <input
+              id="pay-card"
+              className="field"
+              type="text"
+              inputMode="numeric"
+              placeholder="0000 0000 0000 0000"
+              required
+              value={cardNumber}
+              onChange={handleCardNumberChange}
+              disabled={isProcessing}
+            />
           </div>
 
-          <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', gap: '20px' }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontSize: '11px', letterSpacing: '0.1em', fontWeight: '500', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Valid Thru</label>
-              <input type="text" placeholder="MM/YY" required value={expiry} onChange={handleExpiryChange} disabled={isProcessing} style={{ width: '100%', padding: '14px', border: '0.5px solid var(--border)', borderRadius: '8px', fontSize: '15px', textAlign: 'center', background: 'var(--surface-2)', color: 'var(--white)', outline: 'none' }} />
+              <label className="meta" htmlFor="pay-exp" style={{ display: 'block' }}>Valid to</label>
+              <input
+                id="pay-exp"
+                className="field"
+                type="text"
+                inputMode="numeric"
+                placeholder="MM/YY"
+                required
+                value={expiry}
+                onChange={handleExpiryChange}
+                disabled={isProcessing}
+              />
             </div>
             <div style={{ flex: 1 }}>
-               <label style={{ display: 'block', marginBottom: '8px', fontSize: '11px', letterSpacing: '0.1em', fontWeight: '500', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>CVV</label>
-               <input type="password" placeholder="•••" required value={cvv} onChange={handleCvvChange} disabled={isProcessing} style={{ width: '100%', padding: '14px', border: '0.5px solid var(--border)', borderRadius: '8px', fontSize: '15px', textAlign: 'center', letterSpacing: '4px', background: 'var(--surface-2)', color: 'var(--white)', outline: 'none' }} />
+              <label className="meta" htmlFor="pay-cvv" style={{ display: 'block' }}>Security code</label>
+              <input
+                id="pay-cvv"
+                className="field"
+                type="password"
+                inputMode="numeric"
+                placeholder="000"
+                required
+                value={cvv}
+                onChange={handleCvvChange}
+                disabled={isProcessing}
+              />
             </div>
           </div>
 
-          <button type="submit" disabled={isProcessing} style={{ width: '100%', padding: '16px', background: isProcessing ? 'var(--surface-3)' : 'var(--rose)', color: 'var(--white)', border: 'none', borderRadius: '8px', fontSize: '13px', letterSpacing: '0.15em', fontWeight: '500', cursor: isProcessing ? 'not-allowed' : 'pointer', transition: 'background 0.3s' }}>
-            {isProcessing ? 'PROCESSING...' : `PAY ₹${amount}`}
+          <button type="submit" className="btn btn-bone" disabled={isProcessing} style={{ width: '100%', marginTop: '8px' }}>
+            {isProcessing ? 'Processing' : `Pay ₹${Number(amount).toLocaleString('en-IN')}`}
           </button>
         </form>
-        
-        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '11px', color: 'var(--text-muted)' }}>
-           🔒 256-bit AES Bank-grade Security
-        </div>
       </div>
     </div>
   );

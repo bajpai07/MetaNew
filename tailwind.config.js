@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+// Mirrors the tokens in src/index.css. Colour and type live in one place;
+// nothing in a component should invent its own hex value.
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -7,51 +9,58 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        rose: '#E8395A',
-        black: '#0a0a0a',
-        white: '#fafaf8',
-        beige: '#f2ede6',
-        muted: '#888888',
-      },
-      fontFamily: {
-        display: ['Cormorant Garamond', 'serif'],
-        body: ['DM Sans', 'sans-serif'],
-      },
-      keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' }
+        ink: {
+          DEFAULT: '#14110F',
+          raised: '#1C1815',
+          sunken: '#0E0C0B'
         },
-        slow_zoom: {
-          '0%': { transform: 'scale(1.02)' },
-          '100%': { transform: 'scale(1.15)' }
+        bone: {
+          DEFAULT: '#EDE7DE',
+          dim: 'rgba(237,231,222,0.62)'
         },
-        scan: {
-          '0%': { top: '0%' },
-          '100%': { top: '100%' }
+        ash: '#8F857A',
+        oxblood: {
+          DEFAULT: '#5E1A22',
+          deep: '#4A1219'
         },
-        shimmer_slide: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' }
-        },
-        pulse_soft: {
-          '0%, 100%': { opacity: 1, transform: 'scale(1)' },
-          '50%': { opacity: 0.8, transform: 'scale(0.98)' }
-        },
-        progress_bar: {
-          '0%': { width: '0%' },
-          '50%': { width: '70%' },
-          '100%': { width: '92%' }
+        paper: {
+          DEFAULT: '#EDE7DE',
+          raised: '#E3DCD1',
+          ink: '#14110F',
+          ash: '#6B6259'
         }
       },
-      animation: {
-        'slow-zoom': 'slow_zoom 20s ease-in-out infinite alternate',
-        'shimmer-slide': 'shimmer_slide 2s infinite linear',
-        'pulse-soft': 'pulse_soft 3s ease-in-out infinite',
-        'progress-bar': 'progress_bar 6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards',
-        'scan': 'scan 3s ease-in-out infinite alternate'
+      fontFamily: {
+        display: ['Bodoni Moda', 'Didot', 'Times New Roman', 'serif'],
+        body: ['Instrument Sans', '-apple-system', 'Segoe UI', 'Helvetica', 'Arial', 'sans-serif']
+      },
+      fontSize: {
+        micro: ['11px', { lineHeight: '1.4', letterSpacing: '0.18em' }],
+        s: ['13px', { lineHeight: '1.6' }],
+        body: ['15px', { lineHeight: '1.65' }],
+        m: ['17px', { lineHeight: '1.6' }]
+      },
+      letterSpacing: {
+        wide: '0.18em',
+        mark: '0.34em'
+      },
+      borderColor: {
+        veil: 'rgba(237,231,222,0.10)',
+        'veil-strong': 'rgba(237,231,222,0.22)'
+      },
+      transitionTimingFunction: {
+        drape: 'cubic-bezier(0.16, 1, 0.3, 1)'
+      },
+      transitionDuration: {
+        micro: '240ms',
+        state: '600ms',
+        reveal: '1100ms'
+      },
+      maxWidth: {
+        measure: '34em',
+        shell: '1440px'
       }
-    },
+    }
   },
-  plugins: [],
+  plugins: []
 }

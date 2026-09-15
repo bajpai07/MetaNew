@@ -4,6 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import ReactCompareImage from 'react-compare-image';
 import { validatePose } from '../../utils/poseValidation';
+import { API_BASE } from '../../config/api';
 
 export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDescription, garmentCategory, garmentName }) {
   const [userImage, setUserImage] = useState(null);
@@ -65,7 +66,7 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
       setLoadingMessage("AI is analyzing your photo...");
 
       // 2. Kick off prediction
-      const res = await axios.post(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/generate`, {
+      const res = await axios.post(`${API_BASE}/api/vton/generate`, {
         human_image: userImage,
         garment_image: garmentImage,
         garment_des: garmentDescription || "photorealistic clothing",
@@ -86,12 +87,11 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
       let isDone = false;
       while (!isDone) {
         await new Promise(resolve => setTimeout(resolve, 3000)); // poll every 3 seconds
-        const checkRes = await axios.get(`${process.env.REACT_APP_API_URL || `${process.env.REACT_APP_API_URL || 'http://localhost:4000'}`}/api/vton/status/${predictionId}`, { timeout: 120000 });
+        const checkRes = await axios.get(`${API_BASE}/api/vton/status/${predictionId}`, { timeout: 120000 });
         const status = checkRes.data.status;
         
         if (status === 'succeeded') {
           const finalImageUrl = checkRes.data.output[0];
-          console.log('Final Result URL:', finalImageUrl);
           setResultImage(finalImageUrl); // Replicate output is usually an array of URLs
           isDone = true;
           setIsProcessing(false);
@@ -165,7 +165,7 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
                   <button onClick={() => {
                         const link = document.createElement('a');
                         link.href = resultImage;
-                        link.download = 'metashop-tryon.jpg';
+                        link.download = 'aiyaashi-look.jpg';
                         link.click();
                       }}
                       style={{ padding: '8px 15px', background: 'rgba(0,0,0,0.85)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontSize: '10px', letterSpacing: '0.1em', cursor: 'pointer', backdropFilter: 'blur(5px)' }}

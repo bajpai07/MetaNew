@@ -43,7 +43,6 @@ const DeformableShirtMesh = ({
       shirtTexture,
       // onLoad
       (loadedTexture) => {
-        console.log('Texture loaded successfully:', shirtTexture);
       },
       // onProgress
       (progress) => {
