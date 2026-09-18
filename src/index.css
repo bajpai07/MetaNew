@@ -334,8 +334,12 @@ textarea {
    softbox instead of shouting over it. An earlier, gentler version of this
    (saturate .82 / sepia .06) was not nearly strong enough: a cyan wall at 82%
    saturation is still a cyan wall. */
+/* Superseded: that key (saturate .58 / sepia .26) made every customer photo
+   look washed out, and the try-on result read dull beside the product it was
+   meant to sell. The customer's own colours are the point — shown true, with
+   only a whisper of contrast. The mat and vignette still do the framing. */
 .graded {
-  filter: saturate(0.58) contrast(1.07) brightness(0.95) sepia(0.26);
+  filter: contrast(1.03);
 }
 
 /* 2 — the vignette: corners toward ink, eye toward the garment. Deep enough
@@ -348,9 +352,9 @@ textarea {
   pointer-events: none;
   background:
     radial-gradient(108% 82% at 50% 40%,
-      rgba(20, 17, 15, 0) 34%,
-      rgba(20, 17, 15, 0.30) 72%,
-      rgba(20, 17, 15, 0.68) 100%);
+      rgba(20, 17, 15, 0) 48%,
+      rgba(20, 17, 15, 0.12) 78%,
+      rgba(20, 17, 15, 0.34) 100%);
 }
 
 /* 3 — the caption, on the deeper bottom margin */
@@ -377,25 +381,95 @@ textarea {
   animation: plate-develop var(--d-reveal) var(--ease-drape) both;
 }
 
-/* Processing: the customer's own photo, held in the mat, with a slow
-   light band passing over it. No spinner, no percentage. */
+/* Processing: the customer's own photo, held in the mat, gently breathing
+   under a light band that sweeps down it, with a hairline filling along the
+   foot as each stage completes. An earlier version (a 10% band over a
+   desaturated photo) was so faint customers could not tell anything was
+   happening. Colours are dimmed, never drained. */
+@keyframes plate-breathe {
+  0%, 100% { filter: contrast(1.03) brightness(0.74); }
+  50%      { filter: contrast(1.03) brightness(0.92); }
+}
+.graded.is-processing {
+  animation: plate-breathe 2400ms ease-in-out infinite;
+}
+
 @keyframes plate-pass {
-  0%   { transform: translateY(-120%); }
-  100% { transform: translateY(320%); }
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(260%); }
 }
 .pass-band {
   position: absolute;
   left: 0;
   right: 0;
-  height: 42%;
+  top: 0;
+  height: 38%;
+  z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
     rgba(237, 231, 222, 0) 0%,
-    rgba(237, 231, 222, 0.10) 50%,
+    rgba(237, 231, 222, 0.14) 70%,
+    rgba(237, 231, 222, 0.34) 100%
+  );
+  animation: plate-pass 2200ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+/* the bright leading edge of the band */
+.pass-band::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: rgba(255, 250, 242, 0.95);
+  box-shadow: 0 0 14px 3px rgba(237, 231, 222, 0.65);
+}
+
+/* stage progress along the foot of the aperture */
+.plate-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 2;
+  background: rgba(237, 231, 222, 0.22);
+}
+.plate-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--bone);
+  box-shadow: 0 0 8px rgba(237, 231, 222, 0.7);
+  transition: width 900ms var(--ease-drape);
+}
+
+/* The dock button while working: fully legible, with a light sweeping
+   across it, rather than the 40% "disabled" ghost it used to fall to. */
+@keyframes btn-sweep {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.btn.btn-working,
+.btn.btn-working:disabled {
+  position: relative;
+  overflow: hidden;
+  opacity: 1;
+  cursor: progress;
+  background: var(--oxblood);
+  color: var(--bone);
+}
+.btn.btn-working::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(237, 231, 222, 0) 0%,
+    rgba(237, 231, 222, 0.22) 50%,
     rgba(237, 231, 222, 0) 100%
   );
-  animation: plate-pass 3200ms var(--ease-drape) infinite;
+  animation: btn-sweep 1600ms ease-in-out infinite;
 }
 
 /* ============================================================

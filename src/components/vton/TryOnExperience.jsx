@@ -378,6 +378,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
                 alt="Your photograph"
                 fit="contain"
                 processing={isGenerating}
+                progress={(stageIndex + 1) / LOADING_STAGES.length}
                 caption={isGenerating ? 'Developing' : 'Your photograph'}
                 note={isGenerating ? stageText : 'Change'}
                 onClick={isGenerating ? undefined : () => fileInputRef.current?.click()}
@@ -596,7 +597,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       <div className="dock" style={{ position: 'fixed', bottom: 0 }}>
         {!resultUrl ? (
           <button
-            className={`btn ${uploadedPhoto ? 'btn-primary' : 'btn-quiet'}`}
+            className={`btn ${uploadedPhoto ? 'btn-primary' : 'btn-quiet'}${isGenerating ? ' btn-working' : ''}`}
             style={{ width: '100%' }}
             onClick={error && isRetryable ? () => { setError(null); handleGenerate(); } : handleGenerate}
             disabled={isGenerating || !uploadedPhoto}

@@ -30,6 +30,8 @@ export default function Plate({
   revealing = false,
   /** Holds the photo under a slow passing light band instead of a spinner. */
   processing = false,
+  /** 0–1, drawn as a hairline along the foot of the aperture while processing. */
+  progress,
   /** 'contain' shows the whole photograph instead of filling the aperture. */
   fit,
   children,
@@ -43,11 +45,15 @@ export default function Plate({
           <img
             src={src}
             alt={alt || ''}
-            className={`graded${revealing ? ' developing' : ''}`}
-            style={processing ? { filter: 'saturate(0.34) contrast(1.02) brightness(0.82)' } : undefined}
+            className={`graded${revealing ? ' developing' : ''}${processing ? ' is-processing' : ''}`}
           />
         )}
         {processing && <div className="pass-band" />}
+        {processing && typeof progress === 'number' && (
+          <div className="plate-progress">
+            <span style={{ width: `${Math.max(0.06, Math.min(1, progress)) * 100}%` }} />
+          </div>
+        )}
         {children}
       </div>
 
