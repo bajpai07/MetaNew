@@ -328,36 +328,18 @@ textarea {
   object-position: center;
 }
 
-/* 1 — the grade: pulls every source into one warm, desaturated key.
-   Order matters — desaturate first, then warm what is left, so a harsh
-   fluorescent or a cyan-cast wall lands in the same family as a studio
-   softbox instead of shouting over it. An earlier, gentler version of this
-   (saturate .82 / sepia .06) was not nearly strong enough: a cyan wall at 82%
-   saturation is still a cyan wall. */
-/* Superseded: that key (saturate .58 / sepia .26) made every customer photo
-   look washed out, and the try-on result read dull beside the product it was
-   meant to sell. The customer's own colours are the point — shown true, with
-   only a whisper of contrast. The mat and vignette still do the framing. */
+/* The customer's photograph is shown exactly as it was taken: no grade, no
+   vignette. Both were tried and both cost the thing that matters here —
+   a CSS `filter` of any strength makes the browser render the image through
+   sRGB, which clips the wide-gamut (Display P3) colour phone cameras record,
+   so a burgundy dress came out greyer even under contrast(1.03); and the
+   vignette laid a dark wash over a third of the frame. The mat alone frames
+   it. `.graded` stays as a hook but deliberately applies nothing. */
 .graded {
-  filter: contrast(1.03);
+  filter: none;
 }
 
-/* 2 — the vignette: corners toward ink, eye toward the garment. Deep enough
-   to actually swallow a cluttered bedroom corner, which is the usual
-   background in a photograph taken on a phone at arm's length. */
-.aperture::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(108% 82% at 50% 40%,
-      rgba(20, 17, 15, 0) 48%,
-      rgba(20, 17, 15, 0.12) 78%,
-      rgba(20, 17, 15, 0.34) 100%);
-}
-
-/* 3 — the caption, on the deeper bottom margin */
+/* The caption, on the deeper bottom margin */
 .mat-caption {
   margin-top: 12px;
   display: flex;
@@ -381,19 +363,10 @@ textarea {
   animation: plate-develop var(--d-reveal) var(--ease-drape) both;
 }
 
-/* Processing: the customer's own photo, held in the mat, gently breathing
+/* Processing: the customer's own photo, held in the mat at its true colours,
    under a light band that sweeps down it, with a hairline filling along the
-   foot as each stage completes. An earlier version (a 10% band over a
-   desaturated photo) was so faint customers could not tell anything was
-   happening. Colours are dimmed, never drained. */
-@keyframes plate-breathe {
-  0%, 100% { filter: contrast(1.03) brightness(0.74); }
-  50%      { filter: contrast(1.03) brightness(0.92); }
-}
-.graded.is-processing {
-  animation: plate-breathe 2400ms ease-in-out infinite;
-}
-
+   foot as each stage completes. The motion lives in overlays only — the
+   photograph itself is never dimmed or filtered. */
 @keyframes plate-pass {
   0%   { transform: translateY(-100%); }
   100% { transform: translateY(260%); }

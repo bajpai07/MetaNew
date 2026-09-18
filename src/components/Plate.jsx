@@ -14,9 +14,10 @@
  * (upload preview, processing, result, saved look, modal), is mounted here and
  * nowhere else, identically:
  *
- *   1. the grade    — one warm, slightly desaturated tonal key for all sources
- *   2. the vignette — corners pulled toward ink, eye pushed to the garment
- *   3. the mat      — bone board, 3:4 aperture, deeper bottom margin, caption
+ *   the mat — bone board, 3:4 aperture, deeper bottom margin, caption
+ *
+ * The photograph itself is shown untouched: no grade, no vignette (see
+ * `.graded` in index.css for why).
  *
  * Merchandise photography deliberately does NOT get the mat. Your photograph is
  * framed; the goods are not. That distinction is the brand.
@@ -45,7 +46,7 @@ export default function Plate({
           <img
             src={src}
             alt={alt || ''}
-            className={`graded${revealing ? ' developing' : ''}${processing ? ' is-processing' : ''}`}
+            className={`graded${revealing ? ' developing' : ''}`}
           />
         )}
         {processing && <div className="pass-band" />}
