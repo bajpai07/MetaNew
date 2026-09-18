@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../config/api';
 
 const AuthContext = createContext();

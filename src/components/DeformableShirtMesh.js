@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { PlaneGeometry, MeshStandardMaterial, Vector3 } from 'three';
 import * as THREE from 'three';
@@ -104,10 +104,8 @@ const DeformableShirtMesh = ({
     const chestCenter = convertCoordinates(poseData.chestCenter);
 
     // Calculate mesh bounds
-    const meshTop = meshSize.height / 2;
     const meshBottom = -meshSize.height / 2;
     const meshLeft = -meshSize.width / 2;
-    const meshRight = meshSize.width / 2;
 
     // Update each vertex
     for (let i = 0; i < vertexCount; i++) {

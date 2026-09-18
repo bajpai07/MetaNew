@@ -17,7 +17,6 @@ export default function useVTONTracking(videoRef, occlusionCanvasRef) {
   const poseRef = useRef(null);
   const segmentationRef = useRef(null);
   const cameraUtilsRef = useRef(null);
-  const animationFrameId = useRef(null);
   const activeObj = useRef({ active: true });
 
   // Math helper for euclidean distance
@@ -25,7 +24,11 @@ export default function useVTONTracking(videoRef, occlusionCanvasRef) {
 
   useEffect(() => {
     activeObj.current.active = true;
-    const active = activeObj.current.active;
+    // Captured for the cleanup: the flag object is never replaced, and the
+    // <video> is mounted before this effect runs, so these are the same
+    // objects the cleanup would otherwise read off the refs.
+    const activeState = activeObj.current;
+    const video = videoRef.current;
 
     const initTracking = async () => {
       try {
@@ -183,11 +186,10 @@ export default function useVTONTracking(videoRef, occlusionCanvasRef) {
 
     // CLEANUP MEMORY LEAKS
     return () => {
-      activeObj.current.active = false;
-      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
-      
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
+      activeState.active = false;
+
+      if (video && video.srcObject) {
+        const tracks = video.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
       if (cameraUtilsRef.current) cameraUtilsRef.current.stop();

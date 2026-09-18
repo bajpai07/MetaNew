@@ -37,8 +37,11 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Refetch only when the shopper changes. fetchCart is redefined on every
+  // render, so listing it as a dependency would refetch in an endless loop.
   useEffect(() => {
     fetchCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const addToCart = async (productId) => {

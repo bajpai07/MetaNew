@@ -31,38 +31,6 @@ export default function VirtualTryOn({ modelUrl = "/assets/models/dress.glb", ca
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const touchState = useRef({ isDragging: false, lastX: 0, lastY: 0 });
-
-  const handlePointerDown = (e) => {
-    touchState.current.isDragging = true;
-    touchState.current.lastX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    touchState.current.lastY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
-  };
-
-  const handlePointerMove = (e) => {
-    if (!touchState.current.isDragging) return;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-    
-    if (clientX !== undefined && clientY !== undefined) {
-      const dx = clientX - touchState.current.lastX;
-      const dy = clientY - touchState.current.lastY;
-      
-      setDragOffset(prev => ({
-        x: prev.x + (dx * 0.025), // Multiplier for 1:1 feel on drag
-        y: prev.y - (dy * 0.025)
-      }));
-      
-      touchState.current.lastX = clientX;
-      touchState.current.lastY = clientY;
-    }
-  };
-
-  const handlePointerUp = () => {
-    touchState.current.isDragging = false;
-  };
-
   const handleResetFit = () => {
     setScaleOffset(300.0);
     setTargetX(window.innerWidth / 2);
