@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { API_BASE } from '../config/api';
@@ -21,7 +21,9 @@ export const CartProvider = ({ children }) => {
   const userId = user ? (user.id || user._id) : guestId;
   const API_URL = `${API_BASE}/api/cart`;
 
-  const fetchCart = async () => {
+  // Memoised on the shopper (and the constant API URL), so the effect below
+  // refetches only when the shopper changes — exactly as before.
+  const fetchCart = useCallback(async () => {
     try {
       const { data } = await axios.get(API_URL, { params: { userId } });
       if (data && Array.isArray(data.items)) {
@@ -35,14 +37,11 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.error("Failed to fetch cart:", error);
     }
-  };
+  }, [API_URL, userId]);
 
-  // Refetch only when the shopper changes. fetchCart is redefined on every
-  // render, so listing it as a dependency would refetch in an endless loop.
   useEffect(() => {
     fetchCart();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [fetchCart]);
 
   const addToCart = async (productId) => {
     // Return a promise so components can show toasts based on resolution
