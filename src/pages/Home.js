@@ -28,13 +28,6 @@ import { API_BASE } from '../config/api';
  * the customer's own photograph gets the mat.
  */
 
-// Campaign stills, chosen from a rendered contact sheet against one gate:
-// would this be believable in a fashion campaign? Everything that answered
-// "it would be believable in a catalogue" was cut — hanger shots, flat-lays,
-// blank-tee mockups and lifestyle photography all failed at that stage, which
-// is what the earlier set was almost entirely made of.
-const EDITORIAL_GARMENT =
-  "https://images.unsplash.com/photo-1685432531593-1afc8a152e5f?w=2000&q=85";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?w=800&q=80";
 
@@ -208,24 +201,6 @@ export default function Home() {
                 <ProductCard key={p._id} product={p} scale={i === 0 ? "feature" : "quiet"} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ─────────────────── IV. FULL BLEED — THE GARMENT ─────────────────── */}
-      {!browsing && (
-        <section className="chapter-bleed">
-          <img src={EDITORIAL_GARMENT} alt="A model in black tailoring on a runway, shot in black and white" loading="lazy" decoding="async" />
-          <div className="chapter-bleed-copy gutter">
-            <h2 className="display display-l" style={{ marginBottom: "14px" }}>
-              The new silhouette
-            </h2>
-            <p className="meta" style={{ marginBottom: "26px", maxWidth: "26ch" }}>
-              Relaxed structure. Natural movement.
-            </p>
-            <button className="textlink" onClick={goTo("collection")}>
-              Explore
-            </button>
           </div>
         </section>
       )}
