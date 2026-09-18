@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE } from '../config/api';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Sizing sits inside the product page as a disclosure, not as a bordered
@@ -10,6 +11,13 @@ import { API_BASE } from '../config/api';
  *
  * The calculation, the guest-mode localStorage fallback and the authenticated
  * PUT to /api/users/measurements are unchanged.
+ *
+ * A token outlives nothing on its own: AuthContext hydrates "logged in"
+ * from localStorage alone and nothing here ever checked expiry, so a token
+ * past its 7-day life (or otherwise rejected) sat in storage and was resent
+ * on every product page forever, 401-ing quietly each time. On a 401 from
+ * this endpoint specifically, we end that dead session via the existing
+ * logout() rather than leave it to keep failing.
  */
 
 function calculateSizeLocally(height, weight) {
@@ -60,6 +68,7 @@ function calculateSizeLocally(height, weight) {
 }
 
 const SizeRecommendation = ({ onRecommendation }) => {
+  const { logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
@@ -102,7 +111,12 @@ const SizeRecommendation = ({ onRecommendation }) => {
         onRecommendation?.(res.data.recommendation);
       }
     } catch (err) {
-      // Silent fail
+      if (err.response?.status === 401) {
+        // The token this browser is holding is dead (expired or otherwise
+        // rejected) — end that session instead of resending it on every
+        // product page. Otherwise silent, matching the previous behaviour.
+        logout();
+      }
     }
   };
 
@@ -160,7 +174,12 @@ const SizeRecommendation = ({ onRecommendation }) => {
         onRecommendation?.(res.data.recommendation);
       }
     } catch (err) {
-      setError('We couldn’t work that out. Try again.');
+      if (err.response?.status === 401) {
+        logout();
+        setError('Your session has expired. Sign in again to save this to your account.');
+      } else {
+        setError('We couldn’t work that out. Try again.');
+      }
     } finally {
       setLoading(false);
     }
