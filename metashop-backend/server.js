@@ -30,7 +30,8 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://meta-new-beige.vercel.app"
+  "https://meta-new-beige.vercel.app",
+  "https://meta-new-ai.vercel.app"
 ];
 
 app.use(cors({
