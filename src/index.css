@@ -687,6 +687,16 @@ textarea {
   .goods-hero { aspect-ratio: 3 / 4; max-height: 78svh; }
 }
 
+/* The catalogue crops to a fixed ratio on purpose, so every card lines up.
+   A product page has no neighbour to line up with, so cropping here only
+   ever throws away part of the garment — the hem, the sleeve, the fall of a
+   full-length dress — that the shopper opened the page to see. Contain
+   keeps the whole photograph inside the same box instead. */
+.goods-hero > img {
+  object-fit: contain;
+  object-position: center;
+}
+
 /* ============================================================
    Product page layout
    ============================================================ */
