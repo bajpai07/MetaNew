@@ -328,6 +328,15 @@ textarea {
   object-position: center;
 }
 
+/* Before a photograph exists there is nothing to preserve at 3:4 — that
+   ratio was sized for a customer's own body, and reserving it for an empty
+   "choose a photograph" prompt pushed the whole screen past one view before
+   anyone had uploaded anything. Square holds the same mounted-print footprint
+   without over-claiming height it isn't using yet. */
+.aperture-compact {
+  aspect-ratio: 1 / 1;
+}
+
 /* The customer's photograph is shown exactly as it was taken: no grade, no
    vignette. Both were tried and both cost the thing that matters here —
    a CSS `filter` of any strength makes the browser render the image through

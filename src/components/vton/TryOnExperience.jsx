@@ -395,8 +395,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       {/* ── The plate ── */}
       {!resultUrl ? (
         <>
-          <div className="fitting-col" style={{ paddingTop: '24px', paddingBottom: '20px' }}>
-            <h2 className="display display-l" style={{ marginBottom: '14px' }}>
+          <div className="fitting-col" style={{ paddingTop: '16px', paddingBottom: '12px' }}>
+            <h2 className="display display-l" style={{ marginBottom: '10px' }}>
               See it on you
             </h2>
             <p className="meta measure">
@@ -421,7 +421,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
             ) : (
               <figure className="mat">
                 <button
-                  className="aperture"
+                  className="aperture aperture-compact"
                   onClick={() => fileInputRef.current?.click()}
                   style={{
                     display: 'flex',
@@ -453,8 +453,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
           </div>
 
           {!previewUrl && (
-            <div className="fitting-col" style={{ paddingTop: '32px' }}>
-              <div className="rule" style={{ marginBottom: '22px' }} />
+            <div className="fitting-col" style={{ paddingTop: '20px' }}>
+              <div className="rule" style={{ marginBottom: '14px' }} />
               <p className="meta measure">
                 It works best with a plain wall behind you, even light, and your
                 whole body in frame.
