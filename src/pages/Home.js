@@ -151,7 +151,7 @@ export default function Home() {
         <div className="hero-scrim hero-scrim-top" aria-hidden="true" />
         <div className="hero-scrim hero-scrim-v" aria-hidden="true" />
 
-        {/* No masthead down here any more. AIYAASHI now sits at the very top
+        {/* No masthead down here any more. AIYAASI now sits at the very top
             of the screen, centred in the header, on this page and every other
             — so the hero carries the film and the campaign line, nothing else,
             and the name is never said twice on one screen. */}
@@ -293,7 +293,7 @@ export default function Home() {
             {blocks.map((block, i) => {
               // The signature look. One real piece from the collection, at a
               // scale nothing else on the page is given, before the catalogue
-              // begins. It is the answer to "what is Aiyaashi" — so it is a
+              // begins. It is the answer to "what is AIYAASI" — so it is a
               // garment, photographed, not a slogan over a stock image.
               if (block.kind === "signature") {
                 return (

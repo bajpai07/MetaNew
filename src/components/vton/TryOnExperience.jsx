@@ -283,7 +283,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       }
       const link = document.createElement('a');
       link.href = resultUrl;
-      link.download = `aiyaashi-look-${Date.now()}.jpg`;
+      link.download = `aiyaasi-look-${Date.now()}.jpg`;
       link.target = '_blank';
       document.body.appendChild(link);
       link.click();
@@ -300,8 +300,8 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My look from Aiyaashi',
-          text: `${product?.name || 'This piece'}, seen on me before I decide. Aiyaashi.`,
+          title: 'My look from AIYAASI',
+          text: `${product?.name || 'This piece'}, seen on me before I decide. AIYAASI.`,
           url: window.location.href
         });
       } catch (err) {

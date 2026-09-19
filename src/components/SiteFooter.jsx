@@ -43,7 +43,7 @@ export default function SiteFooter() {
       />
 
       <p className="meta" style={{ width: "min(100%, 1440px)", marginInline: "auto" }}>
-        © {new Date().getFullYear()} Aiyaashi
+        © {new Date().getFullYear()} AIYAASI
       </p>
     </footer>
   );

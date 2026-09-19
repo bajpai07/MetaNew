@@ -165,7 +165,7 @@ export default function AITryOnModal({ isOpen, onClose, garmentImage, garmentDes
                   <button onClick={() => {
                         const link = document.createElement('a');
                         link.href = resultImage;
-                        link.download = 'aiyaashi-look.jpg';
+                        link.download = 'aiyaasi-look.jpg';
                         link.click();
                       }}
                       style={{ padding: '8px 15px', background: 'rgba(0,0,0,0.85)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '20px', fontSize: '10px', letterSpacing: '0.1em', cursor: 'pointer', backdropFilter: 'blur(5px)' }}

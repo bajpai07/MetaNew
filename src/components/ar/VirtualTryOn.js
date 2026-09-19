@@ -76,7 +76,7 @@ export default function VirtualTryOn({ modelUrl = "/assets/models/dress.glb", ca
       const dataUrl = canvas2d.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = "aiyaashi-look.png";
+      a.download = "aiyaasi-look.png";
       a.click();
     } catch (err) {
       console.error("Capture Failed:", err);

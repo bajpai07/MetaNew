@@ -28,7 +28,7 @@ if (isProduction && !fromEnv) {
   // at once, and it is otherwise invisible until a request fails.
   // eslint-disable-next-line no-console
   console.error(
-    'Aiyaashi: REACT_APP_API_URL is not set for this build. API requests will ' +
+    'AIYAASI: REACT_APP_API_URL is not set for this build. API requests will ' +
       'be sent to this site\'s own origin and will fail unless a rewrite is in place.'
   );
 }

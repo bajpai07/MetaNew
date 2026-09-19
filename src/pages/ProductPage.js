@@ -55,7 +55,7 @@ export default function ProductPage() {
           const image = found.image || found.imageUrl || FALLBACK_IMAGE;
           setProduct({
             ...found,
-            brand: found.brand || "Aiyaashi",
+            brand: found.brand || "AIYAASI",
             category: found.category || "top",
             originalPrice,
             image,

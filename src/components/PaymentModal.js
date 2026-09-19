@@ -72,7 +72,7 @@ export default function PaymentModal({ amount, onPay, onClose }) {
         </button>
 
         <h2 className="display display-m" style={{ marginBottom: '6px' }}>Payment</h2>
-        <p className="meta" style={{ marginBottom: '32px' }}>Aiyaashi virtual gateway · sandbox</p>
+        <p className="meta" style={{ marginBottom: '32px' }}>AIYAASI virtual gateway · sandbox</p>
 
         <form onSubmit={handlePayment} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>

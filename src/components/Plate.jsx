@@ -3,7 +3,7 @@
  *
  * The problem it solves: every luxury reference this brand is calibrated
  * against (SSENSE, Bottega, The Row) is carried entirely by art-directed
- * photography. Aiyaashi's core feature is the opposite — a customer's own
+ * photography. AIYAASI's core feature is the opposite — a customer's own
  * phone photo, in whatever lighting they happened to have. Dropped beside an
  * editorial product grid, a grainy backlit selfie destroys the illusion in one
  * frame.

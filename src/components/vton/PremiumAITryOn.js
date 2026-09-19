@@ -263,7 +263,7 @@ export default function PremiumAITryOn({ isOpen, onClose, product }) {
                           }
                           const link = document.createElement('a');
                           link.href = imageUrl;
-                          link.download = `aiyaashi-look-${Date.now()}.jpg`;
+                          link.download = `aiyaasi-look-${Date.now()}.jpg`;
                           link.target = '_blank';
                           document.body.appendChild(link);
                           link.click();

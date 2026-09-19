@@ -160,9 +160,9 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* The masthead. One AIYAASHI, dead centre, at the very top of the
+        {/* The masthead. One AIYAASI, dead centre, at the very top of the
             screen — on every page and over the hero as well. */}
-        <Link to="/" aria-label="Aiyaashi, home" className="head-brand">
+        <Link to="/" aria-label="AIYAASI, home" className="head-brand">
           <Wordmark className="head-mark" />
         </Link>
 

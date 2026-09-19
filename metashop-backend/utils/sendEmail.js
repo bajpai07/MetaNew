@@ -29,7 +29,7 @@ const sendOrderConfirmationEmail = async (email, order) => {
     const htmlContent = `
       <div style="font-family: Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #EDE7DE; color: #14110F; padding: 40px 32px;">
         <div style="font-family: Didot, 'Times New Roman', serif; font-size: 15px; letter-spacing: 0.34em; text-transform: uppercase; margin-bottom: 56px;">
-          Aiyaashi
+          AIYAASI
         </div>
 
         <h1 style="font-family: Didot, 'Times New Roman', serif; font-size: 34px; font-weight: 500; line-height: 1.1; margin: 0 0 14px 0;">
@@ -67,15 +67,15 @@ const sendOrderConfirmationEmail = async (email, order) => {
         </table>
 
         <p style="font-size: 12px; line-height: 1.6; color: #6B6259; margin: 56px 0 0 0;">
-          Aiyaashi
+          AIYAASI
         </p>
       </div>
     `;
 
     const info = await transporter.sendMail({
-      from: '"Aiyaashi" <support@aiyaashi.com>', // sender address
+      from: '"AIYAASI" <support@aiyaashi.com>', // sender address — mailbox domain is infrastructure, left unchanged
       to: email, // list of receivers
-      subject: `Your Aiyaashi order — ${order.transactionId}`, // Subject line
+      subject: `Your AIYAASI order — ${order.transactionId}`, // Subject line
       html: htmlContent, // html body
     });
 

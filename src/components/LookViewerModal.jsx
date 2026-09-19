@@ -22,8 +22,8 @@ const LookViewerModal = ({ look, onClose, onDownload }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'My look from Aiyaashi',
-          text: 'Seen on me before I decided. Aiyaashi.',
+          title: 'My look from AIYAASI',
+          text: 'Seen on me before I decided. AIYAASI.',
           url: imageUrl
         });
       } catch (err) {

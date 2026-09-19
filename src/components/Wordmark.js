@@ -1,5 +1,5 @@
 /**
- * AIYAASHI — the logotype.
+ * AIYAASI — the logotype.
  *
  * Two treatments, because one setting cannot serve both jobs:
  *
@@ -24,7 +24,7 @@ export default function Wordmark({ size, variant = 'compact', as: Tag = 'span', 
       style={{ ...(size ? { fontSize: `${size}px` } : null), lineHeight: 1, ...style }}
       {...rest}
     >
-      Aiyaashi
+      AIYAASI
     </Tag>
   );
 }

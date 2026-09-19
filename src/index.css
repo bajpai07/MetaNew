@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ============================================================
-   AIYAASHI — design tokens
+   AIYAASI — design tokens
    See DESIGN.md. Do not hand-tune colour or type per component.
    ============================================================ */
 
@@ -818,7 +818,7 @@ textarea {
   align-self: center;
   /* One line, always. The size is capped by viewport width rather than by a
      fixed maximum, and nowrap plus the trimmed trailing letterspace guarantee
-     AIYAASHI never breaks to "AIYA / ASHI" or runs past the edge. */
+     AIYAASI never breaks to "AIYA / ASI" or runs past the edge. */
   /* Sized against the thing that actually decides the collision: how far down
      the frame the model's head lands.
      `cover` scales the film by whichever axis is short, so the height it paints

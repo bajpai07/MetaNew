@@ -94,7 +94,7 @@ const HistoryPage = () => {
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `aiyaashi-look-${Date.now()}.jpg`;
+      link.download = `aiyaasi-look-${Date.now()}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
