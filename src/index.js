@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { FittingPhotoProvider } from "./context/FittingPhotoContext";
 import { Toaster } from "react-hot-toast";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,28 +19,30 @@ root.render(
   <BrowserRouter>
     <AuthProvider>
       <CartProvider>
-        <Toaster
-          position="bottom-center"
-          reverseOrder={false}
-          toastOptions={{
-            duration: 3200,
-            style: {
-              background: "#EDE7DE",
-              color: "#14110F",
-              borderRadius: 0,
-              fontFamily:
-                "'Instrument Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
-              fontSize: "13px",
-              letterSpacing: "0.01em",
-              padding: "14px 18px",
-              boxShadow: "none",
-              maxWidth: "420px"
-            },
-            success: { iconTheme: { primary: "#5E1A22", secondary: "#EDE7DE" } },
-            error: { iconTheme: { primary: "#5E1A22", secondary: "#EDE7DE" } }
-          }}
-        />
-        <App />
+        <FittingPhotoProvider>
+          <Toaster
+            position="bottom-center"
+            reverseOrder={false}
+            toastOptions={{
+              duration: 3200,
+              style: {
+                background: "#EDE7DE",
+                color: "#14110F",
+                borderRadius: 0,
+                fontFamily:
+                  "'Instrument Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
+                fontSize: "13px",
+                letterSpacing: "0.01em",
+                padding: "14px 18px",
+                boxShadow: "none",
+                maxWidth: "420px"
+              },
+              success: { iconTheme: { primary: "#5E1A22", secondary: "#EDE7DE" } },
+              error: { iconTheme: { primary: "#5E1A22", secondary: "#EDE7DE" } }
+            }}
+          />
+          <App />
+        </FittingPhotoProvider>
       </CartProvider>
     </AuthProvider>
   </BrowserRouter>

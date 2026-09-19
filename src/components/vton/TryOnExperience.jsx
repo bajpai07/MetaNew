@@ -4,6 +4,7 @@ import OutfitRecommendations from '../OutfitRecommendations';
 import Plate from '../Plate';
 import { Back } from '../Marks';
 import { API_BASE } from '../../config/api';
+import { useFittingPhoto } from '../../context/FittingPhotoContext';
 
 /**
  * THE FITTING ROOM.
@@ -26,6 +27,14 @@ import { API_BASE } from '../../config/api';
  *
  * All network behaviour — validation, job creation, polling, download, share,
  * reset, product switching — is unchanged.
+ *
+ * UPLOAD ONCE, TRY ANYTHING: the photograph itself is remembered in
+ * FittingPhotoContext, one level above the router, so it survives the full
+ * remount this component gets on every product navigation (App.js keys its
+ * <Routes> by pathname). This component still owns the whole Try-On flow —
+ * the context only supplies the starting File, exactly as if the visitor had
+ * just picked it from disk. Nothing about generation, polling, the result or
+ * the compare slider changes.
  */
 
 const LOADING_STAGES = [
@@ -37,9 +46,12 @@ const LOADING_STAGES = [
 ];
 
 const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
+  const { photoFile, photoPreviewUrl, setFittingPhoto, clearFittingPhoto } = useFittingPhoto() || {};
   const [currentProduct, setCurrentProduct] = useState(product);
-  const [uploadedPhoto, setUploadedPhoto] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  // Seeded straight from the saved fitting-room photo, if one exists, so the
+  // very first render already shows it — no flash of an empty upload plate.
+  const [uploadedPhoto, setUploadedPhoto] = useState(() => photoFile || null);
+  const [previewUrl, setPreviewUrl] = useState(() => photoPreviewUrl || null);
   const [resultUrl, setResultUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
@@ -55,11 +67,14 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
   const sliderRef = useRef(null);
 
   const handleTryThis = (newProduct) => {
+    // The photograph carries over to the next garment — only the result
+    // belongs to the product being left behind.
     setResultUrl(null);
-    setPreviewUrl(null);
-    setUploadedPhoto(null);
     setFitScore(null);
     setError(null);
+    setWarnings([]);
+    setGenerationTime(null);
+    setIsRetryable(false);
     setSliderPos(50);
     setCurrentProduct(newProduct);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -111,7 +126,10 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setWarnings([]);
     setUploadedPhoto(file);
     setPreviewUrl(URL.createObjectURL(file));
-  }, []);
+    // Save it as the fitting-room photo — Product B, C, D reuse this same
+    // file without asking again. Replaces whatever was saved before.
+    setFittingPhoto?.(file);
+  }, [setFittingPhoto]);
 
   // ── Generation ────────────────────────
   const [, setJobId] = useState(null);
@@ -184,6 +202,18 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
       return;
     }
 
+    // A reused photograph is still just the File object from whenever it was
+    // chosen — nothing server-side to go stale. The one real failure mode is
+    // the browser having discarded it underneath us; guard for it explicitly
+    // so that reads as "please choose a new photograph", not a Try-On error.
+    if (!(uploadedPhoto instanceof Blob) || uploadedPhoto.size === 0) {
+      clearFittingPhoto?.();
+      setUploadedPhoto(null);
+      setPreviewUrl(null);
+      setError('That photograph is no longer available. Please choose a new one.');
+      return;
+    }
+
     setIsGenerating(true);
     setError(null);
     setIsRetryable(false);
@@ -241,7 +271,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
       setError(errorMsg);
     }
-  }, [uploadedPhoto, currentProduct, startStages, startPolling, stopStages]);
+  }, [uploadedPhoto, currentProduct, startStages, startPolling, stopStages, clearFittingPhoto]);
 
   // ── Download ──────────────────────────
   const handleDownload = useCallback(async () => {
@@ -286,6 +316,10 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
 
   // ── Reset ─────────────────────────────
   const handleTryAnother = useCallback(() => {
+    // This is the fitting room's "change photo": it clears the saved
+    // reference too, so the next choice — here or on any future product —
+    // replaces it rather than leaving the old one live underneath.
+    clearFittingPhoto?.();
     setUploadedPhoto(null);
     setPreviewUrl(null);
     setResultUrl(null);
@@ -296,7 +330,7 @@ const TryOnExperience = ({ product, garmentImage, isOpen, onClose }) => {
     setSliderPos(50);
     setGenerationTime(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, []);
+  }, [clearFittingPhoto]);
 
   // ── Compare slider ────────────────────
   const isDraggingRef = useRef(false);
