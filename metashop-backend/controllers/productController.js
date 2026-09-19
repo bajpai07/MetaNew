@@ -24,6 +24,22 @@ export const getProducts = async (req, res) => {
 
     const products = await Product.find(filter).lean();
 
+    // Homepage sequencing override, approved by hand: the collection has no
+    // sort/position field, so Home.js's featured/signature/duo/moment slots
+    // fall out of whatever order MongoDB happens to return (currently _id
+    // order). Boiled Wool Overcoat's photo stays legible at the wide Duo
+    // width; Heavy Cotton Kurta's crops down to leaves and a trouser leg
+    // there, though it reads fine at normal grid scale. This swaps only
+    // those two positions — nothing else about ordering, filtering, or the
+    // response shape changes, and no document is written.
+    const KURTA_ID = "69dbf26c57c0eca185d45646";
+    const OVERCOAT_ID = "6aad16765c2e96f1ef4607cd";
+    const iKurta = products.findIndex(p => String(p._id) === KURTA_ID);
+    const iOvercoat = products.findIndex(p => String(p._id) === OVERCOAT_ID);
+    if (iKurta !== -1 && iOvercoat !== -1) {
+      [products[iKurta], products[iOvercoat]] = [products[iOvercoat], products[iKurta]];
+    }
+
     res.json(
       products.map(p => ({
         _id: p._id,
